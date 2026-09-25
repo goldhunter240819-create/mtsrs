@@ -72,13 +72,8 @@ class WebGuruController {
         $active_year = \App\Core\AcademicYear::current();
         $tahun_ajaran_id = $active_year ? $active_year['id'] : 1;
 
-        // Fetch logs (jurnals) made by this guru
-        $jurnals = $db->query("SELECT j.*, k.nama_kelas, m.nama_mapel 
-                               FROM jurnal_guru j 
-                               LEFT JOIN kelas k ON j.kelas_id = k.id 
-                               LEFT JOIN mapel m ON j.mapel_id = m.id 
-                               WHERE j.guru_id = $guru_id 
-                               ORDER BY j.tanggal DESC, j.id DESC LIMIT 50")->fetchAll();
+        $filter_kelas_id = (int)($_GET['kelas_id'] ?? 0);
+        $filter_mapel_id = (int)($_GET['mapel_id'] ?? 0);
 
         // Fetch classes taught by this guru for the dropdown
         $kelas_mengajar = $db->query("SELECT DISTINCT k.id, k.nama_kelas 
@@ -87,11 +82,30 @@ class WebGuruController {
                                       WHERE jp.guru_id = $guru_id AND jp.tahun_ajaran_id = $tahun_ajaran_id
                                       ORDER BY k.tingkat ASC, k.nama_kelas ASC")->fetchAll();
 
-        $mapel_mengajar = $db->query("SELECT DISTINCT m.id, m.nama_mapel 
-                                      FROM jadwal_pelajaran jp 
-                                      JOIN mapel m ON jp.mapel_id = m.id 
-                                      WHERE jp.guru_id = $guru_id AND jp.tahun_ajaran_id = $tahun_ajaran_id
-                                      ORDER BY m.nama_mapel ASC")->fetchAll();
+        // Fetch subjects taught by this teacher FOR THE SELECTED CLASS
+        $mapel_mengajar = [];
+        if ($filter_kelas_id > 0) {
+            $stmt = $db->prepare("SELECT DISTINCT m.id, m.nama_mapel 
+                                          FROM jadwal_pelajaran jp 
+                                          JOIN mapel m ON jp.mapel_id = m.id 
+                                          WHERE jp.guru_id = ? AND jp.tahun_ajaran_id = ? AND jp.kelas_id = ?
+                                          ORDER BY m.nama_mapel ASC");
+            $stmt->execute([$guru_id, $tahun_ajaran_id, $filter_kelas_id]);
+            $mapel_mengajar = $stmt->fetchAll();
+        }
+
+        // Fetch logs (jurnals) made by this guru if filtered
+        $jurnals = [];
+        if ($filter_kelas_id > 0 && $filter_mapel_id > 0) {
+            $stmt = $db->prepare("SELECT j.*, k.nama_kelas, m.nama_mapel 
+                                   FROM jurnal_guru j 
+                                   LEFT JOIN kelas k ON j.kelas_id = k.id 
+                                   LEFT JOIN mapel m ON j.mapel_id = m.id 
+                                   WHERE j.guru_id = ? AND j.kelas_id = ? AND j.mapel_id = ?
+                                   ORDER BY j.tanggal DESC, j.id DESC LIMIT 100");
+            $stmt->execute([$guru_id, $filter_kelas_id, $filter_mapel_id]);
+            $jurnals = $stmt->fetchAll();
+        }
 
         ob_start();
         include __DIR__ . '/../../resources/views/guru/jurnal.php';
@@ -136,37 +150,63 @@ class WebGuruController {
         $tahun_ajaran_id = $active_year ? $active_year['id'] : 1;
         $semester = $active_year ? $active_year['semester'] : 'Ganjil';
 
-        // Fetch classes taught
+        $filter_kelas_id = (int)($_GET['kelas_id'] ?? 0);
+        $filter_mapel_id = (int)($_GET['mapel_id'] ?? 0);
+
+        // Fetch classes taught by this teacher
         $kelas_mengajar = $db->query("SELECT DISTINCT k.id, k.nama_kelas 
                                       FROM jadwal_pelajaran jp 
                                       JOIN kelas k ON jp.kelas_id = k.id 
                                       WHERE jp.guru_id = $guru_id AND jp.tahun_ajaran_id = $tahun_ajaran_id
                                       ORDER BY k.tingkat ASC, k.nama_kelas ASC")->fetchAll();
 
-        // Fetch subjects taught
-        $mapel_mengajar = $db->query("SELECT DISTINCT m.id, m.nama_mapel 
-                                      FROM jadwal_pelajaran jp 
-                                      JOIN mapel m ON jp.mapel_id = m.id 
-                                      WHERE jp.guru_id = $guru_id AND jp.tahun_ajaran_id = $tahun_ajaran_id
-                                      ORDER BY m.nama_mapel ASC")->fetchAll();
+        // Fetch subjects taught by this teacher FOR THE SELECTED CLASS
+        $mapel_mengajar = [];
+        if ($filter_kelas_id > 0) {
+            $stmt = $db->prepare("SELECT DISTINCT m.id, m.nama_mapel 
+                                          FROM jadwal_pelajaran jp 
+                                          JOIN mapel m ON jp.mapel_id = m.id 
+                                          WHERE jp.guru_id = ? AND jp.tahun_ajaran_id = ? AND jp.kelas_id = ?
+                                          ORDER BY m.nama_mapel ASC");
+            $stmt->execute([$guru_id, $tahun_ajaran_id, $filter_kelas_id]);
+            $mapel_mengajar = $stmt->fetchAll();
+        }
 
-        // Fetch history of grades inputted by this teacher
-        // (Grouping by kelas, mapel, jenis_evaluasi)
-        $stmt_history = $siakad_db->prepare("
-            SELECT nh.kelas_id, nh.mapel_id, nh.jenis_evaluasi, 
-                   COUNT(nh.siswa_id) as jml_siswa, 
-                   MAX(nh.created_at) as last_updated, 
-                   MAX(nh.keterangan) as keterangan,
-                   (SELECT k.nama_kelas FROM db_mts_rs.kelas k WHERE k.id = nh.kelas_id) as nama_kelas,
-                   (SELECT m.nama_mapel FROM db_mts_rs.mapel m WHERE m.id = nh.mapel_id) as nama_mapel
-            FROM nilai_harian nh
-            WHERE nh.tahun_ajaran_id = ? AND nh.semester = ?
-              AND nh.kelas_id IN (SELECT DISTINCT kelas_id FROM db_mts_rs.jadwal_pelajaran WHERE guru_id = ?)
-            GROUP BY nh.kelas_id, nh.mapel_id, nh.jenis_evaluasi 
-            ORDER BY last_updated DESC
-        ");
-        $stmt_history->execute([$tahun_ajaran_id, $semester, $guru_id]);
-        $history = $stmt_history->fetchAll(\PDO::FETCH_ASSOC);
+        $siswa_list = [];
+        $ph_list = [];
+        $ph_materi = [];
+        $nilai_grouped = [];
+
+        if ($filter_kelas_id > 0 && $filter_mapel_id > 0) {
+            // Ambil Siswa
+            $stmt = $siakad_db->prepare("SELECT id, nis, nama FROM siswa WHERE kelas_id = ? AND status = 'Aktif' ORDER BY nama ASC");
+            $stmt->execute([$filter_kelas_id]);
+            $siswa_list = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Ambil jenis PH
+            $stmt = $siakad_db->prepare("SELECT jenis_evaluasi, MAX(materi) as materi FROM nilai_harian WHERE kelas_id = ? AND mapel_id = ? AND tahun_ajaran_id = ? AND semester = ? AND jenis_evaluasi LIKE 'PH %' GROUP BY jenis_evaluasi ORDER BY jenis_evaluasi ASC");
+            $stmt->execute([$filter_kelas_id, $filter_mapel_id, $tahun_ajaran_id, $semester]);
+            $ph_list_raw = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            foreach ($ph_list_raw as $ph) {
+                $ph_list[] = $ph['jenis_evaluasi'];
+                if (!empty($ph['materi'])) {
+                    $ph_materi[$ph['jenis_evaluasi']] = $ph['materi'];
+                }
+            }
+            if (empty($ph_list)) {
+                $ph_list = ['PH 1'];
+            }
+
+            // Ambil Semua Nilai
+            $stmt = $siakad_db->prepare("SELECT siswa_id, jenis_evaluasi, nilai FROM nilai_harian WHERE kelas_id = ? AND mapel_id = ? AND tahun_ajaran_id = ? AND semester = ?");
+            $stmt->execute([$filter_kelas_id, $filter_mapel_id, $tahun_ajaran_id, $semester]);
+            $nilai_raw = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            foreach ($nilai_raw as $n) {
+                $nilai_grouped[$n['siswa_id']][$n['jenis_evaluasi']] = $n['nilai'];
+            }
+        }
 
         ob_start();
         include __DIR__ . '/../../resources/views/guru/nilai_harian_index.php';
