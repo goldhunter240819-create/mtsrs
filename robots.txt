@@ -1,0 +1,14 @@
+User-agent: *
+Disallow: /login
+Disallow: /auth/
+Disallow: /portal/
+Disallow: /siakad/
+Disallow: /guru/
+Disallow: /siswa/
+Disallow: /apk/
+Disallow: /app/
+Disallow: /core/
+Disallow: /vendor/
+Allow: /
+
+Sitemap: https://mtsroudlotussholihin.sch.id/sitemap.xml

@@ -1,0 +1,19 @@
+Array
+(
+    [Table] => absensi_siswa
+    [Create Table] => CREATE TABLE `absensi_siswa` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tanggal` date NOT NULL,
+  `siswa_id` int(11) NOT NULL,
+  `kelas_id` int(11) DEFAULT 0,
+  `status` enum('Hadir','Terlambat','Sakit','Izin','Alpa','Bolos') DEFAULT NULL,
+  `waktu_scan` time DEFAULT NULL,
+  `keterangan` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `tahun_ajaran_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_tgl_siswa` (`tanggal`,`siswa_id`),
+  KEY `siswa_id` (`siswa_id`),
+  CONSTRAINT `absensi_siswa_ibfk_1` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=300 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+)

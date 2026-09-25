@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Halaman Beranda -->
+  <url>
+    <loc>https://mtsroudlotussholihin.sch.id/</loc>
+    <lastmod>2026-08-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <!-- Halaman Profil -->
+  <url>
+    <loc>https://mtsroudlotussholihin.sch.id/profil</loc>
+    <lastmod>2026-08-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Halaman Berita -->
+  <url>
+    <loc>https://mtsroudlotussholihin.sch.id/berita</loc>
+    <lastmod>2026-08-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- Halaman PPDB -->
+  <url>
+    <loc>https://mtsroudlotussholihin.sch.id/ppdb</loc>
+    <lastmod>2026-08-10</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- Halaman Kontak -->
+  <url>
+    <loc>https://mtsroudlotussholihin.sch.id/kontak</loc>
+    <lastmod>2026-08-10</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>

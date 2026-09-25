@@ -1,0 +1,6 @@
+{
+     "app_id": "fac1e48d-90ad-4651-8185-4fb3dd73f04a",
+     "target_channel": "push",
+     "included_segments": ["Subscribed Users"],
+     "contents": {"en": "Test message"}
+}
