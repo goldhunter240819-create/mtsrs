@@ -1,12 +1,9 @@
-<div class="z-card" style="padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(0,0,0,0.05); box-shadow: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--z-text); margin-bottom: 0.3rem;">Jadwal Mengajar</h2>
-            <p style="color: var(--z-muted); font-size: 0.9rem; margin: 0;">Tahun Ajaran <?php echo $active_year['name'] ?? ''; ?> - Semester <?php echo $active_year['semester'] ?? 'Ganjil'; ?></p>
-        </div>
-        <div style="background: rgba(37,99,235,0.1); color: var(--z-primary); width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
-            <i data-lucide="calendar-days"></i>
-        </div>
+<div class="modern-page-header">
+    <div>
+        <h1 class="mph-title">
+            <i data-lucide="calendar-days" style="color: #bfdbfe;"></i> Jadwal Mengajar
+        </h1>
+        <p class="mph-subtitle">Tahun Ajaran <?php echo $active_year['name'] ?? ''; ?> - Semester <?php echo $active_year['semester'] ?? 'Ganjil'; ?></p>
     </div>
 </div>
 
