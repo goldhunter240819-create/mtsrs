@@ -3312,6 +3312,101 @@ class ApkController
         include __DIR__ . '/../../resources/views/apk/layout.php';
     }
 
+    public function berkasSalinParalel()
+    {
+        if (!isset($_SESSION['guru_id'])) {
+            Helper::redirect('/apk/login');
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            Helper::redirect('/apk/berkas');
+        }
+
+        $guru_id = $_SESSION['guru_id'];
+        $kelas_id = trim($_POST['kelas_id'] ?? '');
+        $mapel_id = trim($_POST['mapel_id'] ?? '');
+
+        if (empty($kelas_id) || empty($mapel_id)) {
+            $_SESSION['swal_error'] = 'Data kelas atau mapel tidak valid.';
+            Helper::redirect('/apk/berkas');
+            exit;
+        }
+
+        $active_year = AcademicYear::current();
+        $ta_id = $active_year ? $active_year['id'] : 1;
+
+        try {
+            // 1. Get source class tingkat
+            $stmt = $this->siakad_db->prepare("SELECT tingkat FROM kelas WHERE id = ?");
+            $stmt->execute([$kelas_id]);
+            $tingkat = $stmt->fetchColumn();
+
+            if (!$tingkat) {
+                throw new \Exception("Kelas asal tidak ditemukan.");
+            }
+
+            // 2. Find target classes
+            $stmt = $this->siakad_db->prepare("
+                SELECT DISTINCT k.id 
+                FROM jadwal_pelajaran jp 
+                JOIN kelas k ON jp.kelas_id = k.id 
+                WHERE jp.guru_id = ? AND jp.tahun_ajaran_id = ? AND jp.mapel_id = ? AND k.tingkat = ? AND k.id != ?
+            ");
+            $stmt->execute([$guru_id, $ta_id, $mapel_id, $tingkat, $kelas_id]);
+            $target_classes = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+            if (empty($target_classes)) {
+                $_SESSION['swal_error'] = 'Tidak ada kelas paralel lain (tingkat & mapel sama) yang Anda ajar.';
+                Helper::redirect('/apk/berkas');
+                exit;
+            }
+
+            // 3. Get all uploaded documents
+            $stmt = $this->core_db->prepare("SELECT * FROM perangkat_pembelajaran WHERE guru_id = ? AND tahun_ajaran_id = ? AND kelas_id = ? AND mapel_id = ?");
+            $stmt->execute([$guru_id, $ta_id, $kelas_id, $mapel_id]);
+            $source_docs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($source_docs)) {
+                $_SESSION['swal_error'] = 'Tidak ada berkas di kelas ini yang bisa disalin.';
+                Helper::redirect('/apk/berkas');
+                exit;
+            }
+
+            $copied_count = 0;
+
+            // 4. Copy each document
+            foreach ($target_classes as $target_kelas_id) {
+                foreach ($source_docs as $doc) {
+                    $stmt_check = $this->core_db->prepare("SELECT id FROM perangkat_pembelajaran WHERE guru_id = ? AND tahun_ajaran_id = ? AND kelas_id = ? AND mapel_id = ? AND jenis_berkas = ?");
+                    $stmt_check->execute([$guru_id, $ta_id, $target_kelas_id, $mapel_id, $doc['jenis_berkas']]);
+                    if (!$stmt_check->fetch()) {
+                        $ext = strtolower(pathinfo($doc['file_nama'], PATHINFO_EXTENSION));
+                        $new_filename = uniqid('berkas_copy_') . '.' . $ext;
+                        $old_path = __DIR__ . '/../../public/uploads/berkas/' . $doc['file_nama'];
+                        $new_path = __DIR__ . '/../../public/uploads/berkas/' . $new_filename;
+                        
+                        if (file_exists($old_path) && copy($old_path, $new_path)) {
+                            $stmt_insert = $this->core_db->prepare("INSERT INTO perangkat_pembelajaran (guru_id, tahun_ajaran_id, jenis_berkas, judul_berkas, file_nama, kelas_id, mapel_id, status_validasi) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                            $stmt_insert->execute([$guru_id, $ta_id, $doc['jenis_berkas'], $doc['judul_berkas'], $new_filename, $target_kelas_id, $mapel_id, 'Menunggu']);
+                            $copied_count++;
+                        }
+                    }
+                }
+            }
+
+            if ($copied_count > 0) {
+                $_SESSION['swal_success'] = "Berhasil menyalin $copied_count berkas ke kelas paralel.";
+            } else {
+                $_SESSION['swal_error'] = 'Semua kelas paralel sudah memiliki berkas tersebut.';
+            }
+
+        } catch (\Exception $e) {
+            $_SESSION['swal_error'] = 'Terjadi kesalahan sistem: ' . $e->getMessage();
+        }
+
+        Helper::redirect('/apk/berkas');
+    }
+
     public function hapusBerkas($id)
     {
         if (!isset($_SESSION['guru_id'])) { Helper::redirect('/apk/login'); }

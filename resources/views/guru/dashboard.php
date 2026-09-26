@@ -1,8 +1,10 @@
-<div class="z-card" style="padding: 2rem; border-radius: 16px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; margin-bottom: 2rem;">
-    <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px;">Selamat Datang, Bapak/Ibu Guru!</h2>
-    <p style="font-size: 1rem; opacity: 0.9; margin-bottom: 1.5rem; max-width: 600px;">
-        Ini adalah portal khusus untuk Guru MTs Roudlotus Sholihin. Dari sini Anda bisa mengelola jadwal, presensi, dan penilaian siswa dengan mudah.
-    </p>
+<div class="modern-page-header">
+    <div>
+        <h1 class="mph-title">
+            <i data-lucide="layout-dashboard" style="color: #bfdbfe;"></i> Selamat Datang, Bapak/Ibu Guru!
+        </h1>
+        <p class="mph-subtitle">Ini adalah portal khusus untuk Guru MTs Roudlotus Sholihin. Dari sini Anda bisa mengelola jadwal, presensi, dan penilaian siswa dengan mudah.</p>
+    </div>
 </div>
 
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">

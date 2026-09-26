@@ -535,4 +535,105 @@ class WebGuruController {
         } catch (\Exception $e) {}
         Helper::redirect('/guru/berkas');
     }
+
+    public function berkasSalinParalel()
+    {
+        if (!isset($_SESSION['guru_id']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            Helper::redirect('/guru');
+        }
+        $guru_id = $_SESSION['guru_id'];
+        $kelas_id = $_POST['kelas_id'] ?? null;
+        $mapel_id = $_POST['mapel_id'] ?? null;
+        
+        if (!$kelas_id || !$mapel_id) {
+            $_SESSION['guru_msg'] = 'Data tidak lengkap.';
+            $_SESSION['guru_msg_type'] = 'error';
+            Helper::redirect('/guru/berkas');
+        }
+
+        $active_year = \App\Core\AcademicYear::current();
+        $ta_id = $active_year ? $active_year['id'] : 1;
+
+        $db = Database::connect('core');
+        $siakad_db = Database::connect('siakad');
+
+        try {
+            // 1. Get source class tingkat
+            $stmt = $siakad_db->prepare("SELECT tingkat FROM kelas WHERE id = ?");
+            $stmt->execute([$kelas_id]);
+            $tingkat = $stmt->fetchColumn();
+
+            if (!$tingkat) {
+                throw new \Exception("Kelas asal tidak ditemukan.");
+            }
+
+            // 2. Find target classes (same teacher, same mapel, same tingkat, different class)
+            $stmt = $siakad_db->prepare("
+                SELECT DISTINCT k.id 
+                FROM jadwal_pelajaran jp 
+                JOIN kelas k ON jp.kelas_id = k.id 
+                WHERE jp.guru_id = ? AND jp.tahun_ajaran_id = ? AND jp.mapel_id = ? AND k.tingkat = ? AND k.id != ?
+            ");
+            $stmt->execute([$guru_id, $ta_id, $mapel_id, $tingkat, $kelas_id]);
+            $target_classes = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+            if (empty($target_classes)) {
+                $_SESSION['guru_msg'] = 'Tidak ada kelas paralel lain (tingkat & mapel sama) yang Anda ajar.';
+                $_SESSION['guru_msg_type'] = 'warning';
+                Helper::redirect('/guru/berkas');
+                exit;
+            }
+
+            // 3. Get all uploaded documents for the source class
+            $stmt = $db->prepare("SELECT * FROM perangkat_pembelajaran WHERE guru_id = ? AND tahun_ajaran_id = ? AND kelas_id = ? AND mapel_id = ?");
+            $stmt->execute([$guru_id, $ta_id, $kelas_id, $mapel_id]);
+            $source_docs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($source_docs)) {
+                $_SESSION['guru_msg'] = 'Tidak ada berkas di kelas ini yang bisa disalin.';
+                $_SESSION['guru_msg_type'] = 'warning';
+                Helper::redirect('/guru/berkas');
+                exit;
+            }
+
+            $copied_count = 0;
+
+            // 4. Copy each document to target classes if not exists
+            foreach ($target_classes as $target_kelas_id) {
+                foreach ($source_docs as $doc) {
+                    // Check if already exists in target class
+                    $stmt_check = $db->prepare("SELECT id FROM perangkat_pembelajaran WHERE guru_id = ? AND tahun_ajaran_id = ? AND kelas_id = ? AND mapel_id = ? AND jenis_berkas = ?");
+                    $stmt_check->execute([$guru_id, $ta_id, $target_kelas_id, $mapel_id, $doc['jenis_berkas']]);
+                    if (!$stmt_check->fetch()) {
+                        // Copy the file physically to ensure independent deletion
+                        $ext = strtolower(pathinfo($doc['file_nama'], PATHINFO_EXTENSION));
+                        $new_filename = uniqid('berkas_copy_') . '.' . $ext;
+                        $old_path = __DIR__ . '/../../public/uploads/berkas/' . $doc['file_nama'];
+                        $new_path = __DIR__ . '/../../public/uploads/berkas/' . $new_filename;
+                        
+                        if (file_exists($old_path) && copy($old_path, $new_path)) {
+                            // Insert db record
+                            $stmt_insert = $db->prepare("INSERT INTO perangkat_pembelajaran (guru_id, tahun_ajaran_id, jenis_berkas, judul_berkas, file_nama, kelas_id, mapel_id, status_validasi) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                            $stmt_insert->execute([$guru_id, $ta_id, $doc['jenis_berkas'], $doc['judul_berkas'], $new_filename, $target_kelas_id, $mapel_id, 'Menunggu']);
+                            $copied_count++;
+                        }
+                    }
+                }
+            }
+
+            if ($copied_count > 0) {
+                $_SESSION['guru_msg'] = "Berhasil menyalin $copied_count berkas ke kelas paralel.";
+                $_SESSION['guru_msg_type'] = 'success';
+            } else {
+                $_SESSION['guru_msg'] = 'Semua kelas paralel sudah memiliki berkas tersebut.';
+                $_SESSION['guru_msg_type'] = 'warning';
+            }
+
+        } catch (\Exception $e) {
+            $_SESSION['guru_msg'] = 'Terjadi kesalahan sistem: ' . $e->getMessage();
+            $_SESSION['guru_msg_type'] = 'error';
+        }
+
+        Helper::redirect('/guru/berkas');
+    }
 }

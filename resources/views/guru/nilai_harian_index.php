@@ -1,7 +1,9 @@
-<div class="modern-page-header" style="background: linear-gradient(135deg, #2563eb, #3b82f6); padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 10px 15px -3px rgba(37,99,235,0.2);">
+<div class="modern-page-header">
     <div>
-        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; color: white;">Monitoring Nilai Harian & Rekap</h2>
-        <p style="color: rgba(255,255,255,0.85); font-size: 0.95rem; margin: 0;">Pantau progres nilai harian siswa secara detail sesuai dengan mata pelajaran dan kelas yang Anda ampu.</p>
+        <h1 class="mph-title">
+            <i data-lucide="bar-chart-2" style="color: #bfdbfe;"></i> Monitoring Nilai Harian & Rekap
+        </h1>
+        <p class="mph-subtitle">Pantau progres nilai harian siswa secara detail sesuai dengan mata pelajaran dan kelas yang Anda ampu.</p>
     </div>
 </div>
 

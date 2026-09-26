@@ -34,70 +34,58 @@
             </button>
         </div>
 
-        <!-- Form Upload Berkas (Hidden by default) -->
-        <div id="formUploadWrapper" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 25px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
-                    <i data-lucide="upload-cloud" style="color: #0ea5e9; width: 20px;"></i> Form Unggah
-                </h3>
-                <button onclick="toggleUploadForm()" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 4px;">
-                    <i data-lucide="x" style="width: 18px;"></i>
-                </button>
+        <!-- Form Upload Berkas (Modal Overlay) -->
+        <div id="formUploadWrapper" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+            <div style="background: #ffffff; border-radius: 20px; padding: 25px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease-out;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <div style="background: #e0f2fe; color: #0ea5e9; width: 36px; height: 36px; border-radius: 10px; display: flex; justify-content: center; align-items: center;">
+                            <i data-lucide="upload-cloud" style="width: 20px;"></i>
+                        </div>
+                        Form Unggah
+                    </h3>
+                    <button type="button" onclick="toggleUploadForm()" style="background: #f1f5f9; border: none; color: #64748b; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center;">
+                        <i data-lucide="x" style="width: 16px;"></i>
+                    </button>
+                </div>
+                
+                <form action="<?= \App\Core\Helper::url('/apk/berkas') ?>" method="POST" enctype="multipart/form-data" id="formUpload" onsubmit="return submitForm('btnUpload')">
+                    <input type="hidden" name="tab_type" value="perangkat">
+                    
+                    <div style="margin-bottom: 12px;">
+                        <label style="display:block; margin-bottom: 6px; font-weight: 700; color: #475569; font-size: 0.8rem;">Jenis Berkas <span style="color:red">*</span></label>
+                        <select id="upload_jenis_berkas" name="jenis_berkas" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.9rem; background: #fff; color: #1e293b; outline: none;">
+                            <option value="">-- Pilih Jenis --</option>
+                            <option value="Capaian Pembelajaran (CP) / KI-KD">Capaian Pembelajaran (CP) / KI-KD</option>
+                            <option value="Silabus / ATP">Silabus / ATP</option>
+                            <option value="Program Tahunan (Prota)">Program Tahunan (Prota)</option>
+                            <option value="Program Semester (Promes)">Program Semester (Promes)</option>
+                            <option value="RPP / Modul Ajar">RPP / Modul Ajar</option>
+                            <option value="KKM / KKTP">KKM / KKTP</option>
+                            <option value="Bank Soal / Evaluasi">Bank Soal / Evaluasi</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                    
+                    <input type="hidden" id="upload_kelas_id" name="kelas_id" required>
+                    <input type="hidden" id="upload_mapel_id" name="mapel_id" required>
+                    
+                    <div style="margin-bottom: 12px;">
+                        <label style="display:block; margin-bottom: 6px; font-weight: 700; color: #475569; font-size: 0.8rem;">Judul / Nama Spesifik <span style="color:red">*</span></label>
+                        <input type="text" name="judul_berkas" required placeholder="Contoh: Modul Ajar MTK Kelas 7 Sem 1" style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.9rem; background: #fff; color: #1e293b; outline: none;">
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; margin-bottom: 6px; font-weight: 700; color: #475569; font-size: 0.8rem;">File Dokumen (Wajib berformat PDF) <span style="color:red">*</span></label>
+                        <input type="file" name="file_berkas" accept=".pdf" required style="width: 100%; padding: 10px; border: 2px dashed #cbd5e1; border-radius: 12px; font-size: 0.85rem; background: #f8fafc; color: #1e293b; outline: none; cursor: pointer;">
+                        <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 5px;">Maksimal ukuran file: 5MB</div>
+                    </div>
+
+                    <button type="submit" id="btnUpload" style="width: 100%; background: linear-gradient(135deg, #0ea5e9, #2563eb); color: #fff; border: none; padding: 14px 20px; border-radius: 14px; font-size: 0.95rem; font-weight: 800; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(37,99,235,0.3);">
+                        <i data-lucide="send" style="width: 18px;"></i> Simpan & Ajukan Validasi
+                    </button>
+                </form>
             </div>
-            
-            <form action="" method="POST" enctype="multipart/form-data" id="formUpload" onsubmit="return submitForm('btnUpload')">
-                <input type="hidden" name="tab_type" value="perangkat">
-                <div style="margin-bottom: 12px;">
-                    <label style="display:block; margin-bottom: 6px; font-weight: 700; color: #475569; font-size: 0.8rem;">Jenis Berkas <span style="color:red">*</span></label>
-                    <select name="jenis_berkas" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.9rem; background: #fff; color: #1e293b; outline: none;">
-                        <option value="">-- Pilih Jenis --</option>
-                        <option value="Capaian Pembelajaran (CP) / KI-KD">Capaian Pembelajaran (CP) / KI-KD</option>
-                        <option value="Silabus / ATP">Silabus / ATP</option>
-                        <option value="Program Tahunan (Prota)">Program Tahunan (Prota)</option>
-                        <option value="Program Semester (Promes)">Program Semester (Promes)</option>
-                        <option value="RPP / Modul Ajar">RPP / Modul Ajar</option>
-                        <option value="KKM / KKTP">KKM / KKTP</option>
-                        <option value="Bank Soal / Evaluasi">Bank Soal / Evaluasi</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
-                </div>
-                
-                <div style="margin-bottom: 12px; display: flex; gap: 10px;">
-                    <div style="flex: 1;">
-                        <label style="display:block; margin-bottom: 6px; font-weight: 700; color: #475569; font-size: 0.8rem;">Kelas <span style="color:red">*</span></label>
-                        <select name="kelas_id" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.9rem; background: #fff; color: #1e293b; outline: none;">
-                            <option value="">-- Pilih Kelas --</option>
-                            <?php foreach($kelas_mengajar as $k): ?>
-                                <option value="<?= $k['id'] ?>"><?= htmlspecialchars($k['nama_kelas']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="display:block; margin-bottom: 6px; font-weight: 700; color: #475569; font-size: 0.8rem;">Mapel <span style="color:red">*</span></label>
-                        <select name="mapel_id" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.9rem; background: #fff; color: #1e293b; outline: none;">
-                            <option value="">-- Pilih Mapel --</option>
-                            <?php foreach($mapel_mengajar as $m): ?>
-                                <option value="<?= $m['id'] ?>"><?= htmlspecialchars($m['nama_mapel']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 12px;">
-                    <label style="display:block; margin-bottom: 6px; font-weight: 700; color: #475569; font-size: 0.8rem;">Judul / Nama Spesifik <span style="color:red">*</span></label>
-                    <input type="text" name="judul_berkas" required placeholder="Contoh: Modul Ajar MTK Kelas 7 Sem 1" style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.9rem; background: #fff; color: #1e293b; outline: none;">
-                </div>
-
-                <div style="margin-bottom: 15px;">
-                    <label style="display:block; margin-bottom: 6px; font-weight: 700; color: #475569; font-size: 0.8rem;">File Dokumen (Wajib berformat PDF) <span style="color:red">*</span></label>
-                    <input type="file" name="file_berkas" accept=".pdf" required style="width: 100%; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 12px; font-size: 0.85rem; background: #fff; color: #1e293b; outline: none;">
-                    <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 5px;">Maksimal ukuran file: 5MB</div>
-                </div>
-
-                <button type="submit" id="btnUpload" style="width: 100%; background: linear-gradient(135deg, #0ea5e9, #2563eb); color: #fff; border: none; padding: 14px 20px; border-radius: 14px; font-size: 0.95rem; font-weight: 800; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(37,99,235,0.3);">
-                    <i data-lucide="send" style="width: 18px;"></i> Simpan & Ajukan Validasi
-                </button>
-            </form>
         </div>
         
         <?php if(empty($kombinasi_mengajar)): ?>
@@ -148,14 +136,23 @@
             <div style="display: flex; flex-direction: column; gap: 20px;">
                 <?php foreach($kombinasi_mengajar as $kombinasi): ?>
                     <div class="kombinasi-card" data-kelas="<?= $kombinasi['kelas_id'] ?>" data-mapel="<?= $kombinasi['mapel_id'] ?>" style="display: none; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
-                            <div style="background: #e0f2fe; color: #0284c7; padding: 8px; border-radius: 10px;">
-                                <i data-lucide="book-open" style="width: 20px; height: 20px;"></i>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="background: #e0f2fe; color: #0284c7; padding: 8px; border-radius: 10px;">
+                                    <i data-lucide="book-open" style="width: 20px; height: 20px;"></i>
+                                </div>
+                                <div>
+                                    <h4 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0;"><?= htmlspecialchars($kombinasi['nama_kelas']) ?></h4>
+                                    <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;"><?= htmlspecialchars($kombinasi['nama_mapel']) ?></div>
+                                </div>
                             </div>
-                            <div>
-                                <h4 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0;"><?= htmlspecialchars($kombinasi['nama_kelas']) ?></h4>
-                                <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;"><?= htmlspecialchars($kombinasi['nama_mapel']) ?></div>
-                            </div>
+                            <form method="POST" action="<?= \App\Core\Helper::url('/apk/berkas/salin-paralel') ?>" style="margin: 0;" id="form-copy-<?= $kombinasi['kelas_id'] ?>-<?= $kombinasi['mapel_id'] ?>">
+                                <input type="hidden" name="kelas_id" value="<?= $kombinasi['kelas_id'] ?>">
+                                <input type="hidden" name="mapel_id" value="<?= $kombinasi['mapel_id'] ?>">
+                                <button type="button" onclick="Swal.fire({title:'Salin Berkas?',text:'Semua dokumen akan disalin ke kelas paralel.',icon:'question',showCancelButton:true,confirmButtonColor:'#3b82f6',cancelButtonColor:'#94a3b8',confirmButtonText:'Ya, Salin',cancelButtonText:'Batal'}).then(r=>{if(r.isConfirmed) document.getElementById('form-copy-<?= $kombinasi['kelas_id'] ?>-<?= $kombinasi['mapel_id'] ?>').submit();})" style="background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                    <i data-lucide="copy" style="width: 14px; height: 14px;"></i> Salin
+                                </button>
+                            </form>
                         </div>
 
                         <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -171,7 +168,7 @@
                                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                                         <div style="background: #f8fafc; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
                                             <div style="font-size: 0.85rem; font-weight: 800; color: #334155;"><?= htmlspecialchars($dok_wajib) ?></div>
-                                            <button onclick="document.querySelector('[name=jenis_berkas]').value = '<?= $dok_wajib ?>'; document.querySelector('[name=kelas_id]').value = '<?= $kombinasi['kelas_id'] ?>'; document.querySelector('[name=mapel_id]').value = '<?= $kombinasi['mapel_id'] ?>'; toggleUploadForm(); document.getElementById('formUploadWrapper').scrollIntoView({behavior: 'smooth'});" style="background: #e0f2fe; color: #0284c7; border: none; padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                            <button onclick="openUploadModal('<?= $dok_wajib ?>', '<?= $kombinasi['kelas_id'] ?>', '<?= $kombinasi['mapel_id'] ?>')" style="background: #e0f2fe; color: #0284c7; border: none; padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                                                 <i data-lucide="plus" style="width: 12px; height: 12px;"></i> Tambah
                                             </button>
                                         </div>
@@ -187,8 +184,8 @@
                                                         <div style="font-size: 0.65rem; color: #94a3b8; margin-top: 2px;"><?= date('d/m/Y', strtotime($berkasFound['tanggal_upload'])) ?> · <span style="color: <?= $statusColor ?>; font-weight: 800;"><?= $berkasFound['status_validasi'] ?></span></div>
                                                     </div>
                                                     <div style="display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0;">
-                                                        <a href="/apk/viewer?type=perangkat&id=<?= $berkasFound['id'] ?>" style="background: #e0f2fe; color: #0284c7; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i> Lihat</a>
-                                                        <a href="javascript:void(0)" onclick="Swal.fire({title:'Hapus berkas ini?',text:'File akan dihapus permanen.',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444',cancelButtonText:'Batal',confirmButtonText:'Hapus'}).then(r=>{if(r.isConfirmed) location.href='/apk/berkas/hapus/<?= $berkasFound['id'] ?>';})" style="background: #fee2e2; color: #dc2626; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Hapus</a>
+                                                        <a href="<?= \App\Core\Helper::url('/apk/viewer?type=perangkat&id=' . $berkasFound['id']) ?>" style="background: #e0f2fe; color: #0284c7; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i> Lihat</a>
+                                                        <a href="javascript:void(0)" onclick="Swal.fire({title:'Hapus berkas ini?',text:'File akan dihapus permanen.',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444',cancelButtonText:'Batal',confirmButtonText:'Hapus'}).then(r=>{if(r.isConfirmed) location.href='<?= \App\Core\Helper::url('/apk/berkas/hapus/' . $berkasFound['id']) ?>';})" style="background: #fee2e2; color: #dc2626; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Hapus</a>
                                                     </div>
                                                 </div>
                                             <?php endforeach; ?>
@@ -206,7 +203,7 @@
                                                     <div style="font-size: 0.7rem; color: #e11d48; font-weight: 600;">Belum Upload</div>
                                                 </div>
                                             </div>
-                                            <button onclick="document.querySelector('[name=jenis_berkas]').value = '<?= $dok_wajib ?>'; document.querySelector('[name=kelas_id]').value = '<?= $kombinasi['kelas_id'] ?>'; document.querySelector('[name=mapel_id]').value = '<?= $kombinasi['mapel_id'] ?>'; toggleUploadForm(); document.getElementById('formUploadWrapper').scrollIntoView({behavior: 'smooth'});" style="background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 6px rgba(225,29,72,0.2);">
+                                            <button onclick="openUploadModal('<?= $dok_wajib ?>', '<?= $kombinasi['kelas_id'] ?>', '<?= $kombinasi['mapel_id'] ?>')" style="background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 6px rgba(225,29,72,0.2);">
                                                 <i data-lucide="upload-cloud" style="width: 14px; height: 14px;"></i> Upload
                                             </button>
                                         </div>
@@ -243,7 +240,7 @@
                                                     <?= htmlspecialchars($berkas['status_validasi']) ?>
                                                 </div>
                                             </div>
-                                            <a href="/apk/viewer?type=perangkat&id=<?= $berkas['id'] ?>" style="font-size: 0.75rem; font-weight: 700; color: #0ea5e9; text-decoration: none;"><i data-lucide="eye" style="width: 12px; height: 12px; display:inline-block; vertical-align:middle;"></i> Lihat File</a>
+                                            <a href="<?= \App\Core\Helper::url('/apk/viewer?type=perangkat&id=' . $berkas['id']) ?>" style="font-size: 0.75rem; font-weight: 700; color: #0ea5e9; text-decoration: none;"><i data-lucide="eye" style="width: 12px; height: 12px; display:inline-block; vertical-align:middle;"></i> Lihat File</a>
                                         </div>
                                         <?php
                                     }
@@ -277,7 +274,7 @@
                 </button>
             </div>
             
-            <form action="" method="POST" enctype="multipart/form-data" id="formUploadPribadi" onsubmit="return submitForm('btnUploadPribadi')">
+            <form action="<?= \App\Core\Helper::url('/apk/berkas') ?>" method="POST" enctype="multipart/form-data" id="formUploadPribadi" onsubmit="return submitForm('btnUploadPribadi')">
                 <input type="hidden" name="tab_type" value="pribadi">
                 <div style="margin-bottom: 12px;">
                     <label style="display:block; margin-bottom: 6px; font-weight: 700; color: #475569; font-size: 0.8rem;">Nama / Jenis Berkas <span style="color:red">*</span></label>
@@ -322,8 +319,8 @@
                             <div style="font-size: 0.65rem; color: #94a3b8;"><?= htmlspecialchars($bp['judul_berkas']) ?> · <?= date('d/m/Y', strtotime($bp['tanggal_upload'])) ?> · <span style="background: #f1f5f9; padding: 1px 4px; border-radius: 3px; font-weight: 700; text-transform: uppercase;"><?= $ext ?></span></div>
                         </div>
                         <div style="display: flex; gap: 8px; margin-left: 8px; flex-shrink: 0;">
-                            <a href="/apk/viewer?type=pribadi&id=<?= $bp['id'] ?>" style="background: #e0f2fe; color: #0284c7; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; gap: 4px;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i> Lihat</a>
-                            <a href="javascript:void(0)" onclick="Swal.fire({title:'Hapus berkas ini?',text:'File akan dihapus permanen.',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444',cancelButtonText:'Batal',confirmButtonText:'Hapus'}).then(r=>{if(r.isConfirmed) location.href='/apk/berkas-pribadi/hapus/<?= $bp['id'] ?>';})" style="background: #fee2e2; color: #dc2626; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; gap: 4px;"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Hapus</a>
+                            <a href="<?= \App\Core\Helper::url('/apk/viewer?type=pribadi&id=' . $bp['id']) ?>" style="background: #e0f2fe; color: #0284c7; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; gap: 4px;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i> Lihat</a>
+                            <a href="javascript:void(0)" onclick="Swal.fire({title:'Hapus berkas ini?',text:'File akan dihapus permanen.',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444',cancelButtonText:'Batal',confirmButtonText:'Hapus'}).then(r=>{if(r.isConfirmed) location.href='<?= \App\Core\Helper::url('/apk/berkas-pribadi/hapus/' . $bp['id']) ?>';})" style="background: #fee2e2; color: #dc2626; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; gap: 4px;"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Hapus</a>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -393,10 +390,17 @@ function switchTab(tab) {
     }
 }
 
+function openUploadModal(jenis, kelas, mapel) {
+    document.getElementById('upload_jenis_berkas').value = jenis;
+    document.getElementById('upload_kelas_id').value = kelas;
+    document.getElementById('upload_mapel_id').value = mapel;
+    toggleUploadForm();
+}
+
 function toggleUploadForm() {
     const formWrapper = document.getElementById('formUploadWrapper');
     if (formWrapper.style.display === 'none' || formWrapper.style.display === '') {
-        formWrapper.style.display = 'block';
+        formWrapper.style.display = 'flex';
     } else {
         formWrapper.style.display = 'none';
     }
@@ -435,6 +439,26 @@ document.addEventListener('DOMContentLoaded', function() {
             timerProgressBar: true
         });
         <?php unset($_SESSION['swal_success']); ?>
+    <?php endif; ?>
+
+    <?php if(isset($_SESSION['swal_error'])): ?>
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: '<?= $_SESSION['swal_error'] ?>',
+            confirmButtonColor: '#ef4444'
+        });
+        <?php unset($_SESSION['swal_error']); ?>
+    <?php endif; ?>
+
+    <?php if(isset($_SESSION['swal_warning'])): ?>
+        Swal.fire({
+            icon: 'warning',
+            title: 'Perhatian',
+            text: '<?= $_SESSION['swal_warning'] ?>',
+            confirmButtonColor: '#f59e0b'
+        });
+        <?php unset($_SESSION['swal_warning']); ?>
     <?php endif; ?>
 });
 </script>

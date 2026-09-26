@@ -393,6 +393,7 @@ $router->add('GET', '/apk/berkas', [\App\Controllers\ApkController::class, 'berk
 $router->add('POST', '/apk/berkas', [\App\Controllers\ApkController::class, 'berkas']);
 $router->add('GET', '/apk/berkas/hapus/{id}', [\App\Controllers\ApkController::class, 'hapusBerkas']);
 $router->add('GET', '/apk/berkas-pribadi/hapus/{id}', [\App\Controllers\ApkController::class, 'hapusBerkasPribadi']);
+$router->add('POST', '/apk/berkas/salin-paralel', [\App\Controllers\ApkController::class, 'berkasSalinParalel']);
 $router->add('GET', '/apk/edit-profile', [\App\Controllers\ApkController::class, 'editProfile']);
 $router->add('POST', '/apk/edit-profile', [\App\Controllers\ApkController::class, 'editProfile']);
 $router->add('GET', '/apk/logout', [\App\Controllers\ApkController::class, 'logout']);
@@ -469,6 +470,7 @@ $router->add('GET', '/guru/berkas', [\App\Controllers\WebGuruController::class, 
 $router->add('POST', '/guru/berkas', [\App\Controllers\WebGuruController::class, 'berkas']);
 $router->add('GET', '/guru/berkas/hapus/{id}', [\App\Controllers\WebGuruController::class, 'hapusBerkas']);
 $router->add('GET', '/guru/berkas-pribadi/hapus/{id}', [\App\Controllers\WebGuruController::class, 'hapusBerkasPribadi']);
+$router->add('POST', '/guru/berkas/salin-paralel', [\App\Controllers\WebGuruController::class, 'berkasSalinParalel']);
 
 // ROUTE: Apk Guru Izin
 $router->add('GET', '/apk/izin-guru', [\App\Controllers\ApkController::class, 'izinGuru']);

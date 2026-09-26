@@ -1,8 +1,10 @@
-<div class="z-card" style="padding: 2rem; border-radius: 16px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; margin-bottom: 2rem;">
-    <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px;">Pusat Dokumen</h2>
-    <p style="font-size: 1rem; opacity: 0.9; margin: 0; max-width: 600px;">
-        Arsip E-Kinerja & Berkas Pribadi. Kelola dokumen pengajaran dan berkas pribadi Anda di sini.
-    </p>
+<div class="modern-page-header">
+    <div>
+        <h1 class="mph-title">
+            <i data-lucide="folder-open" style="color: #bfdbfe;"></i> Pusat Dokumen
+        </h1>
+        <p class="mph-subtitle">Arsip E-Kinerja & Berkas Pribadi. Kelola dokumen pengajaran dan berkas pribadi Anda di sini.</p>
+    </div>
 </div>
 
 <?php if(isset($_SESSION['guru_msg'])): ?>
@@ -34,74 +36,64 @@
             </button>
         </div>
 
-        <!-- Form Upload Berkas (Hidden by default) -->
-        <div id="formUploadWrapper" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 25px; margin-bottom: 25px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
-                    <i data-lucide="upload-cloud" style="color: #3b82f6; width: 22px;"></i> Form Unggah Perangkat
-                </h3>
-                <button onclick="toggleUploadForm()" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 4px;">
-                    <i data-lucide="x" style="width: 20px;"></i>
-                </button>
-            </div>
-            
-            <form action="" method="POST" enctype="multipart/form-data" id="formUpload" onsubmit="return submitForm('btnUpload')">
-                <input type="hidden" name="tab_type" value="perangkat">
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px;">
-                    <div>
-                        <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">Jenis Berkas <span style="color:red">*</span></label>
-                        <select name="jenis_berkas" required style="width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; background: #fff; color: #1e293b; outline: none;">
-                            <option value="">-- Pilih Jenis --</option>
-                            <option value="Capaian Pembelajaran (CP) / KI-KD">Capaian Pembelajaran (CP) / KI-KD</option>
-                            <option value="Silabus / ATP">Silabus / ATP</option>
-                            <option value="Program Tahunan (Prota)">Program Tahunan (Prota)</option>
-                            <option value="Program Semester (Promes)">Program Semester (Promes)</option>
-                            <option value="RPP / Modul Ajar">RPP / Modul Ajar</option>
-                            <option value="KKM / KKTP">KKM / KKTP</option>
-                            <option value="Bank Soal / Evaluasi">Bank Soal / Evaluasi</option>
-                            <option value="Lainnya">Lainnya</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">Judul Spesifik <span style="color:red">*</span></label>
-                        <input type="text" name="judul_berkas" required placeholder="Contoh: Modul Ajar MTK Kelas 7 Sem 1" style="width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; background: #fff; color: #1e293b; outline: none;">
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px;">
-                    <div>
-                        <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">Kelas <span style="color:red">*</span></label>
-                        <select name="kelas_id" required style="width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; background: #fff; color: #1e293b; outline: none;">
-                            <option value="">-- Pilih Kelas --</option>
-                            <?php foreach($kelas_mengajar as $k): ?>
-                                <option value="<?= $k['id'] ?>"><?= htmlspecialchars($k['nama_kelas']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">Mapel <span style="color:red">*</span></label>
-                        <select name="mapel_id" required style="width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; background: #fff; color: #1e293b; outline: none;">
-                            <option value="">-- Pilih Mapel --</option>
-                            <?php foreach($mapel_mengajar as $m): ?>
-                                <option value="<?= $m['id'] ?>"><?= htmlspecialchars($m['nama_mapel']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">File Dokumen (Wajib berformat PDF) <span style="color:red">*</span></label>
-                    <input type="file" name="file_berkas" accept=".pdf" required style="width: 100%; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px; font-size: 0.95rem; background: #fff; color: #1e293b; outline: none;">
-                    <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 5px;">Maksimal ukuran file: 5MB</div>
-                </div>
-
-                <div style="display: flex; justify-content: flex-end;">
-                    <button type="submit" id="btnUpload" class="z-btn z-btn-primary" style="display: flex; align-items: center; gap: 8px; padding: 12px 24px;">
-                        <i data-lucide="send" style="width: 18px;"></i> Simpan & Ajukan Validasi
+        <!-- Form Upload Berkas (Modal Overlay) -->
+        <div id="formUploadWrapper" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+            <div style="background: #ffffff; border-radius: 16px; padding: 25px; width: 100%; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin: 20px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease-out;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <div style="background: #eff6ff; color: #3b82f6; width: 36px; height: 36px; border-radius: 8px; display: flex; justify-content: center; align-items: center;">
+                            <i data-lucide="upload-cloud" style="width: 20px;"></i>
+                        </div>
+                        Form Unggah Perangkat
+                    </h3>
+                    <button type="button" onclick="toggleUploadForm()" style="background: #f1f5f9; border: none; color: #64748b; cursor: pointer; padding: 6px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                        <i data-lucide="x" style="width: 18px;"></i>
                     </button>
                 </div>
-            </form>
+                
+                <form action="" method="POST" enctype="multipart/form-data" id="formUpload" onsubmit="return submitForm('btnUpload')">
+                    <input type="hidden" name="tab_type" value="perangkat">
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">Jenis Berkas <span style="color:red">*</span></label>
+                            <select id="upload_jenis_berkas" name="jenis_berkas" required style="width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; background: #f8fafc; color: #1e293b; outline: none;">
+                                <option value="">-- Pilih Jenis --</option>
+                                <option value="Capaian Pembelajaran (CP) / KI-KD">Capaian Pembelajaran (CP) / KI-KD</option>
+                                <option value="Silabus / ATP">Silabus / ATP</option>
+                                <option value="Program Tahunan (Prota)">Program Tahunan (Prota)</option>
+                                <option value="Program Semester (Promes)">Program Semester (Promes)</option>
+                                <option value="RPP / Modul Ajar">RPP / Modul Ajar</option>
+                                <option value="KKM / KKTP">KKM / KKTP</option>
+                                <option value="Bank Soal / Evaluasi">Bank Soal / Evaluasi</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">Judul Spesifik <span style="color:red">*</span></label>
+                            <input type="text" name="judul_berkas" required placeholder="Contoh: Modul Ajar MTK Kelas 7 Sem 1" style="width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; background: #f8fafc; color: #1e293b; outline: none;">
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="upload_kelas_id" name="kelas_id" required>
+                    <input type="hidden" id="upload_mapel_id" name="mapel_id" required>
+    
+                    <div style="margin-bottom: 25px;">
+                        <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">File Dokumen (Wajib berformat PDF) <span style="color:red">*</span></label>
+                        <div style="position: relative;">
+                            <input type="file" name="file_berkas" accept=".pdf" required style="width: 100%; padding: 12px; border: 2px dashed #cbd5e1; border-radius: 8px; font-size: 0.95rem; background: #f8fafc; color: #1e293b; outline: none; cursor: pointer;">
+                        </div>
+                        <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 5px; display: flex; align-items: center; gap: 4px;"><i data-lucide="info" style="width: 14px;"></i> Maksimal ukuran file: 5MB</div>
+                    </div>
+    
+                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="button" onclick="toggleUploadForm()" style="background: #f1f5f9; color: #475569; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;">Batal</button>
+                        <button type="submit" id="btnUpload" class="z-btn z-btn-primary" style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 8px;">
+                            <i data-lucide="send" style="width: 18px;"></i> Simpan & Ajukan Validasi
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
         
         <?php if(empty($kombinasi_mengajar)): ?>
@@ -131,14 +123,23 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
                 <?php foreach($kombinasi_mengajar as $kombinasi): ?>
                     <div class="kombinasi-card" data-kelas="<?= $kombinasi['kelas_id'] ?>" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9;">
-                            <div style="background: #e0f2fe; color: #0284c7; padding: 12px; border-radius: 12px;">
-                                <i data-lucide="book-open" style="width: 24px; height: 24px;"></i>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="background: #e0f2fe; color: #0284c7; padding: 12px; border-radius: 12px;">
+                                    <i data-lucide="book-open" style="width: 24px; height: 24px;"></i>
+                                </div>
+                                <div>
+                                    <h4 style="font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0;"><?= htmlspecialchars($kombinasi['nama_kelas']) ?></h4>
+                                    <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;"><?= htmlspecialchars($kombinasi['nama_mapel']) ?></div>
+                                </div>
                             </div>
-                            <div>
-                                <h4 style="font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0;"><?= htmlspecialchars($kombinasi['nama_kelas']) ?></h4>
-                                <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;"><?= htmlspecialchars($kombinasi['nama_mapel']) ?></div>
-                            </div>
+                            <form method="POST" action="<?= \App\Core\Helper::url('/guru/berkas/salin-paralel') ?>" style="margin: 0;" id="form-copy-<?= $kombinasi['kelas_id'] ?>-<?= $kombinasi['mapel_id'] ?>">
+                                <input type="hidden" name="kelas_id" value="<?= $kombinasi['kelas_id'] ?>">
+                                <input type="hidden" name="mapel_id" value="<?= $kombinasi['mapel_id'] ?>">
+                                <button type="button" onclick="Swal.fire({title:'Salin Berkas?',text:'Semua dokumen di kelas ini akan disalin ke kelas paralel (tingkat & mapel sama).',icon:'question',showCancelButton:true,confirmButtonColor:'#3b82f6',cancelButtonColor:'#94a3b8',confirmButtonText:'Ya, Salin',cancelButtonText:'Batal'}).then(r=>{if(r.isConfirmed) document.getElementById('form-copy-<?= $kombinasi['kelas_id'] ?>-<?= $kombinasi['mapel_id'] ?>').submit();})" style="background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+                                    <i data-lucide="copy" style="width: 14px; height: 14px;"></i> Salin
+                                </button>
+                            </form>
                         </div>
 
                         <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -153,7 +154,7 @@
                                 <?php if(!empty($matched_berkas)): ?>
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                                         <div style="font-size: 0.85rem; font-weight: 700; color: #475569;"><?= htmlspecialchars($dok_wajib) ?></div>
-                                        <button onclick="document.querySelector('[name=jenis_berkas]').value = '<?= $dok_wajib ?>'; document.querySelector('[name=kelas_id]').value = '<?= $kombinasi['kelas_id'] ?>'; document.querySelector('[name=mapel_id]').value = '<?= $kombinasi['mapel_id'] ?>'; toggleUploadForm(); document.getElementById('formUploadWrapper').scrollIntoView({behavior: 'smooth'});" style="background: none; border: none; color: #3b82f6; padding: 2px 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        <button onclick="openUploadModal('<?= $dok_wajib ?>', '<?= $kombinasi['kelas_id'] ?>', '<?= $kombinasi['mapel_id'] ?>')" style="background: none; border: none; color: #3b82f6; padding: 2px 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                                             <i data-lucide="plus" style="width: 12px;"></i> Tambah
                                         </button>
                                     </div>
@@ -168,8 +169,8 @@
                                                 <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;"><?= date('d/m/Y', strtotime($berkasFound['tanggal_upload'])) ?> · <span style="color: <?= $statusColor ?>; font-weight: 700;"><?= $berkasFound['status_validasi'] ?></span></div>
                                             </div>
                                             <div style="display: flex; gap: 6px; margin-left: 10px; flex-shrink: 0;">
-                                                <a href="/public/uploads/berkas/<?= htmlspecialchars($berkasFound['file_nama']) ?>" target="_blank" style="background: #e0f2fe; color: #0284c7; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 4px;"><i data-lucide="external-link" style="width: 14px; height: 14px;"></i> Lihat</a>
-                                                <a href="javascript:void(0)" onclick="Swal.fire({title:'Hapus berkas ini?',text:'File akan dihapus permanen.',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444',cancelButtonText:'Batal',confirmButtonText:'Hapus'}).then(r=>{if(r.isConfirmed) location.href='/guru/berkas/hapus/<?= $berkasFound['id'] ?>';})" style="background: #fee2e2; color: #dc2626; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 4px;"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Hapus</a>
+                                                <a href="<?= \App\Core\Helper::url('/public/uploads/berkas/' . $berkasFound['file_nama']) ?>" target="_blank" style="background: #e0f2fe; color: #0284c7; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 4px;"><i data-lucide="external-link" style="width: 14px; height: 14px;"></i> Lihat</a>
+                                                <a href="javascript:void(0)" onclick="Swal.fire({title:'Hapus berkas ini?',text:'File akan dihapus permanen.',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444',cancelButtonText:'Batal',confirmButtonText:'Hapus'}).then(r=>{if(r.isConfirmed) location.href='<?= \App\Core\Helper::url('/guru/berkas/hapus/' . $berkasFound['id']) ?>';})" style="background: #fee2e2; color: #dc2626; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 4px;"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Hapus</a>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -179,7 +180,7 @@
                                             <div style="font-size: 0.85rem; font-weight: 700; color: #4c1d95;"><?= htmlspecialchars($dok_wajib) ?></div>
                                             <div style="font-size: 0.75rem; color: #f43f5e; font-weight: 600; margin-top: 2px;">Belum Upload</div>
                                         </div>
-                                        <button onclick="document.querySelector('[name=jenis_berkas]').value = '<?= $dok_wajib ?>'; document.querySelector('[name=kelas_id]').value = '<?= $kombinasi['kelas_id'] ?>'; document.querySelector('[name=mapel_id]').value = '<?= $kombinasi['mapel_id'] ?>'; toggleUploadForm(); document.getElementById('formUploadWrapper').scrollIntoView({behavior: 'smooth'});" style="background: transparent; border: 1px solid #f43f5e; color: #f43f5e; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        <button onclick="openUploadModal('<?= $dok_wajib ?>', '<?= $kombinasi['kelas_id'] ?>', '<?= $kombinasi['mapel_id'] ?>')" style="background: transparent; border: 1px solid #f43f5e; color: #f43f5e; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                                             <i data-lucide="upload" style="width: 12px;"></i> Upload
                                         </button>
                                     </div>
@@ -216,8 +217,8 @@
                                                 </div>
                                             </div>
                                             <div style="display: flex; gap: 10px;">
-                                                <a href="/public/uploads/berkas/<?= htmlspecialchars($berkas['file_nama']) ?>" target="_blank" style="font-size: 0.85rem; font-weight: 600; color: #3b82f6; text-decoration: none;"><i data-lucide="external-link" style="width: 14px; height: 14px; display:inline-block; vertical-align:middle;"></i> Lihat File</a>
-                                                <a href="javascript:void(0)" onclick="Swal.fire({title:'Hapus?',text:'Yakin hapus file ini?',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444',cancelButtonText:'Batal',confirmButtonText:'Hapus'}).then(r=>{if(r.isConfirmed) location.href='/guru/berkas/hapus/<?= $berkas['id'] ?>';})" style="font-size: 0.85rem; font-weight: 600; color: #ef4444; text-decoration: none;"><i data-lucide="trash-2" style="width: 14px; height: 14px; display:inline-block; vertical-align:middle;"></i> Hapus</a>
+                                                <a href="<?= \App\Core\Helper::url('/public/uploads/berkas/' . $berkas['file_nama']) ?>" target="_blank" style="font-size: 0.85rem; font-weight: 600; color: #3b82f6; text-decoration: none;"><i data-lucide="external-link" style="width: 14px; height: 14px; display:inline-block; vertical-align:middle;"></i> Lihat File</a>
+                                                <a href="javascript:void(0)" onclick="Swal.fire({title:'Hapus?',text:'Yakin hapus file ini?',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444',cancelButtonText:'Batal',confirmButtonText:'Hapus'}).then(r=>{if(r.isConfirmed) location.href='<?= \App\Core\Helper::url('/guru/berkas/hapus/' . $berkas['id']) ?>';})" style="font-size: 0.85rem; font-weight: 600; color: #ef4444; text-decoration: none;"><i data-lucide="trash-2" style="width: 14px; height: 14px; display:inline-block; vertical-align:middle;"></i> Hapus</a>
                                             </div>
                                         </div>
                                         <?php
@@ -240,55 +241,63 @@
             </button>
         </div>
 
-        <!-- Form Upload Berkas Pribadi -->
-        <div id="formUploadPribadiWrapper" style="display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 16px; padding: 25px; margin-bottom: 25px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
-                    <i data-lucide="upload-cloud" style="color: #10b981; width: 22px;"></i> Upload Berkas Pribadi
-                </h3>
-                <button onclick="togglePribadiForm()" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 4px;">
-                    <i data-lucide="x" style="width: 20px;"></i>
-                </button>
-            </div>
-            
-            <form action="" method="POST" enctype="multipart/form-data" id="formUploadPribadi" onsubmit="return submitForm('btnUploadPribadi')">
-                <input type="hidden" name="tab_type" value="pribadi">
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px;">
-                    <div>
-                        <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">Jenis Dokumen <span style="color:red">*</span></label>
-                        <select name="jenis_berkas" required style="width: 100%; padding: 10px 15px; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 0.95rem; background: #fff; color: #1e293b; outline: none;">
-                            <option value="">-- Pilih Jenis --</option>
-                            <option value="KTP">KTP</option>
-                            <option value="Kartu Keluarga (KK)">Kartu Keluarga (KK)</option>
-                            <option value="Ijazah Terakhir">Ijazah Terakhir</option>
-                            <option value="Transkrip Nilai">Transkrip Nilai</option>
-                            <option value="Sertifikat Pendidik">Sertifikat Pendidik</option>
-                            <option value="SK Pengangkatan">SK Pengangkatan</option>
-                            <option value="NUPTK / NRG">NUPTK / NRG</option>
-                            <option value="Kartu BPJS">Kartu BPJS</option>
-                            <option value="NPWP">NPWP</option>
-                            <option value="Lainnya">Lainnya</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">Keterangan <span style="color:red">*</span></label>
-                        <input type="text" name="judul_berkas" required placeholder="Contoh: KTP Atas Nama Ahmad" style="width: 100%; padding: 10px 15px; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 0.95rem; background: #fff; color: #1e293b; outline: none;">
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">File Dokumen (PDF / Gambar) <span style="color:red">*</span></label>
-                    <input type="file" name="file_berkas" accept=".pdf,.jpg,.jpeg,.png" required style="width: 100%; padding: 10px; border: 1px dashed #bbf7d0; border-radius: 8px; font-size: 0.95rem; background: #fff; color: #1e293b; outline: none;">
-                    <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 5px;">Format: PDF, JPG, JPEG, PNG – Maks. 5MB</div>
-                </div>
-
-                <div style="display: flex; justify-content: flex-end;">
-                    <button type="submit" id="btnUploadPribadi" class="z-btn" style="background: #10b981; color: white; border: none; display: flex; align-items: center; gap: 8px; padding: 12px 24px;">
-                        <i data-lucide="send" style="width: 18px;"></i> Simpan Berkas Pribadi
+        <!-- Form Upload Berkas Pribadi (Modal Overlay) -->
+        <div id="formUploadPribadiWrapper" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+            <div style="background: #ffffff; border-radius: 16px; padding: 25px; width: 100%; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin: 20px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease-out;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <div style="background: #ecfdf5; color: #10b981; width: 36px; height: 36px; border-radius: 8px; display: flex; justify-content: center; align-items: center;">
+                            <i data-lucide="upload-cloud" style="width: 20px;"></i>
+                        </div>
+                        Upload Berkas Pribadi
+                    </h3>
+                    <button type="button" onclick="togglePribadiForm()" style="background: #f1f5f9; border: none; color: #64748b; cursor: pointer; padding: 6px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                        <i data-lucide="x" style="width: 18px;"></i>
                     </button>
                 </div>
-            </form>
+                
+                <form action="" method="POST" enctype="multipart/form-data" id="formUploadPribadi" onsubmit="return submitForm('btnUploadPribadi')">
+                    <input type="hidden" name="tab_type" value="pribadi">
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">Jenis Dokumen <span style="color:red">*</span></label>
+                            <select name="jenis_berkas" required style="width: 100%; padding: 10px 15px; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 0.95rem; background: #f8fafc; color: #1e293b; outline: none;">
+                                <option value="">-- Pilih Jenis --</option>
+                                <option value="KTP">KTP</option>
+                                <option value="Kartu Keluarga (KK)">Kartu Keluarga (KK)</option>
+                                <option value="Ijazah Terakhir">Ijazah Terakhir</option>
+                                <option value="Transkrip Nilai">Transkrip Nilai</option>
+                                <option value="Sertifikat Pendidik">Sertifikat Pendidik</option>
+                                <option value="SK Pengangkatan">SK Pengangkatan</option>
+                                <option value="NUPTK / NRG">NUPTK / NRG</option>
+                                <option value="Kartu BPJS">Kartu BPJS</option>
+                                <option value="NPWP">NPWP</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">Keterangan <span style="color:red">*</span></label>
+                            <input type="text" name="judul_berkas" required placeholder="Contoh: KTP Atas Nama Ahmad" style="width: 100%; padding: 10px 15px; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 0.95rem; background: #f8fafc; color: #1e293b; outline: none;">
+                        </div>
+                    </div>
+    
+                    <div style="margin-bottom: 25px;">
+                        <label style="display:block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.9rem;">File Dokumen (PDF / Gambar) <span style="color:red">*</span></label>
+                        <div style="position: relative;">
+                            <input type="file" name="file_berkas" accept=".pdf,.jpg,.jpeg,.png" required style="width: 100%; padding: 12px; border: 2px dashed #bbf7d0; border-radius: 8px; font-size: 0.95rem; background: #f8fafc; color: #1e293b; outline: none; cursor: pointer;">
+                        </div>
+                        <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 5px; display: flex; align-items: center; gap: 4px;"><i data-lucide="info" style="width: 14px;"></i> Format: PDF, JPG, JPEG, PNG – Maks. 5MB</div>
+                    </div>
+    
+                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="button" onclick="togglePribadiForm()" style="background: #f1f5f9; color: #475569; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;">Batal</button>
+                        <button type="submit" id="btnUploadPribadi" class="z-btn" style="background: #10b981; color: white; border: none; display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 8px;">
+                            <i data-lucide="send" style="width: 18px;"></i> Simpan Berkas Pribadi
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Daftar Berkas Pribadi -->
@@ -317,8 +326,8 @@
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
-                            <a href="/public/uploads/berkas/<?= htmlspecialchars($bp['file_nama']) ?>" target="_blank" style="flex: 1; text-align: center; background: #e0f2fe; color: #0284c7; text-decoration: none; padding: 6px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 4px;"><i data-lucide="external-link" style="width: 14px; height: 14px;"></i> Lihat</a>
-                            <a href="javascript:void(0)" onclick="Swal.fire({title:'Hapus berkas ini?',text:'File akan dihapus permanen.',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444',cancelButtonText:'Batal',confirmButtonText:'Hapus'}).then(r=>{if(r.isConfirmed) location.href='/guru/berkas-pribadi/hapus/<?= $bp['id'] ?>';})" style="flex: 1; text-align: center; background: #fee2e2; color: #dc2626; text-decoration: none; padding: 6px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 4px;"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Hapus</a>
+                            <a href="<?= \App\Core\Helper::url('/public/uploads/berkas/' . $bp['file_nama']) ?>" target="_blank" style="flex: 1; text-align: center; background: #e0f2fe; color: #0284c7; text-decoration: none; padding: 6px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 4px;"><i data-lucide="external-link" style="width: 14px; height: 14px;"></i> Lihat</a>
+                            <a href="javascript:void(0)" onclick="Swal.fire({title:'Hapus berkas ini?',text:'File akan dihapus permanen.',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444',cancelButtonText:'Batal',confirmButtonText:'Hapus'}).then(r=>{if(r.isConfirmed) location.href='<?= \App\Core\Helper::url('/guru/berkas-pribadi/hapus/' . $bp['id']) ?>';})" style="flex: 1; text-align: center; background: #fee2e2; color: #dc2626; text-decoration: none; padding: 6px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 4px;"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Hapus</a>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -373,10 +382,17 @@ function switchTab(tab) {
     }
 }
 
+function openUploadModal(jenis, kelas, mapel) {
+    document.getElementById('upload_jenis_berkas').value = jenis;
+    document.getElementById('upload_kelas_id').value = kelas;
+    document.getElementById('upload_mapel_id').value = mapel;
+    toggleUploadForm();
+}
+
 function toggleUploadForm() {
     const formWrapper = document.getElementById('formUploadWrapper');
     if (formWrapper.style.display === 'none' || formWrapper.style.display === '') {
-        formWrapper.style.display = 'block';
+        formWrapper.style.display = 'flex';
     } else {
         formWrapper.style.display = 'none';
     }
@@ -385,7 +401,7 @@ function toggleUploadForm() {
 function togglePribadiForm() {
     const formWrapper = document.getElementById('formUploadPribadiWrapper');
     if (formWrapper.style.display === 'none' || formWrapper.style.display === '') {
-        formWrapper.style.display = 'block';
+        formWrapper.style.display = 'flex';
     } else {
         formWrapper.style.display = 'none';
     }
@@ -394,12 +410,20 @@ function togglePribadiForm() {
 function submitForm(btnId) {
     var btn = document.getElementById(btnId);
     btn.disabled = true;
-    btn.innerHTML = '<i data-lucide="loader-2" class="lucide-spin" style="width: 18px;"></i> Mengunggah...';
+    btn.style.opacity = '0.7';
+    btn.style.cursor = 'not-allowed';
+    btn.innerHTML = '<i data-lucide="loader-2" class="lucide-spin" style="width: 18px;"></i> Menyimpan...';
     lucide.createIcons();
     return true;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Pindahkan modal ke body agar position fixed bekerja sempurna menutupi seluruh layar
+    const modalUpload = document.getElementById('formUploadWrapper');
+    const modalPribadi = document.getElementById('formUploadPribadiWrapper');
+    if (modalUpload) document.body.appendChild(modalUpload);
+    if (modalPribadi) document.body.appendChild(modalPribadi);
+
     <?php if(isset($active_tab) && $active_tab === 'pribadi'): ?>
         switchTab('pribadi');
     <?php endif; ?>
