@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cetak Cover Buku Keuangan</title>
+    <?php if(!empty($inst['logo'])): ?>
+    <link rel="icon" type="image/png" href="/public/uploads/logo/<?php echo htmlspecialchars($inst['logo']); ?>">
+    <?php endif; ?>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap');
         
