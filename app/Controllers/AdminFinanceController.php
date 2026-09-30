@@ -634,7 +634,7 @@ class AdminFinanceController {
         }
 
         $activeMenu = 'keuangan_kolektif';
-        $title = "Pembayaran Kolektif (Auto-Split) - Keuangan MTs RS";
+        $title = "Pembayaran Kolektif - Keuangan MTs RS";
         
         ob_start();
         include __DIR__ . '/../../resources/views/finance/pembayaran_kolektif.php';
@@ -1301,7 +1301,7 @@ class AdminFinanceController {
                 ];
             } else {
                 $grouped[$group_key]['id'] .= ',' . $r['bayar_id'];
-                $grouped[$group_key]['jenis'] = 'Pembayaran Kolektif (Auto-Split)';
+                $grouped[$group_key]['jenis'] = 'Pembayaran Komite';
                 $grouped[$group_key]['periode'] = '-';
                 $grouped[$group_key]['status'] = 'Multi-Tagihan';
             }
@@ -1396,7 +1396,7 @@ class AdminFinanceController {
                     'status'  => (!empty($r['status_tagihan'])) ? $r['status_tagihan'] : 'Belum Bayar',
                 ];
             } else {
-                $grouped[$group_key]['jenis'] = 'Pembayaran Kolektif (Auto-Split)';
+                $grouped[$group_key]['jenis'] = 'Pembayaran Komite';
                 $grouped[$group_key]['periode'] = '-';
                 $grouped[$group_key]['status'] = 'Multi-Tagihan';
             }
