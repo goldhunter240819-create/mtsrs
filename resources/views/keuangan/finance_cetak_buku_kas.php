@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cetak Buku Kas Umum Keuangan</title>
+    <?php if(!empty($inst['logo'])): ?>
+    <link rel="icon" type="image/png" href="/public/uploads/logo/<?php echo $inst['logo']; ?>">
+    <?php endif; ?>
     <style>
         body {
             font-family: 'Times New Roman', Times, serif;
@@ -63,8 +66,8 @@
         
         .buku-table th, .buku-table td {
             border: 1px solid #000;
-            padding: 8px;
-            font-size: 12px;
+            padding: 6px;
+            font-size: 10px;
         }
         .buku-table th { background: #f3f4f6; font-weight: bold; text-align: center; }
         
