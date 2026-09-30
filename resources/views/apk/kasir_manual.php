@@ -158,9 +158,20 @@
         </div>
     </div>
 
-    <!-- Daftar Tagihan -->
-    <div style="font-size:0.9rem; font-weight:800; color:#1e293b; margin-bottom:12px; padding-left:4px;">
-        <i data-lucide="receipt" style="width:16px; display:inline; vertical-align:middle;"></i> Daftar Tagihan
+    <?php 
+        $total_hutang = 0;
+        $total_terbayar = 0;
+        foreach($tagihan_list as $t) {
+            $total_hutang += ($t['jumlah_tagihan'] - $t['jumlah_terbayar']);
+            $total_terbayar += $t['jumlah_terbayar'];
+        }
+    ?>
+    <div style="font-size:0.9rem; font-weight:800; color:#1e293b; margin-bottom:12px; padding-left:4px; display:flex; justify-content:space-between; align-items:center;">
+        <div><i data-lucide="receipt" style="width:16px; display:inline; vertical-align:middle;"></i> Daftar Tagihan</div>
+        <div style="display: flex; flex-direction: column; gap: 4px; text-align: right;">
+            <div style="font-size:0.7rem; color:#10b981; font-weight: 700; padding-right: 2px;">Terbayar: Rp <?= number_format($total_terbayar, 0, ',', '.') ?></div>
+            <div style="font-size:0.75rem; color:#ef4444; background:#fee2e2; padding:3px 8px; border-radius:8px; border:1px solid #fca5a5;">Sisa: Rp <?= number_format($total_hutang, 0, ',', '.') ?></div>
+        </div>
     </div>
 
     <?php foreach($tagihan_list as $t): 
