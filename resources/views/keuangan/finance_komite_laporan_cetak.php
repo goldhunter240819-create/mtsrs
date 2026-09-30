@@ -13,6 +13,8 @@ function tgl_indo($tanggal){
 <head>
     <meta charset="UTF-8">
     <title>Cetak Detail Laporan Kas</title>
+    <?php $logoUrl = !empty($inst['logo']) ? \App\Core\Helper::url('/uploads/logo/' . $inst['logo']) : \App\Core\Helper::url('/assets/images/logo.png'); ?>
+    <link rel="icon" type="image/png" href="<?php echo $logoUrl; ?>">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         body {
@@ -118,36 +120,64 @@ function tgl_indo($tanggal){
             th { background-color: #eee !important; -webkit-print-color-adjust: exact; }
             .no-print { display: none; }
         }
+        .filter-box { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #cbd5e1; display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
+        .filter-box select, .filter-box input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px; }
+        .kop-text h2 { margin: 2px 0; font-size: 18px; font-weight: bold; }
     </style>
 </head>
 <body>
+
+    <div class="no-print filter-box">
+        <form method="GET" action="" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:0;">
+            <?php if (empty($is_restricted)): ?>
+            <select name="petugas_id">
+                <option value="">Semua Petugas</option>
+                <?php if(isset($petugasList)): foreach($petugasList as $p): ?>
+                <option value="<?php echo $p['id']; ?>" <?php echo (isset($_GET['petugas_id']) && $_GET['petugas_id']==$p['id'])?'selected':''; ?>><?php echo htmlspecialchars($p['nama']); ?></option>
+                <?php endforeach; endif; ?>
+            </select>
+            <?php endif; ?>
+            
+            <select name="kategori">
+                <option value="">Semua Kategori</option>
+                <?php if(isset($kategoriList)): foreach($kategoriList as $k): ?>
+                <option value="<?php echo htmlspecialchars($k['kategori']); ?>" <?php echo (isset($_GET['kategori']) && $_GET['kategori']==$k['kategori'])?'selected':''; ?>><?php echo htmlspecialchars($k['kategori']); ?></option>
+                <?php endforeach; endif; ?>
+            </select>
+            
+            <input type="date" name="start_date" value="<?php echo isset($_GET['start_date']) ? $_GET['start_date'] : ''; ?>">
+            <span style="font-family: sans-serif; font-size: 14px; font-weight: bold;">s.d</span>
+            <input type="date" name="end_date" value="<?php echo isset($_GET['end_date']) ? $_GET['end_date'] : ''; ?>">
+            
+            <button type="submit" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; font-family: sans-serif;">Filter</button>
+        </form>
+        <button onclick="window.print()" style="padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; font-family: sans-serif; margin-left: 15px;">Cetak Dokumen</button>
+    </div>
 
     <div class="kop-surat">
         <?php if(!empty($inst['logo'])): ?>
             <img src="/public/uploads/logo/<?php echo htmlspecialchars($inst['logo']); ?>" class="kop-logo" alt="Logo">
         <?php else: ?>
-            <div class="kop-logo"></div>
+            <div style="width: 80px; margin-right: 20px;"></div>
         <?php endif; ?>
+        <?php 
+            $alamat = $inst['alamat'] ?? '';
+            $desa = !empty($inst['desa']) ? 'Ds. ' . $inst['desa'] : '';
+            $kecamatan = !empty($inst['kecamatan']) ? 'Kec. ' . $inst['kecamatan'] : '';
+            $kota = !empty($inst['kota']) ? 'Kab. ' . $inst['kota'] : '';
+            $provinsi = !empty($inst['provinsi']) ? 'Prov. ' . $inst['provinsi'] : '';
+            $kodepos = !empty($inst['kodepos']) ? 'KP. ' . $inst['kodepos'] : '';
+            
+            $fullAddressArray = array_filter([$alamat, $desa, $kecamatan, $kota, $provinsi, $kodepos]);
+            $fullAddress = implode(', ', $fullAddressArray);
+        ?>
         <div class="kop-text">
-            <h1><?php echo isset($inst['nama']) && !empty($inst['nama']) ? htmlspecialchars($inst['nama']) : 'INSTITUSI PENDIDIKAN'; ?></h1>
-            <p>
-                <?php 
-                $alamat = [];
-                if(!empty($inst['alamat'])) $alamat[] = $inst['alamat'];
-                if(!empty($inst['desa'])) $alamat[] = 'Desa/Kel. ' . $inst['desa'];
-                if(!empty($inst['kecamatan'])) $alamat[] = 'Kec. ' . $inst['kecamatan'];
-                if(!empty($inst['kota'])) $alamat[] = $inst['kota'];
-                echo implode(', ', $alamat);
-                ?>
-                <br>
-                <?php
-                $kontak = [];
-                if(!empty($inst['telepon'])) $kontak[] = 'Telp: ' . $inst['telepon'];
-                if(!empty($inst['email'])) $kontak[] = 'Email: ' . $inst['email'];
-                if(!empty($kontak)) echo implode(' | ', $kontak);
-                ?>
-            </p>
+            <h1 style="font-size: <?php echo intval($inst['kop_font_yayasan'] ?? 14); ?>px; font-weight: normal; margin-bottom: 5px;"><?php echo htmlspecialchars($inst['yayasan'] ?? ''); ?></h1>
+            <h2 style="font-size: <?php echo intval($inst['kop_font_nama'] ?? 18); ?>px; text-transform: uppercase;"><?php echo htmlspecialchars($inst['nama'] ?? ''); ?></h2>
+            <p style="font-size: 12px; margin-top: 5px;"><?php echo htmlspecialchars($fullAddress); ?></p>
+            <p style="font-size: 12px;">Website: <?php echo htmlspecialchars($inst['website'] ?? ''); ?> | Email: <?php echo htmlspecialchars($inst['email'] ?? ''); ?></p>
         </div>
+        <div style="width: 80px; margin-left: 20px;"></div>
     </div>
 
     <div class="report-title">LAPORAN RINCIAN KAS <?php echo htmlspecialchars($title_suffix); ?></div>
@@ -249,10 +279,5 @@ function tgl_indo($tanggal){
         </div>
     </div>
 
-    <script>
-        window.onload = function() {
-            window.print();
-        };
-    </script>
 </body>
 </html>

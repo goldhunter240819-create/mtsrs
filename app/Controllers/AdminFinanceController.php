@@ -1942,12 +1942,28 @@ class AdminFinanceController {
             $title_suffix = strtoupper(reset($allowed_cats));
         }
 
+        // Filter kategori dropdown
+        if (!in_array('ALL', $allowed_cats)) {
+            if (empty($allowed_cats)) {
+                $kategoriList = [];
+            } else {
+                $quoted_cats = implode(',', array_map([$db, 'quote'], $allowed_cats));
+                $kategoriList = $db->query("SELECT nama_kategori as kategori FROM keuangan_komite_kategori WHERE nama_kategori IN ($quoted_cats) ORDER BY nama_kategori ASC")->fetchAll();
+            }
+        } else {
+            $kategoriList = $db->query("SELECT nama_kategori as kategori FROM keuangan_komite_kategori ORDER BY nama_kategori ASC")->fetchAll();
+        }
+
+        $petugasList = $db->query("SELECT u.id, COALESCE(g.nama, u.username) as nama FROM users u LEFT JOIN guru g ON u.id = g.user_id WHERE u.role_id IN (1, 99) OR u.id IN (SELECT user_id FROM guru WHERE id IN (SELECT DISTINCT guru_id FROM keuangan_komite_kategori)) ORDER BY nama ASC")->fetchAll();
+
         extract([
             'inst' => $inst,
             'start_date' => $start_date,
             'end_date' => $end_date,
             'kategori' => $kategori,
             'petugas_nama' => $petugas_nama,
+            'kategoriList' => $kategoriList,
+            'petugasList' => $petugasList,
             'detailPemasukan' => $detailPemasukan,
             'detailPengeluaran' => $detailPengeluaran,
             'totalMasuk' => $totalMasuk,
