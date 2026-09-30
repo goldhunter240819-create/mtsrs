@@ -53,11 +53,7 @@
             <div class="quick-action-text">Kelola Tagihan</div>
             <i data-lucide="chevron-right" class="quick-action-arrow"></i>
         </a>
-        <a href="/keuangan/cetak/buku-manual" class="quick-action-item">
-            <div class="quick-action-icon" style="background:rgba(5,150,105,0.1); color:#059669;"><i data-lucide="book-open" style="width:18px;height:18px;"></i></div>
-            <div class="quick-action-text">Cetak Buku Pembayaran</div>
-            <i data-lucide="chevron-right" class="quick-action-arrow"></i>
-        </a>
+
         <a href="/keuangan/cetak/buku-kas" class="quick-action-item">
             <div class="quick-action-icon" style="background:rgba(79,70,229,0.1); color:#4f46e5;"><i data-lucide="wallet" style="width:18px;height:18px;"></i></div>
             <div class="quick-action-text">Cetak Buku Kas Umum</div>
