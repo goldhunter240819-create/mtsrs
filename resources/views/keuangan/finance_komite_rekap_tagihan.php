@@ -46,8 +46,8 @@ foreach($rekap as $r){
 
             <div style="display:flex; flex-direction:column; align-items:flex-start; gap:4px;">
                 <label class="z-label" style="margin:0; font-size:10px; font-weight:700; letter-spacing:0.5px; color:#64748b;">KELAS</label>
-                <select name="kelas_id" class="z-field" style="width:auto; min-width:120px; padding:4px 10px; font-size:0.85rem; margin:0;" required onchange="this.form.submit()">
-                    <option value="">- Pilih Kelas -</option>
+                <select name="kelas_id" class="z-field" style="width:auto; min-width:120px; padding:4px 10px; font-size:0.85rem; margin:0;" onchange="this.form.submit()">
+                    <option value="0">- Semua Kelas -</option>
                     <?php foreach($kelasList as $k): ?>
                     <option value="<?php echo $k['id']; ?>" <?php echo $kelas_id==$k['id']?'selected':''; ?>><?php echo $k['nama_kelas']; ?></option>
                     <?php endforeach; ?>
@@ -78,7 +78,7 @@ foreach($rekap as $r){
             <?php endforeach; ?>
             <?php if(empty($rekap)): ?>
             <tr><td colspan="6" style="text-align:center;color:var(--z-muted);padding:20px;">
-                <?php echo ($kelas_id==0) ? 'Silakan pilih Kelas terlebih dahulu.' : 'Tidak ada data siswa ditemukan.'; ?>
+                Tidak ada data siswa ditemukan.
             </td></tr>
             <?php endif; ?>
         </tbody>

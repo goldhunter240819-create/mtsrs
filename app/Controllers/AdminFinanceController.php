@@ -1443,9 +1443,13 @@ class AdminFinanceController {
         }
         
         $rekap = [];
-        if ($kelas_id > 0) {
-            // Get all students in the class
-            $siswas = $db->query("SELECT id, nama, nis FROM siswa WHERE kelas_id = $kelas_id AND (status = 'Aktif' OR status = 'aktif') ORDER BY nama ASC")->fetchAll();
+        {
+            // Get all students (or filter by class)
+            if ($kelas_id > 0) {
+                $siswas = $db->query("SELECT id, nama, nis FROM siswa WHERE kelas_id = $kelas_id AND (status = 'Aktif' OR status = 'aktif') ORDER BY nama ASC")->fetchAll();
+            } else {
+                $siswas = $db->query("SELECT id, nama, nis FROM siswa WHERE (status = 'Aktif' OR status = 'aktif') ORDER BY nama ASC")->fetchAll();
+            }
             foreach ($siswas as $s) {
                 $jumlah_tagihan_total = 0;
                 $terbayar_total = 0;
@@ -1527,15 +1531,19 @@ class AdminFinanceController {
         $kelas_id = isset($_GET['kelas_id']) ? intval($_GET['kelas_id']) : 0;
         $tagihan_nama = isset($_GET['tagihan_nama']) ? $_GET['tagihan_nama'] : '';
         
-        $kelas_nama = '-';
+        $kelas_nama = 'Semua Kelas';
         if ($kelas_id > 0) {
             $kls = $db->query("SELECT nama_kelas FROM kelas WHERE id = $kelas_id")->fetch();
             if ($kls) $kelas_nama = $kls['nama_kelas'];
         }
         
         $rekap = [];
-        if ($kelas_id > 0) {
-            $siswas = $db->query("SELECT id, nama, nis FROM siswa WHERE kelas_id = $kelas_id AND (status = 'Aktif' OR status = 'aktif') ORDER BY nama ASC")->fetchAll();
+        {
+            if ($kelas_id > 0) {
+                $siswas = $db->query("SELECT id, nama, nis FROM siswa WHERE kelas_id = $kelas_id AND (status = 'Aktif' OR status = 'aktif') ORDER BY nama ASC")->fetchAll();
+            } else {
+                $siswas = $db->query("SELECT id, nama, nis FROM siswa WHERE (status = 'Aktif' OR status = 'aktif') ORDER BY nama ASC")->fetchAll();
+            }
             $allowed_cats = self::getAllowedCategories();
             foreach ($siswas as $s) {
                 $jumlah_tagihan_total = 0;

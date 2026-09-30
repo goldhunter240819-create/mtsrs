@@ -77,7 +77,7 @@ $tanggal_cetak = !empty($_GET['tanggal_cetak']) ? $_GET['tanggal_cetak'] : date(
             <div>
                 <label style="font-weight: bold; display: block; text-align: left; margin-bottom: 5px;">Pilih Kelas:</label>
                 <select name="kelas_id" onchange="this.form.submit()">
-                    <option value="">- Pilih Kelas -</option>
+                    <option value="0">- Semua Kelas -</option>
                     <?php 
                     $kelasList = $db->query("SELECT id, nama_kelas FROM kelas ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll();
                     foreach($kelasList as $k): 
