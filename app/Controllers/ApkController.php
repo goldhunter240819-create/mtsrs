@@ -6117,7 +6117,7 @@ class ApkController
         // Ambil rincian saldo per kategori
         $rincianKategori = [];
         try {
-            $rincianKategori = $db->query("
+            $rawKategori = $db->query("
                 SELECT kategori, 
                        SUM(CASE WHEN jenis='Pemasukan' THEN jumlah ELSE 0 END) as masuk,
                        SUM(CASE WHEN jenis='Pengeluaran' THEN jumlah ELSE 0 END) as keluar,
@@ -6125,8 +6125,43 @@ class ApkController
                 FROM keuangan_transaksi 
                 WHERE kategori IS NOT NULL AND TRIM(kategori) != ''
                 GROUP BY kategori
-                ORDER BY kategori ASC
             ")->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Fetch mappings for tagihan to kategori
+            $jenisTagihan = $db->query("SELECT nama_tagihan, kategori FROM keuangan_komite_jenis")->fetchAll(\PDO::FETCH_ASSOC);
+            $tagihanToKategori = [];
+            foreach ($jenisTagihan as $jt) {
+                $tagihanToKategori[trim($jt['nama_tagihan'])] = trim($jt['kategori']);
+            }
+
+            $mappedKategori = [];
+            foreach($rawKategori as $rk) {
+                $kat = trim($rk['kategori']);
+                // resolve to real category if it's a tagihan name
+                if (isset($tagihanToKategori[$kat])) {
+                    $kat = $tagihanToKategori[$kat];
+                }
+
+                if (!isset($mappedKategori[$kat])) {
+                    $mappedKategori[$kat] = ['masuk' => 0, 'keluar' => 0, 'saldo' => 0];
+                }
+                $mappedKategori[$kat]['masuk'] += (float)$rk['masuk'];
+                $mappedKategori[$kat]['keluar'] += (float)$rk['keluar'];
+                $mappedKategori[$kat]['saldo'] += (float)$rk['saldo'];
+            }
+
+            foreach($mappedKategori as $kat => $data) {
+                $rincianKategori[] = [
+                    'kategori' => $kat,
+                    'masuk' => $data['masuk'],
+                    'keluar' => $data['keluar'],
+                    'saldo' => $data['saldo']
+                ];
+            }
+            
+            usort($rincianKategori, function($a, $b) {
+                return strcmp($a['kategori'], $b['kategori']);
+            });
         } catch (\Exception $e) {}
 
         // Ambil daftar kategori dari komite_kategori
