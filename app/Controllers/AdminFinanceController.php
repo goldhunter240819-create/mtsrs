@@ -2897,9 +2897,8 @@ class AdminFinanceController {
                 
                 // Best-effort sync update to keuangan_transaksi
                 if ($old) {
-                    $keterangan_sync = "[$kategori] $keterangan";
-                    $stmt_sync = $db->prepare("UPDATE keuangan_transaksi SET jumlah = ?, tanggal_bayar = ?, keterangan = ? WHERE jenis = ? AND jumlah = ? AND tanggal_bayar = ? AND keterangan LIKE ? LIMIT 1");
-                    $stmt_sync->execute([$jumlah, $tanggal, $keterangan_sync, $old['jenis'], $old['jumlah'], $old['tanggal_transaksi'], '%' . $old['keterangan'] . '%']);
+                    $stmt_sync = $db->prepare("UPDATE keuangan_transaksi SET jumlah = ?, tanggal_bayar = ?, keterangan = ?, kategori = ? WHERE jenis = ? AND jumlah = ? AND tanggal_bayar = ? AND keterangan LIKE ? LIMIT 1");
+                    $stmt_sync->execute([$jumlah, $tanggal, $keterangan, $kategori, $old['jenis'], $old['jumlah'], $old['tanggal_transaksi'], '%' . $old['keterangan'] . '%']);
                 }
             } else {
                 // INSERT (New Mode)
@@ -2907,9 +2906,8 @@ class AdminFinanceController {
                 $stmt->execute([$tanggal, $keterangan, $jenis, $kategori, $jumlah, $petugas_id, $bukti_filename]);
                 
                 // Sync insert to keuangan_transaksi
-                $keterangan_sync = "[$kategori] $keterangan";
-                $stmt_sync_insert = $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, keterangan, jenis, jumlah, guru_id) VALUES (?, ?, ?, ?, 1)");
-                $stmt_sync_insert->execute([$tanggal, $keterangan_sync, $jenis, $jumlah]);
+                $stmt_sync_insert = $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, kategori, keterangan, jenis, jumlah, guru_id) VALUES (?, ?, ?, ?, ?, 1)");
+                $stmt_sync_insert->execute([$tanggal, $kategori, $keterangan, $jenis, $jumlah]);
             }
         }
         $r = $jenis == 'Pemasukan' ? 'pemasukan' : 'pengeluaran';
