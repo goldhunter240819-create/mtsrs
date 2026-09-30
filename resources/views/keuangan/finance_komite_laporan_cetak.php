@@ -64,11 +64,10 @@ function tgl_indo($tanggal){
             margin-bottom: 20px;
         }
         .summary-box {
-            display: flex;
-            justify-content: space-between;
+            flex: 1;
+            text-align: center;
             border: 1px solid #000;
             padding: 10px;
-            margin-bottom: 20px;
             font-weight: bold;
         }
         .section-title {
@@ -114,10 +113,10 @@ function tgl_indo($tanggal){
             text-decoration: underline;
         }
         @media print {
-            @page { margin: 1cm; }
+            @page { size: landscape; margin: 1cm; }
             body { font-size: 11px; }
             th { background-color: #eee !important; -webkit-print-color-adjust: exact; }
-            .no-print { display: none; }
+            .no-print { display: none !important; }
         }
         .filter-box { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #cbd5e1; display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
         .filter-box select, .filter-box input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px; }
@@ -189,10 +188,10 @@ function tgl_indo($tanggal){
         <?php endif; ?>
     </div>
 
-    <div class="summary-box">
-        <div>Total Pemasukan: Rp <?php echo number_format($totalMasuk, 0, ',', '.'); ?></div>
-        <div>Total Pengeluaran: Rp <?php echo number_format($totalKeluar, 0, ',', '.'); ?></div>
-        <div>Total Saldo Kas: Rp <?php echo number_format($saldo, 0, ',', '.'); ?></div>
+    <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 20px;">
+        <div class="summary-box">Total Pemasukan: Rp <?php echo number_format($totalMasuk, 0, ',', '.'); ?></div>
+        <div class="summary-box">Total Pengeluaran: Rp <?php echo number_format($totalKeluar, 0, ',', '.'); ?></div>
+        <div class="summary-box">Total Saldo Kas: Rp <?php echo number_format($saldo, 0, ',', '.'); ?></div>
     </div>
 
     <div class="section-title">A. Rincian Pemasukan Kas</div>

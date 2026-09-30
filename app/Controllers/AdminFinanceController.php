@@ -1826,7 +1826,7 @@ class AdminFinanceController {
         // Pemasukan Siswa
         $pemasukanSiswa = $db->query("
             SELECT k.tanggal_bayar as tanggal, 
-                   CONCAT('Pembayaran Tagihan (', k.jenis_pembayaran, ') - ', s.nama) as keterangan, 
+                   CONCAT(k.jenis_pembayaran, ' - ', s.nama) as keterangan, 
                    COALESCE(kj.kategori, 'Lainnya') as kategori, 
                    k.jumlah, 
                    COALESCE(gu.nama, u.username, gu_cat.nama, '-') as petugas 
