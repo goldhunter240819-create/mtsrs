@@ -3,12 +3,24 @@ $dbCore = \App\Core\Database::connect('core');
 $inst = $dbCore->query("SELECT disable_web_trx FROM institusi LIMIT 1")->fetch();
 $disableWebTrx = !empty($inst['disable_web_trx']);
 ?>
+<style>
+@media print {
+    .z-sidebar, .z-header, .mph-right, form, .pagination-container, .z-modal-overlay { display: none !important; }
+    #tbl th:last-child, #tbl td:last-child { display: none !important; }
+    .siakad-container, .z-main { padding: 0 !important; margin: 0 !important; width: 100% !important; }
+    .z-panel { box-shadow: none !important; border: 1px solid #ccc !important; }
+    .modern-page-header { background: transparent !important; padding: 0 !important; margin-bottom: 20px !important; }
+    .mph-title, .mph-subtitle { color: #000 !important; }
+    @page { margin: 10mm; size: landscape; }
+}
+</style>
 <div class="modern-page-header">
     <div class="mph-left">
         <h1 class="mph-title"><i data-lucide="layers"></i> Pembayaran Siswa</h1>
         <p class="mph-subtitle">Pencatatan uang SPP / tagihan dari siswa</p>
     </div>
     <div class="mph-right" style="display:flex; gap:10px;">
+        <button type="button" class="btn btn-outline" onclick="window.print()" style="background:#0ea5e9; color:white; border:none;"><i data-lucide="printer" style="width:14px;height:14px;"></i> Cetak Laporan</button>
         <?php if(!$disableWebTrx): ?>
         <button type="button" class="btn btn-primary" onclick="resetModal(); document.getElementById('mOv').classList.add('open')"><i data-lucide="plus" style="width:14px;height:14px;"></i>Tambah Pembayaran</button>
         <?php else: ?>
