@@ -434,6 +434,26 @@ class AdminFinanceController {
         $allowed_cats = self::getAllowedCategories();
         $selected_kat = isset($_GET['kategori']) ? trim($_GET['kategori']) : '';
         
+        // Auto-sync missing transactions from APK (keuangan_transaksi) to Web (keuangan_komite_transaksi)
+        // This ensures transactions inputted before the sync fix was deployed will appear on the web dashboard
+        $db->exec("
+            INSERT INTO keuangan_komite_transaksi (tanggal_transaksi, keterangan, jenis, kategori, jumlah, petugas_id)
+            SELECT t.tanggal_bayar, t.keterangan, t.jenis, t.kategori, t.jumlah, g.user_id
+            FROM keuangan_transaksi t
+            LEFT JOIN guru g ON t.guru_id = g.id
+            WHERE t.keterangan NOT LIKE '%Pembayaran Kas:%'
+              AND t.keterangan NOT LIKE '%Auto-Split%'
+              AND t.keterangan NOT LIKE '%Pembayaran Tagihan:%'
+              AND t.keterangan NOT LIKE '%Pelunasan Tagihan:%'
+              AND NOT EXISTS (
+                  SELECT 1 FROM keuangan_komite_transaksi kt
+                  WHERE kt.jenis = t.jenis 
+                    AND kt.jumlah = t.jumlah 
+                    AND kt.tanggal_transaksi = t.tanggal_bayar 
+                    AND kt.keterangan = t.keterangan
+              )
+        ");
+
         // 1. Hitung Pemasukan dan Pengeluaran
         $wherePembayaran = "";
         $whereManualMasuk = " WHERE jenis='Pemasukan'";
