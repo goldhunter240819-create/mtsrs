@@ -1446,9 +1446,9 @@ class AdminFinanceController {
         {
             // Get all students (or filter by class)
             if ($kelas_id > 0) {
-                $siswas = $db->query("SELECT id, nama, nis FROM siswa WHERE kelas_id = $kelas_id AND (status = 'Aktif' OR status = 'aktif') ORDER BY nama ASC")->fetchAll();
+                $siswas = $db->query("SELECT s.id, s.nama, s.nis, c.nama_kelas as kelas FROM siswa s LEFT JOIN kelas c ON s.kelas_id = c.id WHERE s.kelas_id = $kelas_id AND (s.status = 'Aktif' OR s.status = 'aktif') ORDER BY c.tingkat ASC, c.nama_kelas ASC, s.nama ASC")->fetchAll();
             } else {
-                $siswas = $db->query("SELECT id, nama, nis FROM siswa WHERE (status = 'Aktif' OR status = 'aktif') ORDER BY nama ASC")->fetchAll();
+                $siswas = $db->query("SELECT s.id, s.nama, s.nis, c.nama_kelas as kelas FROM siswa s LEFT JOIN kelas c ON s.kelas_id = c.id WHERE (s.status = 'Aktif' OR s.status = 'aktif') ORDER BY c.tingkat ASC, c.nama_kelas ASC, s.nama ASC")->fetchAll();
             }
             foreach ($siswas as $s) {
                 $jumlah_tagihan_total = 0;
@@ -1507,6 +1507,7 @@ class AdminFinanceController {
                 $rekap[] = [
                     'nama' => $s['nama'],
                     'nis' => $s['nis'],
+                    'kelas' => $s['kelas'] ?? '-',
                     'status' => $status_summary,
                     'jumlah_tagihan' => $jumlah_tagihan_total,
                     'terbayar' => $terbayar_total,
@@ -1540,9 +1541,9 @@ class AdminFinanceController {
         $rekap = [];
         {
             if ($kelas_id > 0) {
-                $siswas = $db->query("SELECT id, nama, nis FROM siswa WHERE kelas_id = $kelas_id AND (status = 'Aktif' OR status = 'aktif') ORDER BY nama ASC")->fetchAll();
+                $siswas = $db->query("SELECT s.id, s.nama, s.nis, c.nama_kelas as kelas FROM siswa s LEFT JOIN kelas c ON s.kelas_id = c.id WHERE s.kelas_id = $kelas_id AND (s.status = 'Aktif' OR s.status = 'aktif') ORDER BY c.tingkat ASC, c.nama_kelas ASC, s.nama ASC")->fetchAll();
             } else {
-                $siswas = $db->query("SELECT id, nama, nis FROM siswa WHERE (status = 'Aktif' OR status = 'aktif') ORDER BY nama ASC")->fetchAll();
+                $siswas = $db->query("SELECT s.id, s.nama, s.nis, c.nama_kelas as kelas FROM siswa s LEFT JOIN kelas c ON s.kelas_id = c.id WHERE (s.status = 'Aktif' OR s.status = 'aktif') ORDER BY c.tingkat ASC, c.nama_kelas ASC, s.nama ASC")->fetchAll();
             }
             $allowed_cats = self::getAllowedCategories();
             foreach ($siswas as $s) {
@@ -1589,6 +1590,7 @@ class AdminFinanceController {
                 $rekap[] = [
                     'nama' => $s['nama'],
                     'nis' => $s['nis'],
+                    'kelas' => $s['kelas'] ?? '-',
                     'status' => $status_summary,
                     'jumlah_tagihan' => $jumlah_tagihan_total,
                     'terbayar' => $terbayar_total,

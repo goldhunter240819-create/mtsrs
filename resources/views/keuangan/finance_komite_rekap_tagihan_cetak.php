@@ -127,6 +127,7 @@ $tanggal_cetak = !empty($_GET['tanggal_cetak']) ? $_GET['tanggal_cetak'] : date(
                 <th style="width: 30px;">No</th>
                 <th style="width: 80px;">NIS</th>
                 <th>Nama Siswa</th>
+                <th style="width: 60px;">Kelas</th>
                 <th style="width: 100px;">Total Tagihan</th>
                 <th style="width: 100px;">Total Terbayar</th>
                 <th style="width: 100px;">Sisa Tagihan</th>
@@ -143,7 +144,7 @@ $tanggal_cetak = !empty($_GET['tanggal_cetak']) ? $_GET['tanggal_cetak'] : date(
             if(empty($rekap)): 
             ?>
             <tr>
-                <td colspan="7" class="center" style="padding: 15px;">Tidak ada data tagihan ditemukan.</td>
+                <td colspan="8" class="center" style="padding: 15px;">Tidak ada data tagihan ditemukan.</td>
             </tr>
             <?php else: ?>
                 <?php foreach($rekap as $p): 
@@ -155,6 +156,7 @@ $tanggal_cetak = !empty($_GET['tanggal_cetak']) ? $_GET['tanggal_cetak'] : date(
                     <td class="center"><?php echo $no++; ?></td>
                     <td class="center"><?php echo htmlspecialchars($p['nis']); ?></td>
                     <td><?php echo htmlspecialchars($p['nama']); ?></td>
+                    <td class="center"><?php echo htmlspecialchars($p['kelas'] ?? '-'); ?></td>
                     <td class="num">Rp <?php echo number_format($p['jumlah_tagihan'],0,',','.'); ?></td>
                     <td class="num">Rp <?php echo number_format($p['terbayar'],0,',','.'); ?></td>
                     <td class="num" style="color: <?php echo $p['sisa'] > 0 ? '#dc2626' : '#000'; ?>">Rp <?php echo number_format($p['sisa'],0,',','.'); ?></td>
@@ -162,7 +164,7 @@ $tanggal_cetak = !empty($_GET['tanggal_cetak']) ? $_GET['tanggal_cetak'] : date(
                 </tr>
                 <?php endforeach; ?>
                 <tr style="background-color: #f8fafc; font-weight: bold;">
-                    <td colspan="3" style="text-align: right; padding-right: 15px;">GRAND TOTAL</td>
+                    <td colspan="4" style="text-align: right; padding-right: 15px;">GRAND TOTAL</td>
                     <td class="num">Rp <?php echo number_format($grand_tagihan,0,',','.'); ?></td>
                     <td class="num">Rp <?php echo number_format($grand_terbayar,0,',','.'); ?></td>
                     <td class="num" style="color: <?php echo $grand_sisa > 0 ? '#dc2626' : '#000'; ?>">Rp <?php echo number_format($grand_sisa,0,',','.'); ?></td>
