@@ -38,7 +38,18 @@
 </head>
 <body>
     <div class="print-container">
-        <div class="no-print" style="text-align: right;">
+        <div class="no-print" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; font-family:sans-serif;">
+            <form method="GET" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <input type="hidden" name="kelas_id" value="<?= $kelas_id ?>">
+                <label style="font-size:0.85rem; font-weight:600;">Dari:</label>
+                <input type="date" name="start_date" value="<?= htmlspecialchars($start_date) ?>" style="padding:6px 10px; border:1px solid #ccc; border-radius:6px; font-size:0.85rem;">
+                <label style="font-size:0.85rem; font-weight:600;">Sampai:</label>
+                <input type="date" name="end_date" value="<?= htmlspecialchars($end_date) ?>" style="padding:6px 10px; border:1px solid #ccc; border-radius:6px; font-size:0.85rem;">
+                <button type="submit" style="padding:6px 16px; background:#2563eb; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.85rem;">Filter</button>
+                <?php if(!empty($start_date) || !empty($end_date)): ?>
+                <a href="/keuangan/komite/pembayaran/cetak?kelas_id=<?= $kelas_id ?>" style="padding:6px 16px; background:#ef4444; color:#fff; border:none; border-radius:6px; font-weight:600; text-decoration:none; font-size:0.85rem;">Reset</a>
+                <?php endif; ?>
+            </form>
             <button class="btn-print" onclick="window.print()">🖨️ Cetak Laporan</button>
         </div>
 
@@ -57,11 +68,11 @@
                     $alamat = $institusi['alamat'] ?? '';
                     $desa = !empty($institusi['desa']) ? 'Ds. ' . $institusi['desa'] : '';
                     $kecamatan = !empty($institusi['kecamatan']) ? 'Kec. ' . $institusi['kecamatan'] : '';
-                    $kota = !empty($institusi['kota']) ? 'Kab. ' . $institusi['kota'] : '';
+                    $kota_inst = !empty($institusi['kota']) ? 'Kab. ' . $institusi['kota'] : '';
                     $provinsi = !empty($institusi['provinsi']) ? 'Prov. ' . $institusi['provinsi'] : '';
                     $kodepos = !empty($institusi['kodepos']) ? 'KP. ' . $institusi['kodepos'] : '';
                     
-                    $fullAddressArray = array_filter([$alamat, $desa, $kecamatan, $kota, $provinsi, $kodepos]);
+                    $fullAddressArray = array_filter([$alamat, $desa, $kecamatan, $kota_inst, $provinsi, $kodepos]);
                     $fullAddress = implode(', ', $fullAddressArray);
                 ?>
                 <p style="margin: 3px 0; font-size: 11px; color: #000;">
@@ -79,6 +90,13 @@
             <h3 style="margin: 0; font-size: 1.2rem; text-decoration: underline;">LAPORAN PEMBAYARAN SISWA</h3>
             <p style="margin: 5px 0 0 0; font-weight: bold;">
                 Kelas: <?= htmlspecialchars($kelas_nama) ?>
+                <?php if(!empty($start_date) && !empty($end_date)): ?>
+                    &mdash; Periode: <?= date('d/m/Y', strtotime($start_date)) ?> s/d <?= date('d/m/Y', strtotime($end_date)) ?>
+                <?php elseif(!empty($start_date)): ?>
+                    &mdash; Mulai: <?= date('d/m/Y', strtotime($start_date)) ?>
+                <?php elseif(!empty($end_date)): ?>
+                    &mdash; Sampai: <?= date('d/m/Y', strtotime($end_date)) ?>
+                <?php endif; ?>
             </p>
         </div>
 
@@ -143,14 +161,5 @@
             </tr>
         </table>
     </div>
-    
-    <script>
-        // Auto print pas halamannya dibuka
-        window.onload = function() {
-            setTimeout(function() {
-                window.print();
-            }, 500);
-        }
-    </script>
 </body>
 </html>

@@ -1344,6 +1344,8 @@ class AdminFinanceController {
         self::autoRolloverJatuhTempo();
         $db = Database::connect('core');
         $kelas_id = isset($_GET['kelas_id']) ? intval($_GET['kelas_id']) : 0;
+        $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
+        $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
         $allowed_cats = self::getAllowedCategories();
         
         $kelasList = $db->query("SELECT id, nama_kelas FROM kelas ORDER BY tingkat, nama_kelas")->fetchAll();
@@ -1357,6 +1359,12 @@ class AdminFinanceController {
         $whereClause = " WHERE 1=1";
         if ($kelas_id > 0) {
             $whereClause .= " AND s.kelas_id = " . intval($kelas_id);
+        }
+        if (!empty($start_date)) {
+            $whereClause .= " AND DATE(k.tanggal_bayar) >= " . $db->quote($start_date);
+        }
+        if (!empty($end_date)) {
+            $whereClause .= " AND DATE(k.tanggal_bayar) <= " . $db->quote($end_date);
         }
         if (!in_array('ALL', $allowed_cats)) {
             if (empty($allowed_cats)) {
