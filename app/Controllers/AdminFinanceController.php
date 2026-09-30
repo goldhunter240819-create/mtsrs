@@ -1832,10 +1832,10 @@ class AdminFinanceController {
 
         // Pemasukan Siswa
         $pemasukanSiswa = $db->query("
-            SELECT k.tanggal_bayar as tanggal, 
+            SELECT DATE(k.tanggal_bayar) as tanggal, 
                    CONCAT(k.jenis_pembayaran, ' - ', s.nama) as keterangan, 
                    COALESCE(kj.kategori, 'Lainnya') as kategori, 
-                   k.jumlah, 
+                   SUM(k.jumlah) as jumlah, 
                    IF(u.username = 'admin', $bendahara_umum_q, COALESCE(gu.nama, u.username, gu_cat.nama, '-')) as petugas 
             FROM keuangan_komite_pembayaran k
             JOIN siswa s ON k.siswa_id = s.id
@@ -1845,7 +1845,8 @@ class AdminFinanceController {
             LEFT JOIN keuangan_komite_kategori kk ON kj.kategori = kk.nama_kategori
             LEFT JOIN guru gu_cat ON kk.guru_id = gu_cat.id
             $wherePembayaran
-            ORDER BY k.tanggal_bayar ASC
+            GROUP BY DATE(k.tanggal_bayar), k.jenis_pembayaran, s.nama, kj.kategori, petugas
+            ORDER BY DATE(k.tanggal_bayar) ASC
         ")->fetchAll();
 
         // Pemasukan Manual
