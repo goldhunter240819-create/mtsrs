@@ -85,8 +85,9 @@ function tgl_indo($tanggal){
             border: 1px solid #000;
         }
         th, td {
-            padding: 8px;
+            padding: 6px 8px;
             text-align: left;
+            white-space: nowrap;
         }
         th {
             background-color: #f0f0f0;
@@ -113,8 +114,8 @@ function tgl_indo($tanggal){
             text-decoration: underline;
         }
         @media print {
-            @page { size: landscape; margin: 1cm; }
-            body { font-size: 11px; }
+            @page { size: landscape; margin: 10mm; }
+            body { font-size: 10px; }
             th { background-color: #eee !important; -webkit-print-color-adjust: exact; }
             .no-print { display: none !important; }
         }
@@ -220,13 +221,11 @@ function tgl_indo($tanggal){
                     <td class="text-right"><?php echo number_format($row['jumlah'], 0, ',', '.'); ?></td>
                 </tr>
                 <?php endforeach; ?>
-            </tbody>
-            <tfoot>
                 <tr>
-                    <th colspan="5" class="text-right">TOTAL PEMASUKAN</th>
-                    <th class="text-right">Rp <?php echo number_format($totalMasuk, 0, ',', '.'); ?></th>
+                    <th colspan="5" class="text-right" style="background-color: #eee !important; -webkit-print-color-adjust: exact;">TOTAL PEMASUKAN</th>
+                    <th class="text-right" style="background-color: #eee !important; -webkit-print-color-adjust: exact;">Rp <?php echo number_format($totalMasuk, 0, ',', '.'); ?></th>
                 </tr>
-            </tfoot>
+            </tbody>
         </table>
     <?php endif; ?>
 
@@ -256,13 +255,11 @@ function tgl_indo($tanggal){
                     <td class="text-right"><?php echo number_format($row['jumlah'], 0, ',', '.'); ?></td>
                 </tr>
                 <?php endforeach; ?>
-            </tbody>
-            <tfoot>
                 <tr>
-                    <th colspan="5" class="text-right">TOTAL PENGELUARAN</th>
-                    <th class="text-right">Rp <?php echo number_format($totalKeluar, 0, ',', '.'); ?></th>
+                    <th colspan="5" class="text-right" style="background-color: #eee !important; -webkit-print-color-adjust: exact;">TOTAL PENGELUARAN</th>
+                    <th class="text-right" style="background-color: #eee !important; -webkit-print-color-adjust: exact;">Rp <?php echo number_format($totalKeluar, 0, ',', '.'); ?></th>
                 </tr>
-            </tfoot>
+            </tbody>
         </table>
     <?php endif; ?>
 
