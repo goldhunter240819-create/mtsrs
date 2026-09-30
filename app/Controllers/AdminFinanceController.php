@@ -1960,7 +1960,7 @@ class AdminFinanceController {
             'title_suffix' => $title_suffix
         ]);
         
-        include __DIR__ . '/../../resources/views/admin/finance_komite_laporan_cetak.php';
+        include __DIR__ . '/../../resources/views/keuangan/finance_komite_laporan_cetak.php';
     }
 
     // Alias lama
@@ -3087,7 +3087,7 @@ class AdminFinanceController {
             }
         }
         
-        include __DIR__ . '/../../resources/views/admin/finance_cetak_buku_manual.php';
+        include __DIR__ . '/../../resources/views/keuangan/finance_cetak_buku_manual.php';
     }
 
     // --- CETAK COVER BUKU KEUANGAN ---
@@ -3098,7 +3098,7 @@ class AdminFinanceController {
         $active_year = \App\Core\AcademicYear::current();
         $active_year_name = $active_year ? $active_year['name'] : '2025/2026';
         
-        include __DIR__ . '/../../resources/views/admin/finance_cetak_cover.php';
+        include __DIR__ . '/../../resources/views/keuangan/finance_cetak_cover.php';
     }
 
     // --- CETAK BUKU KAS (PEMASUKAN/PENGELUARAN) ---
@@ -3178,6 +3178,6 @@ class AdminFinanceController {
             $transaksi = $transaksiTerbaru;
         }
         
-        include __DIR__ . '/../../resources/views/admin/finance_cetak_buku_kas.php';
+        include __DIR__ . '/../../resources/views/keuangan/finance_cetak_buku_kas.php';
     }
 }
