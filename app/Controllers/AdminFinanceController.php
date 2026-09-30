@@ -1728,7 +1728,7 @@ class AdminFinanceController {
         }
 
         $instData = $db->query("SELECT bendahara_nama FROM institusi LIMIT 1")->fetch();
-        $bendahara_umum_str = !empty($instData['bendahara_nama']) ? $instData['bendahara_nama'] : 'Bendahara Umum';
+        $bendahara_umum_str = !empty($instData['bendahara_nama']) ? $instData['bendahara_nama'] . ' (Admin)' : 'Bendahara Umum (Admin)';
         $bendahara_umum_q = $db->quote($bendahara_umum_str);
 
         $petugasList = $db->query("SELECT u.id, IF(u.username = 'admin', $bendahara_umum_q, COALESCE(g.nama, u.username)) as nama FROM users u LEFT JOIN guru g ON u.id = g.user_id WHERE u.role_id IN (1, 99) OR u.id IN (SELECT user_id FROM guru WHERE id IN (SELECT DISTINCT guru_id FROM keuangan_komite_kategori)) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_pembayaran) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_transaksi) ORDER BY nama ASC")->fetchAll();
@@ -1765,7 +1765,7 @@ class AdminFinanceController {
         self::guard('komite_laporan');
         $db = Database::connect('core');
         $inst = $db->query("SELECT * FROM institusi LIMIT 1")->fetch();
-        $bendahara_umum_str = !empty($inst['bendahara_nama']) ? $inst['bendahara_nama'] : 'Bendahara Umum';
+        $bendahara_umum_str = !empty($inst['bendahara_nama']) ? $inst['bendahara_nama'] . ' (Admin)' : 'Bendahara Umum (Admin)';
         $bendahara_umum_q = $db->quote($bendahara_umum_str);
 
         $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
