@@ -1727,7 +1727,11 @@ class AdminFinanceController {
             $kategoriList = $db->query("SELECT nama_kategori as kategori FROM keuangan_komite_kategori ORDER BY nama_kategori ASC")->fetchAll();
         }
 
-        $petugasList = $db->query("SELECT u.id, COALESCE(g.nama, u.username) as nama FROM users u LEFT JOIN guru g ON u.id = g.user_id WHERE u.role_id IN (1, 99) OR u.id IN (SELECT user_id FROM guru WHERE id IN (SELECT DISTINCT guru_id FROM keuangan_komite_kategori)) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_pembayaran) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_transaksi) ORDER BY nama ASC")->fetchAll();
+        $instData = $db->query("SELECT bendahara_nama FROM institusi LIMIT 1")->fetch();
+        $bendahara_umum_str = !empty($instData['bendahara_nama']) ? $instData['bendahara_nama'] : 'Bendahara Umum';
+        $bendahara_umum_q = $db->quote($bendahara_umum_str);
+
+        $petugasList = $db->query("SELECT u.id, IF(u.username = 'admin', $bendahara_umum_q, COALESCE(g.nama, u.username)) as nama FROM users u LEFT JOIN guru g ON u.id = g.user_id WHERE u.role_id IN (1, 99) OR u.id IN (SELECT user_id FROM guru WHERE id IN (SELECT DISTINCT guru_id FROM keuangan_komite_kategori)) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_pembayaran) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_transaksi) ORDER BY nama ASC")->fetchAll();
 
         // Mapping kategori ke petugas_id (user_id)
         $kategoriMapping = $db->query("
@@ -1829,7 +1833,7 @@ class AdminFinanceController {
                    CONCAT(k.jenis_pembayaran, ' - ', s.nama) as keterangan, 
                    COALESCE(kj.kategori, 'Lainnya') as kategori, 
                    k.jumlah, 
-                   COALESCE(gu.nama, u.username, gu_cat.nama, '-') as petugas 
+                   IF(u.username = 'admin', $bendahara_umum_q, COALESCE(gu.nama, u.username, gu_cat.nama, '-')) as petugas 
             FROM keuangan_komite_pembayaran k
             JOIN siswa s ON k.siswa_id = s.id
             LEFT JOIN (SELECT DISTINCT nama_tagihan, kategori FROM keuangan_komite_jenis) kj ON k.jenis_pembayaran = kj.nama_tagihan
@@ -1847,7 +1851,7 @@ class AdminFinanceController {
                    t.keterangan, 
                    t.kategori, 
                    t.jumlah, 
-                   COALESCE(gu.nama, u.username, gu_cat.nama, '-') as petugas 
+                   IF(u.username = 'admin', $bendahara_umum_q, COALESCE(gu.nama, u.username, gu_cat.nama, '-')) as petugas 
             FROM keuangan_komite_transaksi t
             LEFT JOIN users u ON t.petugas_id = u.id
             LEFT JOIN guru gu ON u.id = gu.user_id
@@ -1868,7 +1872,7 @@ class AdminFinanceController {
                    t.keterangan, 
                    t.kategori, 
                    t.jumlah, 
-                   COALESCE(gu.nama, u.username, gu_cat.nama, '-') as petugas 
+                   IF(u.username = 'admin', $bendahara_umum_q, COALESCE(gu.nama, u.username, gu_cat.nama, '-')) as petugas 
             FROM keuangan_komite_transaksi t
             LEFT JOIN users u ON t.petugas_id = u.id
             LEFT JOIN guru gu ON u.id = gu.user_id
@@ -1886,8 +1890,10 @@ class AdminFinanceController {
 
         $petugas_nama = 'Semua Petugas';
         if (!empty($petugas_id)) {
-            $p = $db->query("SELECT COALESCE(g.nama, u.username) as nama FROM users u LEFT JOIN guru g ON u.id = g.user_id WHERE u.id = " . intval($petugas_id))->fetch();
-            if ($p) $petugas_nama = $p['nama'];
+            $p = $db->query("SELECT COALESCE(g.nama, u.username) as nama, u.username FROM users u LEFT JOIN guru g ON u.id = g.user_id WHERE u.id = " . intval($petugas_id))->fetch();
+            if ($p) {
+                $petugas_nama = ($p['username'] === 'admin') ? $bendahara_umum_str : $p['nama'];
+            }
         }
 
         // TTD Bendahara Dinamis
@@ -1954,7 +1960,7 @@ class AdminFinanceController {
             $kategoriList = $db->query("SELECT nama_kategori as kategori FROM keuangan_komite_kategori ORDER BY nama_kategori ASC")->fetchAll();
         }
 
-        $petugasList = $db->query("SELECT u.id, COALESCE(g.nama, u.username) as nama FROM users u LEFT JOIN guru g ON u.id = g.user_id WHERE u.role_id IN (1, 99) OR u.id IN (SELECT user_id FROM guru WHERE id IN (SELECT DISTINCT guru_id FROM keuangan_komite_kategori)) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_pembayaran) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_transaksi) ORDER BY nama ASC")->fetchAll();
+        $petugasList = $db->query("SELECT u.id, IF(u.username = 'admin', $bendahara_umum_q, COALESCE(g.nama, u.username)) as nama FROM users u LEFT JOIN guru g ON u.id = g.user_id WHERE u.role_id IN (1, 99) OR u.id IN (SELECT user_id FROM guru WHERE id IN (SELECT DISTINCT guru_id FROM keuangan_komite_kategori)) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_pembayaran) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_transaksi) ORDER BY nama ASC")->fetchAll();
 
         extract([
             'inst' => $inst,
