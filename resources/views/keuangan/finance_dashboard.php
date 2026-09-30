@@ -48,33 +48,33 @@
             .quick-action-item:hover .quick-action-arrow { color: var(--z-primary); transform: translateX(2px); }
         </style>
         
-        <a href="/admin/finance/tagihan" class="quick-action-item">
+        <a href="/keuangan/tagihan" class="quick-action-item">
             <div class="quick-action-icon" style="background:rgba(16,185,129,0.1); color:#10b981;"><i data-lucide="file-text" style="width:18px;height:18px;"></i></div>
             <div class="quick-action-text">Kelola Tagihan</div>
             <i data-lucide="chevron-right" class="quick-action-arrow"></i>
         </a>
-        <a href="/admin/finance/cetak-buku-manual" class="quick-action-item">
+        <a href="/keuangan/cetak/buku-manual" class="quick-action-item">
             <div class="quick-action-icon" style="background:rgba(5,150,105,0.1); color:#059669;"><i data-lucide="book-open" style="width:18px;height:18px;"></i></div>
             <div class="quick-action-text">Cetak Buku Pembayaran</div>
             <i data-lucide="chevron-right" class="quick-action-arrow"></i>
         </a>
-        <a href="/admin/finance/cetak-buku-kas" class="quick-action-item">
+        <a href="/keuangan/cetak/buku-kas" class="quick-action-item">
             <div class="quick-action-icon" style="background:rgba(79,70,229,0.1); color:#4f46e5;"><i data-lucide="wallet" style="width:18px;height:18px;"></i></div>
             <div class="quick-action-text">Cetak Buku Kas Umum</div>
             <i data-lucide="chevron-right" class="quick-action-arrow"></i>
         </a>
-        <a href="/admin/finance/cetak-cover" class="quick-action-item">
+        <a href="/keuangan/cetak/cover" class="quick-action-item">
             <div class="quick-action-icon" style="background:rgba(139,92,246,0.1); color:#8b5cf6;"><i data-lucide="book" style="width:18px;height:18px;"></i></div>
             <div class="quick-action-text">Cetak Cover Buku</div>
             <i data-lucide="chevron-right" class="quick-action-arrow"></i>
         </a>
         <div style="height:1px; background:rgba(0,0,0,0.05); margin:4px 0;"></div>
-        <a href="/admin/finance/gaji" class="quick-action-item">
+        <a href="/keuangan/gaji" class="quick-action-item">
             <div class="quick-action-icon" style="background:rgba(99,102,241,0.1); color:#6366f1;"><i data-lucide="users" style="width:18px;height:18px;"></i></div>
             <div class="quick-action-text">Data Gaji</div>
             <i data-lucide="chevron-right" class="quick-action-arrow"></i>
         </a>
-        <a href="/admin/finance/biaya" class="quick-action-item">
+        <a href="/keuangan/biaya" class="quick-action-item">
             <div class="quick-action-icon" style="background:rgba(245,158,11,0.1); color:#f59e0b;"><i data-lucide="receipt" style="width:18px;height:18px;"></i></div>
             <div class="quick-action-text">Biaya Sekolah</div>
             <i data-lucide="chevron-right" class="quick-action-arrow"></i>
