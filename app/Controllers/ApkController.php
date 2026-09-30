@@ -6129,6 +6129,12 @@ class ApkController
             ")->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Exception $e) {}
 
+        // Ambil daftar kategori dari komite_kategori
+        $kategoriList = [];
+        try {
+            $kategoriList = $db->query("SELECT nama_kategori FROM keuangan_komite_kategori ORDER BY nama_kategori ASC")->fetchAll(\PDO::FETCH_COLUMN);
+        } catch (\Exception $e) {}
+
         ob_start();
         include __DIR__ . '/../../resources/views/apk/bku_bendahara.php';
         $content = ob_get_clean();
