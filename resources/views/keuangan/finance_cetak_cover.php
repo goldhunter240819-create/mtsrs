@@ -20,10 +20,10 @@
         
         @media print {
             @page { size: landscape; margin: 0; } 
-            body { -webkit-print-color-adjust: exact; margin: 0; background: white; }
+            body { -webkit-print-color-adjust: exact; margin: 0; padding: 0; background: white; }
             .no-print { display: none !important; }
             html, body { width: 100%; height: 100%; overflow: hidden !important; }
-            .print-container { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+            .print-container { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; page-break-inside: avoid; }
         }
         
         .modern-cover {
@@ -46,10 +46,12 @@
                 border: none;
                 box-shadow: none;
                 border-radius: 0;
-                width: 100vw;
-                height: 100vh;
+                width: 100%;
+                height: 98vh; /* Fix to prevent overflowing to second page */
                 padding: 0;
                 margin: 0;
+                page-break-after: avoid;
+                page-break-inside: avoid;
             }
         }
 
@@ -267,7 +269,7 @@
                 
                 <div class="cover-title-area">
                     <div class="dynamic-title" contenteditable="true">BUKU KAS UMUM</div>
-                    <div class="dynamic-subtitle" contenteditable="true">Rekapitulasi Pemasukan dan Pengeluaran<?= !empty($kategori) ? '<br>('.htmlspecialchars($kategori).')' : '' ?></div>
+                    <div class="dynamic-subtitle" contenteditable="true">Rekapitulasi Pemasukan dan Pengeluaran<?= !empty($kategori) ? '<br><span style="color:#1e3a8a; font-size:1.1em; display:inline-block; margin-top:12px;">(KATEGORI: '.htmlspecialchars(strtoupper($kategori)).')</span>' : '' ?></div>
                 </div>
                 
                 <div class="cover-details">
@@ -281,7 +283,7 @@
                 </div>
                 
                 <div class="cover-footer">
-                    Mis Mifhda &copy; <?= date('Y') ?>
+                    MTs Roudlotus Sholihin Gunung Terang &copy; <?= date('Y') ?>
                 </div>
             </div>
         </div>
