@@ -1921,49 +1921,9 @@ class AdminFinanceController {
             }
         }
 
-        // TTD Bendahara Dinamis
-        $bendahara_nama = '';
+        // TTD Bendahara (Selalu pakai Bendahara Umum sesuai instruksi)
+        $bendahara_nama = !empty($inst['bendahara_nama']) ? $inst['bendahara_nama'] : 'Bendahara Umum';
         $bendahara_nip = '';
-        $active_cat = '';
-        if (!empty($kategori)) {
-            $active_cat = $kategori;
-        } elseif (!in_array('ALL', $allowed_cats) && count($allowed_cats) === 1) {
-            $active_cat = reset($allowed_cats);
-        }
-
-        if (!empty($active_cat)) {
-            $guru_cat = $db->query("
-                SELECT g.nama, g.nip 
-                FROM keuangan_komite_kategori kk
-                JOIN guru g ON kk.guru_id = g.id
-                WHERE kk.nama_kategori = " . $db->quote($active_cat)
-            )->fetch();
-            if ($guru_cat) {
-                $bendahara_nama = $guru_cat['nama'];
-                $bendahara_nip = $guru_cat['nip'] ?: '';
-            }
-        }
-
-        if (empty($bendahara_nama) && !empty($petugas_id)) {
-            $p_guru = $db->query("
-                SELECT g.nama, g.nip 
-                FROM users u
-                LEFT JOIN guru g ON u.id = g.user_id
-                WHERE u.id = " . intval($petugas_id)
-            )->fetch();
-            if ($p_guru) {
-                $bendahara_nama = $p_guru['nama'];
-                $bendahara_nip = $p_guru['nip'] ?: '';
-            }
-        }
-
-        if (empty($bendahara_nama) && isset($_SESSION['role_id']) && !in_array($_SESSION['role_id'], [1, 99])) {
-            $bendahara_nama = $_SESSION['nama'] ?? '';
-            $u_guru = $db->query("SELECT nip FROM guru WHERE user_id = " . intval($_SESSION['user_id']))->fetch();
-            if ($u_guru) {
-                $bendahara_nip = $u_guru['nip'] ?: '';
-            }
-        }
 
         // Title suffix
         $title_suffix = 'KOMITE & LAINNYA';
@@ -2902,7 +2862,7 @@ class AdminFinanceController {
         if (!in_array('ALL', $allowed_cats)) {
             if (!in_array($kategori, $allowed_cats)) {
                 $r = $jenis == 'Pemasukan' ? 'pemasukan' : 'pengeluaran';
-                header('Location: /admin/finance/komite/' . $r . '?msg=unauthorized_category');
+                header('Location: /keuangan/komite/' . $r . '?msg=unauthorized_category');
                 exit;
             }
         }
@@ -2953,7 +2913,7 @@ class AdminFinanceController {
             }
         }
         $r = $jenis == 'Pemasukan' ? 'pemasukan' : 'pengeluaran';
-        header('Location: /admin/finance/komite/' . $r . '?msg=saved');
+        header('Location: /keuangan/komite/' . $r . '?msg=saved');
         exit;
     }
 
@@ -2966,7 +2926,7 @@ class AdminFinanceController {
             if (!in_array('ALL', $allowed_cats)) {
                 if (!in_array($t['kategori'], $allowed_cats)) {
                     $r = $t['jenis'] == 'Pemasukan' ? 'pemasukan' : 'pengeluaran';
-                    header('Location: /admin/finance/komite/' . $r . '?msg=unauthorized_category');
+                    header('Location: /keuangan/komite/' . $r . '?msg=unauthorized_category');
                     exit;
                 }
             }
@@ -2976,9 +2936,9 @@ class AdminFinanceController {
             
             $db->prepare("DELETE FROM keuangan_komite_transaksi WHERE id = ?")->execute([$id]);
             $r = $t['jenis'] == 'Pemasukan' ? 'pemasukan' : 'pengeluaran';
-            header('Location: /admin/finance/komite/' . $r . '?msg=deleted');
+            header('Location: /keuangan/komite/' . $r . '?msg=deleted');
         } else {
-            header('Location: /admin/finance/komite/pemasukan');
+            header('Location: /keuangan/komite/pemasukan');
         }
         exit;
     }
