@@ -2851,7 +2851,7 @@ class AdminFinanceController {
         $tanggal = isset($_POST['tanggal_transaksi']) ? $_POST['tanggal_transaksi'] : date('Y-m-d');
         $keterangan = isset($_POST['keterangan']) ? $_POST['keterangan'] : '';
         $kategori = isset($_POST['kategori']) ? $_POST['kategori'] : '';
-        $jumlah = isset($_POST['jumlah']) ? floatval($_POST['jumlah']) : 0;
+        $jumlah = isset($_POST['jumlah']) ? floatval(str_replace(['Rp', '.', ',', ' '], '', $_POST['jumlah'])) : 0;
         
         $sumber_dana = isset($_POST['sumber_dana']) ? trim($_POST['sumber_dana']) : '';
         if (!empty($sumber_dana)) {
