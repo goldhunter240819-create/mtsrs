@@ -16,9 +16,8 @@ function tgl_indo($tanggal){
     <?php $logoUrl = !empty($inst['logo']) ? \App\Core\Helper::url('/uploads/logo/' . $inst['logo']) : \App\Core\Helper::url('/assets/images/logo.png'); ?>
     <link rel="icon" type="image/png" href="<?php echo $logoUrl; ?>">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         body {
-            font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+            font-family: 'Times New Roman', serif;
             background-color: #fff;
             color: #000;
             margin: 0;
@@ -172,10 +171,10 @@ function tgl_indo($tanggal){
             $fullAddress = implode(', ', $fullAddressArray);
         ?>
         <div class="kop-text">
-            <h1 style="font-size: <?php echo intval($inst['kop_font_yayasan'] ?? 14); ?>px; font-weight: normal; margin-bottom: 5px;"><?php echo htmlspecialchars($inst['yayasan'] ?? ''); ?></h1>
-            <h2 style="font-size: <?php echo intval($inst['kop_font_nama'] ?? 18); ?>px; text-transform: uppercase;"><?php echo htmlspecialchars($inst['nama'] ?? ''); ?></h2>
+            <h1 style="font-size: <?php echo intval($inst['kop_font_yayasan'] ?? 14); ?>px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px;"><?php echo htmlspecialchars($inst['yayasan'] ?? ''); ?></h1>
+            <h2 style="font-size: <?php echo intval($inst['kop_font_nama'] ?? 18); ?>px; font-weight: bold; text-transform: uppercase; margin: 0;"><?php echo htmlspecialchars($inst['nama'] ?? ''); ?></h2>
             <p style="font-size: 12px; margin-top: 5px;"><?php echo htmlspecialchars($fullAddress); ?></p>
-            <p style="font-size: 12px;">Website: <?php echo htmlspecialchars($inst['website'] ?? ''); ?> | Email: <?php echo htmlspecialchars($inst['email'] ?? ''); ?></p>
+            <p style="font-size: 12px; margin-top: 2px;">Website: <?php echo htmlspecialchars($inst['website'] ?? ''); ?> | Email: <?php echo htmlspecialchars($inst['email'] ?? ''); ?></p>
         </div>
         <div style="width: 80px; margin-left: 20px;"></div>
     </div>
