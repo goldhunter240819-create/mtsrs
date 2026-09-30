@@ -40,14 +40,20 @@
     <div class="print-container">
         <div class="no-print" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; font-family:sans-serif;">
             <form method="GET" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <input type="hidden" name="kelas_id" value="<?= $kelas_id ?>">
+                <label style="font-size:0.85rem; font-weight:600;">Kelas:</label>
+                <select name="kelas_id" style="padding:6px 10px; border:1px solid #ccc; border-radius:6px; font-size:0.85rem;">
+                    <option value="0">- Semua Kelas -</option>
+                    <?php foreach($kelasList as $k): ?>
+                    <option value="<?= $k['id'] ?>" <?= $kelas_id == $k['id'] ? 'selected' : '' ?>><?= htmlspecialchars($k['nama_kelas']) ?></option>
+                    <?php endforeach; ?>
+                </select>
                 <label style="font-size:0.85rem; font-weight:600;">Dari:</label>
                 <input type="date" name="start_date" value="<?= htmlspecialchars($start_date) ?>" style="padding:6px 10px; border:1px solid #ccc; border-radius:6px; font-size:0.85rem;">
                 <label style="font-size:0.85rem; font-weight:600;">Sampai:</label>
                 <input type="date" name="end_date" value="<?= htmlspecialchars($end_date) ?>" style="padding:6px 10px; border:1px solid #ccc; border-radius:6px; font-size:0.85rem;">
                 <button type="submit" style="padding:6px 16px; background:#2563eb; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.85rem;">Filter</button>
-                <?php if(!empty($start_date) || !empty($end_date)): ?>
-                <a href="/keuangan/komite/pembayaran/cetak?kelas_id=<?= $kelas_id ?>" style="padding:6px 16px; background:#ef4444; color:#fff; border:none; border-radius:6px; font-weight:600; text-decoration:none; font-size:0.85rem;">Reset</a>
+                <?php if(!empty($start_date) || !empty($end_date) || $kelas_id > 0): ?>
+                <a href="/keuangan/komite/pembayaran/cetak" style="padding:6px 16px; background:#ef4444; color:#fff; border:none; border-radius:6px; font-weight:600; text-decoration:none; font-size:0.85rem;">Reset</a>
                 <?php endif; ?>
             </form>
             <button class="btn-print" onclick="window.print()">🖨️ Cetak Laporan</button>
