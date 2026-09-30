@@ -42,12 +42,37 @@
             <button class="btn-print" onclick="window.print()">🖨️ Cetak Laporan</button>
         </div>
 
-        <div class="header">
-            <?php if(!empty($institusi['yayasan'])): ?>
-                <h3>YAYASAN <?php echo $institusi['yayasan']; ?></h3>
-            <?php endif; ?>
-            <h2><?php echo !empty($institusi['nama_institusi']) ? $institusi['nama_institusi'] : 'MTS ROUDLOTUS SHOLIHIN'; ?></h2>
-            <p><?php echo !empty($institusi['alamat']) ? $institusi['alamat'] : 'Jl. Sukarno Hatta No. 123, Demak'; ?></p>
+        <div style="display: flex; align-items: center; border-bottom: 3px double #000; padding-bottom: 10px; margin-bottom: 20px;">
+            <?php $logoUrl = !empty($institusi['logo']) ? '/public/uploads/logo/'.$institusi['logo'] : '/public/assets/images/logo.png'; ?>
+            <img src="<?php echo $logoUrl; ?>" alt="Logo" style="width: 80px; height: 80px; object-fit: contain;">
+            
+            <div style="text-align: center; flex: 1; padding: 0 10px;">
+                <h1 style="margin: 0; font-size: <?php echo intval($institusi['kop_font_yayasan'] ?? 14); ?>px; text-transform: uppercase; font-weight: bold; color: #000;">
+                    <?php echo htmlspecialchars($institusi['yayasan'] ?? ''); ?>
+                </h1>
+                <h2 style="margin: 3px 0; font-size: <?php echo intval($institusi['kop_font_nama'] ?? 18); ?>px; font-weight: bold; color: #000;">
+                    <?php echo htmlspecialchars($institusi['nama'] ?? ''); ?>
+                </h2>
+                <?php 
+                    $alamat = $institusi['alamat'] ?? '';
+                    $desa = !empty($institusi['desa']) ? 'Ds. ' . $institusi['desa'] : '';
+                    $kecamatan = !empty($institusi['kecamatan']) ? 'Kec. ' . $institusi['kecamatan'] : '';
+                    $kota = !empty($institusi['kota']) ? 'Kab. ' . $institusi['kota'] : '';
+                    $provinsi = !empty($institusi['provinsi']) ? 'Prov. ' . $institusi['provinsi'] : '';
+                    $kodepos = !empty($institusi['kodepos']) ? 'KP. ' . $institusi['kodepos'] : '';
+                    
+                    $fullAddressArray = array_filter([$alamat, $desa, $kecamatan, $kota, $provinsi, $kodepos]);
+                    $fullAddress = implode(', ', $fullAddressArray);
+                ?>
+                <p style="margin: 3px 0; font-size: 11px; color: #000;">
+                    <?php echo htmlspecialchars($fullAddress); ?>
+                </p>
+                <p style="margin: 3px 0; font-size: 11px; color: #000;">
+                    Website: <span><?php echo htmlspecialchars($institusi['website'] ?? ''); ?></span> | Email: <span><?php echo htmlspecialchars($institusi['email'] ?? ''); ?></span>
+                </p>
+            </div>
+            
+            <div style="width: 80px;"></div>
         </div>
 
         <div style="text-align: center; margin-bottom: 20px;">
