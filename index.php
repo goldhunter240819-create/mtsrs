@@ -230,6 +230,31 @@ $router->add('GET', '/keuangan/cetak/buku-kas', [\App\Controllers\AdminFinanceCo
 $router->add('GET', '/keuangan/cetak/buku-manual', [\App\Controllers\AdminFinanceController::class, 'cetakBukuManual']);
 $router->add('GET', '/keuangan/cetak/cover', [\App\Controllers\AdminFinanceController::class, 'cetakCover']);
 
+// Temporary route for DB update
+$router->add('GET', '/keuangan/update-kategori-db', function() {
+    $db = \App\Core\Database::connect('core');
+    $tx = $db->query("SELECT id, keterangan FROM keuangan_transaksi WHERE kategori IS NULL OR TRIM(kategori) = ''")->fetchAll();
+    $updated = 0;
+    foreach($tx as $t) {
+        $ket = $t['keterangan'];
+        $kategori = '';
+        if (preg_match('/Pembayaran Tagihan:\s*(.+)/', $ket, $matches)) {
+            $kategori = str_replace([' - Auto-Split (APK Kasir)', ' - Auto-Split'], '', $matches[1]);
+            $kategori = trim($kategori);
+        } else if (preg_match('/Pembayaran Kas \((.*?)\): APK Kasir/', $ket, $matches)) {
+            $kategori = trim($matches[1]);
+        } else if (preg_match('/Pembayaran (.*?) - /', $ket, $matches)) {
+            $kategori = trim($matches[1]);
+        }
+        if (!empty($kategori)) {
+            $db->prepare("UPDATE keuangan_transaksi SET kategori = ? WHERE id = ?")->execute([$kategori, $t['id']]);
+            $updated++;
+        }
+    }
+    echo "<h1>Mantap! Berhasil update $updated baris data kategori di Server.</h1>";
+    exit;
+});
+
 // --- Keuangan Routes (Tabungan) ---
 $router->add('GET', '/tabungan', [\App\Controllers\AdminTabunganController::class, 'overview']);
 $router->add('GET', '/tabungan/siswa', [\App\Controllers\AdminTabunganController::class, 'siswa']);
