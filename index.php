@@ -200,6 +200,7 @@ $router->add('GET', '/keuangan/komite/jenis', [\App\Controllers\AdminFinanceCont
 $router->add('POST', '/keuangan/komite/jenis/save', [\App\Controllers\AdminFinanceController::class, 'saveKomiteJenisTagihan']);
 $router->add('POST', '/keuangan/komite/jenis/bulk-delete', [\App\Controllers\AdminFinanceController::class, 'bulkDeleteKomiteJenisTagihan']);
 $router->add('GET', '/keuangan/komite/jenis/delete/{id}', [\App\Controllers\AdminFinanceController::class, 'deleteKomiteJenisTagihan']);
+$router->add('GET', '/keuangan/komite/pembayaran/cetak', [\App\Controllers\AdminFinanceController::class, 'cetakKomitePembayaranSiswa']);
 $router->add('GET', '/keuangan/komite/pembayaran/{id}', [\App\Controllers\AdminFinanceController::class, 'komitePembayaranSiswa']);
 $router->add('POST', '/keuangan/komite/pembayaran/save', [\App\Controllers\AdminFinanceController::class, 'saveKomitePembayaran']);
 $router->add('GET', '/keuangan/komite/rekap', [\App\Controllers\AdminFinanceController::class, 'komiteRekapTagihan']);

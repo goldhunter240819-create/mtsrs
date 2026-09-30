@@ -1340,7 +1340,78 @@ class AdminFinanceController {
         ], 'komite_pembayaran_siswa');
     }
 
-    public static function komiteRekapTagihan() {
+    public static function cetakKomitePembayaranSiswa() {
+        self::autoRolloverJatuhTempo();
+        $db = Database::connect('core');
+        $kelas_id = isset($_GET['kelas_id']) ? intval($_GET['kelas_id']) : 0;
+        $allowed_cats = self::getAllowedCategories();
+        
+        $kelasList = $db->query("SELECT id, nama_kelas FROM kelas ORDER BY tingkat, nama_kelas")->fetchAll();
+        $kelas_nama = 'Semua Kelas';
+        if ($kelas_id > 0) {
+            foreach($kelasList as $k) {
+                if ($k['id'] == $kelas_id) $kelas_nama = $k['nama_kelas'];
+            }
+        }
+
+        $whereClause = " WHERE 1=1";
+        if ($kelas_id > 0) {
+            $whereClause .= " AND s.kelas_id = " . intval($kelas_id);
+        }
+        if (!in_array('ALL', $allowed_cats)) {
+            if (empty($allowed_cats)) {
+                $whereClause .= " AND 1=0";
+            } else {
+                $quoted_cats = implode(',', array_map([$db, 'quote'], $allowed_cats));
+                $whereClause .= " AND k.jenis_pembayaran IN (SELECT nama_tagihan FROM keuangan_komite_jenis WHERE kategori IN ($quoted_cats))";
+            }
+        }
+
+        $sql = "
+            SELECT k.id as bayar_id, k.jenis_pembayaran, k.periode, k.jumlah, k.tanggal_bayar, k.created_at,
+                   s.nama, s.nis, s.id as siswa_id, c.nama_kelas as kelas, t.status as status_tagihan
+            FROM keuangan_komite_pembayaran k
+            JOIN siswa s ON k.siswa_id = s.id
+            LEFT JOIN kelas c ON s.kelas_id = c.id
+            LEFT JOIN keuangan_tagihan t ON (k.siswa_id = t.siswa_id AND TRIM(k.jenis_pembayaran) = TRIM(t.nama_tagihan))
+            $whereClause
+            ORDER BY k.tanggal_bayar DESC, k.created_at DESC, k.id DESC
+        ";
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        
+        $raw_pembayaran = $stmt->fetchAll();
+        $grouped = [];
+        foreach ($raw_pembayaran as $r) {
+            $group_key = $r['siswa_id'] . '_' . $r['tanggal_bayar'];
+            if (!isset($grouped[$group_key])) {
+                $grouped[$group_key] = [
+                    'tanggal' => $r['tanggal_bayar'],
+                    'nama'    => $r['nama'],
+                    'nis'     => $r['nis'],
+                    'kelas'   => $r['kelas'],
+                    'jumlah'  => 0,
+                    'jenis'   => $r['jenis_pembayaran'],
+                    'periode' => $r['periode'],
+                    'status'  => (!empty($r['status_tagihan'])) ? $r['status_tagihan'] : 'Belum Bayar',
+                ];
+            } else {
+                $grouped[$group_key]['jenis'] = 'Pembayaran Kolektif (Auto-Split)';
+                $grouped[$group_key]['periode'] = '-';
+                $grouped[$group_key]['status'] = 'Multi-Tagihan';
+            }
+            $grouped[$group_key]['jumlah'] += $r['jumlah'];
+        }
+        
+        $pembayaran = array_values($grouped);
+
+        $institusi = $db->query("SELECT * FROM institusi LIMIT 1")->fetch();
+
+        ob_start();
+        include __DIR__ . '/../../resources/views/keuangan/finance_cetak_pembayaran_siswa.php';
+        echo ob_get_clean();
+        exit;
+    }
         self::autoRolloverJatuhTempo();
         $db = Database::connect('core');
         $kelas_id = isset($_GET['kelas_id']) ? intval($_GET['kelas_id']) : 0;
