@@ -1764,6 +1764,9 @@ class AdminFinanceController {
     public static function cetakLaporan() {
         self::guard('komite_laporan');
         $db = Database::connect('core');
+        $inst = $db->query("SELECT * FROM institusi LIMIT 1")->fetch();
+        $bendahara_umum_str = !empty($inst['bendahara_nama']) ? $inst['bendahara_nama'] : 'Bendahara Umum';
+        $bendahara_umum_q = $db->quote($bendahara_umum_str);
 
         $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
         $end_date   = isset($_GET['end_date']) ? $_GET['end_date'] : '';
