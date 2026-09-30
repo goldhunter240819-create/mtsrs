@@ -146,9 +146,15 @@
         <div style="display: flex; flex-direction: column; gap: 8px;">
             <?php if(!empty($rincianKategori)): ?>
                 <?php foreach($rincianKategori as $rk): ?>
-                <div style="background: #16a34a; border-radius: 10px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; color: #fff; box-shadow: 0 4px 6px rgba(22,163,74,0.2);">
-                    <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;"><?= htmlspecialchars($rk['kategori']) ?></div>
-                    <div style="font-size: 0.85rem; font-weight: 800;">Rp <?= number_format($rk['saldo'], 0, ',', '.') ?></div>
+                <div style="background: #fff; border: 1px solid #dcfce7; border-radius: 10px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(22,163,74,0.05);">
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.75rem; font-weight: 800; color: #166534; text-transform: uppercase;"><?= htmlspecialchars($rk['kategori']) ?></div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Rp <?= number_format($rk['saldo'], 0, ',', '.') ?></div>
+                        <div style="font-size: 0.6rem; font-weight: 700; color: #10b981; margin-bottom: 1px;">Masuk: Rp <?= number_format($rk['masuk'], 0, ',', '.') ?></div>
+                        <div style="font-size: 0.6rem; font-weight: 700; color: #ef4444;">Keluar: Rp <?= number_format($rk['keluar'], 0, ',', '.') ?></div>
+                    </div>
                 </div>
                 <?php endforeach; ?>
             <?php else: ?>
