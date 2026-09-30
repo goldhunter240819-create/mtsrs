@@ -1412,6 +1412,8 @@ class AdminFinanceController {
         echo ob_get_clean();
         exit;
     }
+
+    public static function komiteRekapTagihan() {
         self::autoRolloverJatuhTempo();
         $db = Database::connect('core');
         $kelas_id = isset($_GET['kelas_id']) ? intval($_GET['kelas_id']) : 0;
