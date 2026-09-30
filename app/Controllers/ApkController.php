@@ -6184,8 +6184,15 @@ class ApkController
         }
 
         try {
+            // 1. Simpan ke transaksi umum (APK)
             $stmt = $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, kategori, keterangan, jenis, jumlah, guru_id, bukti) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([$tanggal, $kategori, $keterangan, $jenis, $jumlah, $guru_id, $bukti]);
+
+            // 2. Sinkronisasi ke Modul Keuangan Web (keuangan_komite_transaksi)
+            $guru = $db->query("SELECT user_id FROM guru WHERE id = " . intval($guru_id))->fetch();
+            $petugas_id = $guru ? $guru['user_id'] : null;
+            $stmt_komite = $db->prepare("INSERT INTO keuangan_komite_transaksi (tanggal_transaksi, keterangan, jenis, kategori, jumlah, petugas_id, bukti) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt_komite->execute([$tanggal, $keterangan, $jenis, $kategori, $jumlah, $petugas_id, $bukti]);
             
             $_SESSION['flash_message'] = "$jenis berhasil disimpan!";
             $_SESSION['flash_type'] = "success";
