@@ -1727,7 +1727,7 @@ class AdminFinanceController {
             $kategoriList = $db->query("SELECT nama_kategori as kategori FROM keuangan_komite_kategori ORDER BY nama_kategori ASC")->fetchAll();
         }
 
-        $petugasList = $db->query("SELECT u.id, COALESCE(g.nama, u.username) as nama FROM users u LEFT JOIN guru g ON u.id = g.user_id WHERE u.role_id IN (1, 99) OR u.id IN (SELECT user_id FROM guru WHERE id IN (SELECT DISTINCT guru_id FROM keuangan_komite_kategori)) ORDER BY nama ASC")->fetchAll();
+        $petugasList = $db->query("SELECT u.id, COALESCE(g.nama, u.username) as nama FROM users u LEFT JOIN guru g ON u.id = g.user_id WHERE u.role_id IN (1, 99) OR u.id IN (SELECT user_id FROM guru WHERE id IN (SELECT DISTINCT guru_id FROM keuangan_komite_kategori)) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_pembayaran) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_transaksi) ORDER BY nama ASC")->fetchAll();
 
         // Mapping kategori ke petugas_id (user_id)
         $kategoriMapping = $db->query("
@@ -1954,7 +1954,7 @@ class AdminFinanceController {
             $kategoriList = $db->query("SELECT nama_kategori as kategori FROM keuangan_komite_kategori ORDER BY nama_kategori ASC")->fetchAll();
         }
 
-        $petugasList = $db->query("SELECT u.id, COALESCE(g.nama, u.username) as nama FROM users u LEFT JOIN guru g ON u.id = g.user_id WHERE u.role_id IN (1, 99) OR u.id IN (SELECT user_id FROM guru WHERE id IN (SELECT DISTINCT guru_id FROM keuangan_komite_kategori)) ORDER BY nama ASC")->fetchAll();
+        $petugasList = $db->query("SELECT u.id, COALESCE(g.nama, u.username) as nama FROM users u LEFT JOIN guru g ON u.id = g.user_id WHERE u.role_id IN (1, 99) OR u.id IN (SELECT user_id FROM guru WHERE id IN (SELECT DISTINCT guru_id FROM keuangan_komite_kategori)) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_pembayaran) OR u.id IN (SELECT DISTINCT petugas_id FROM keuangan_komite_transaksi) ORDER BY nama ASC")->fetchAll();
 
         extract([
             'inst' => $inst,
