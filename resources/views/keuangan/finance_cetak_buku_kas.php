@@ -105,9 +105,9 @@
             <input type="date" id="endDate" onchange="changeFilter()" value="<?php echo isset($_GET['end_date']) ? htmlspecialchars($_GET['end_date']) : ''; ?>" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px;">
 
             <span style="font-family: sans-serif; font-size: 14px; font-weight: bold; margin-left:15px;">Jml Baris:</span>
-            <input type="number" id="rowCount" value="18" min="0" max="50" onchange="renderRows()" onkeyup="renderRows()" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 60px; font-size: 14px; text-align: center;">
+            <input type="number" id="rowCount" value="0" min="0" max="50" onchange="renderRows()" onkeyup="renderRows()" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 60px; font-size: 14px; text-align: center;">
             <button onclick="window.print()" style="padding: 8px 16px; background: #059669; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; font-family: sans-serif; margin-left: 10px;">Cetak Halaman</button>
-            <a href="/admin/finance" style="padding: 8px 16px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; font-family: sans-serif; margin-left: 10px; text-decoration: none;">Kembali</a>
+            <a href="/keuangan" style="padding: 8px 16px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; font-family: sans-serif; margin-left: 10px; text-decoration: none;">Kembali</a>
         </div>
 
         <div class="page-container">
