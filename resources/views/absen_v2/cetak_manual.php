@@ -258,7 +258,7 @@
                                     $huruf = '';
                                     $bgColor = '';
                                     $textColor = '#000';
-                                    if ($st == 'Hadir') { $huruf = 'H'; }
+                                    if ($st == 'Hadir' || $st == 'Terlambat') { $huruf = 'H'; }
                                     elseif ($st == 'Sakit') { $huruf = 'S'; $bgColor = '#3b82f6'; $textColor = '#fff'; }
                                     elseif ($st == 'Izin') { $huruf = 'I'; $bgColor = '#eab308'; $textColor = '#fff'; }
                                     elseif ($st == 'Alpa' || $st == 'Alpha') { $huruf = 'A'; $bgColor = '#ef4444'; $textColor = '#fff'; }

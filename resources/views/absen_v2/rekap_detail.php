@@ -98,7 +98,7 @@
                                         <?php foreach($mapelColumns as $mc): 
                                             $st = $td['mapel_status'][$mc['mapel_id']] ?? '-';
                                             $st_color = '#64748b';
-                                            if ($st == 'Hadir') $st_color = '#10b981';
+                                            if ($st == 'Hadir' || $st == 'Terlambat') $st_color = '#10b981';
                                             if ($st == 'Sakit') $st_color = '#eab308';
                                             if ($st == 'Izin') $st_color = '#3b82f6';
                                             if ($st == 'Alpa') $st_color = '#ef4444';
@@ -106,14 +106,14 @@
                                             if ($st == '?') $st_color = '#cbd5e1';
                                         ?>
                                         <td style="padding:10px; font-weight:700; color:<?php echo $st_color; ?>; border:1px solid #e2e8f0;" title="<?php echo $st == '?' ? 'Jurnal belum diisi guru' : ''; ?>">
-                                            <?php echo $st == 'Hadir' ? 'H' : ($st == 'Sakit' ? 'S' : ($st == 'Izin' ? 'I' : ($st == 'Alpa' ? 'A' : ($st == 'Bolos' ? 'B' : ($st == '?' ? '-' : '-'))))); ?>
+                                            <?php echo ($st == 'Hadir' || $st == 'Terlambat') ? 'H' : ($st == 'Sakit' ? 'S' : ($st == 'Izin' ? 'I' : ($st == 'Alpa' ? 'A' : ($st == 'Bolos' ? 'B' : ($st == '?' ? '-' : '-'))))); ?>
                                         </td>
                                         <?php endforeach; ?>
                                         
                                         <?php 
                                             $ps = $td['status_pusat'];
                                             $bg_color = 'transparent';
-                                            if ($ps == 'Hadir') $bg_color = '#dcfce7; color:#16a34a;';
+                                            if ($ps == 'Hadir' || $ps == 'Terlambat') $bg_color = '#dcfce7; color:#16a34a;';
                                             if ($ps == 'Terlambat') $bg_color = '#fef3c7; color:#b45309;';
                                             if ($ps == 'Sakit') $bg_color = '#fef9c3; color:#ca8a04;';
                                             if ($ps == 'Izin') $bg_color = '#dbeafe; color:#2563eb;';

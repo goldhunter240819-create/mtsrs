@@ -162,7 +162,7 @@
                     
                     <?php foreach($mapelColumns as $mc): 
                         $st = $td['mapel_status'][$mc['mapel_id']] ?? '-';
-                        $stShort = $st == 'Hadir' ? 'H' : ($st == 'Sakit' ? 'S' : ($st == 'Izin' ? 'I' : ($st == 'Alpa' ? 'A' : ($st == 'Bolos' ? 'B' : ($st == '?' ? '-' : '-')))));
+                        $stShort = ($st == 'Hadir' || $st == 'Terlambat') ? 'H' : ($st == 'Sakit' ? 'S' : ($st == 'Izin' ? 'I' : ($st == 'Alpa' ? 'A' : ($st == 'Bolos' ? 'B' : ($st == '?' ? '-' : '-')))));
                     ?>
                     <td class="center"><?php echo $stShort; ?></td>
                     <?php endforeach; ?>
