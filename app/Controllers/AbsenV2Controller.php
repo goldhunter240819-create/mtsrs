@@ -1117,15 +1117,36 @@ class AbsenV2Controller {
         $daysInMonth = cal_days_in_month(CAL_GREGORIAN, intval($bulan), intval($tahun));
         $dates = [];
         $dayNames = ['Sunday'=>'Ahad', 'Monday'=>'Senin', 'Tuesday'=>'Selasa', 'Wednesday'=>'Rabu', 'Thursday'=>'Kamis', 'Friday'=>'Jumat', 'Saturday'=>'Sabtu'];
-        
+        // Ambil data hari libur
+        $holidays = [];
+        $stmtLibur = $db_core->prepare("SELECT tanggal_mulai, tanggal_selesai, kegiatan FROM kalender_pendidikan WHERE kategori = 'Libur'");
+        $stmtLibur->execute();
+        while ($lbr = $stmtLibur->fetch(\PDO::FETCH_ASSOC)) {
+            $start = strtotime($lbr['tanggal_mulai']);
+            $end = strtotime($lbr['tanggal_selesai']);
+            for ($d = $start; $d <= $end; $d += 86400) {
+                $holidays[date('Y-m-d', $d)] = $lbr['kegiatan'];
+            }
+        }
+
         for ($i = 1; $i <= $daysInMonth; $i++) {
             $dateStr = sprintf("%04d-%02d-%02d", $tahun, $bulan, $i);
             $hari_en = date('l', strtotime($dateStr));
             $is_jumat = ($hari_en == 'Friday');
+            $is_holiday = isset($holidays[$dateStr]);
+            
+            $kegiatan = '';
+            if ($is_holiday) {
+                $kegiatan = $holidays[$dateStr];
+            } elseif ($is_jumat) {
+                $kegiatan = 'Libur Hari Jumat';
+            }
+            
             $dates[] = [
                 'date' => $dateStr,
                 'tgl' => $i,
-                'is_libur' => $is_jumat
+                'is_libur' => ($is_jumat || $is_holiday),
+                'kegiatan' => $kegiatan
             ];
         }
 

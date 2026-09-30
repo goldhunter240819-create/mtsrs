@@ -28,6 +28,7 @@
         
         .ontime { color: #059669; font-weight: bold; }
         .late { color: #d97706; font-weight: bold; }
+        .libur-cell { background-color: #fca5a5; font-size: 8pt; font-weight: bold; writing-mode: vertical-rl; text-orientation: mixed; white-space: nowrap; padding: 2px; letter-spacing: 1px; }
         
         @media print {
             body { background: white; margin: 0; padding: 0; }
@@ -115,9 +116,16 @@
                     
                     <?php foreach ($dates as $d): ?>
                         <?php 
+                        $is_libur = $d['is_libur'];
+                        if ($is_libur) {
+                            if ($no == 2) { // $no was incremented at the start of the row
+                                echo '<td rowspan="' . count($siswaList) . '" class="libur-cell">' . htmlspecialchars($d['kegiatan']) . '</td>';
+                            }
+                            continue;
+                        }
+
                         $jam = '-';
                         $class = '';
-                        $is_libur = $d['is_libur'];
                         $tgl = $d['date'];
                         
                         if (isset($absenBulanIni[$s['id']][$tgl])) {
@@ -133,10 +141,8 @@
                                 $jam = substr($absen['status'], 0, 1); // S/I/A
                             }
                         }
-                        
-                        $bg = $is_libur ? 'background:#fff1f2;' : '';
                         ?>
-                        <td style="<?php echo $bg; ?>" class="<?php echo $class; ?>"><?php echo $jam; ?></td>
+                        <td class="<?php echo $class; ?>"><?php echo $jam; ?></td>
                     <?php endforeach; ?>
                 </tr>
                 <?php endforeach; ?>
