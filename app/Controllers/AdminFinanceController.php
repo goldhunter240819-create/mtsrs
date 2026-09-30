@@ -3103,6 +3103,9 @@ class AdminFinanceController {
         $active_year = \App\Core\AcademicYear::current();
         $active_year_name = $active_year ? $active_year['name'] : '2025/2026';
         
+        $kategori = isset($_GET['kategori']) ? $_GET['kategori'] : '';
+        $kategoriList = $db->query("SELECT nama_kategori FROM keuangan_komite_kategori ORDER BY nama_kategori ASC")->fetchAll(\PDO::FETCH_COLUMN);
+        
         include __DIR__ . '/../../resources/views/keuangan/finance_cetak_cover.php';
     }
 

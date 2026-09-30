@@ -234,10 +234,24 @@
     <div class="print-container">
         
         <div class="no-print filter-box">
-            <span style="font-family: sans-serif; font-size: 14px; font-weight: bold;">Pastikan opsi "Background Graphics" aktif saat mencetak agar warna muncul. Anda dapat mengedit teks sebelum mencetak.</span>
+            <span style="font-family: sans-serif; font-size: 14px; font-weight: bold;">Jenis Tagihan:</span>
+            <select id="kategoriFilter" onchange="changeFilter()" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; margin-right: 20px;">
+                <option value="">-- Semua Kategori --</option>
+                <?php foreach($kategoriList as $kat): ?>
+                    <option value="<?php echo htmlspecialchars($kat); ?>" <?php echo $kategori == $kat ? 'selected' : ''; ?>><?php echo htmlspecialchars($kat); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <span style="font-family: sans-serif; font-size: 14px; font-weight: bold; flex:1;">Pastikan opsi "Background Graphics" aktif saat mencetak agar warna muncul.</span>
             <button onclick="window.print()" style="padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; font-family: sans-serif; margin-left: auto;">Cetak Cover</button>
-            <a href="/admin/finance" style="padding: 8px 16px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; font-family: sans-serif; margin-left: 10px; text-decoration: none;">Kembali</a>
+            <a href="/keuangan" style="padding: 8px 16px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; font-family: sans-serif; margin-left: 10px; text-decoration: none;">Kembali</a>
         </div>
+        
+        <script>
+            function changeFilter() {
+                var kat = document.getElementById('kategoriFilter').value;
+                window.location.href = '?kategori=' + encodeURIComponent(kat);
+            }
+        </script>
 
         <div class="modern-cover">
             <div class="cover-content">
@@ -247,13 +261,13 @@
                     <?php else: ?>
                         <div style="width: 80px; height: 80px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold;">LOGO</div>
                     <?php endif; ?>
-                    <div class="inst-name"><?= isset($inst['nama_institusi']) ? htmlspecialchars($inst['nama_institusi']) : 'MADRASAH IBTIDAIYAH MIFTAHUL HUDA' ?></div>
-                    <div class="inst-sub">Miftahul Huda Mathla'ul Anwar</div>
+                    <div class="inst-name"><?= !empty($inst['nama']) ? htmlspecialchars(strtoupper($inst['nama'])) : 'MADRASAH IBTIDAIYAH MIFTAHUL HUDA' ?></div>
+                    <div class="inst-sub"><?= !empty($inst['yayasan']) ? htmlspecialchars(strtoupper($inst['yayasan'])) : "Miftahul Huda Mathla'ul Anwar" ?></div>
                 </div>
                 
                 <div class="cover-title-area">
                     <div class="dynamic-title" contenteditable="true">BUKU KAS UMUM</div>
-                    <div class="dynamic-subtitle" contenteditable="true">Rekapitulasi Pemasukan dan Pengeluaran</div>
+                    <div class="dynamic-subtitle" contenteditable="true">Rekapitulasi Pemasukan dan Pengeluaran<?= !empty($kategori) ? '<br>('.htmlspecialchars($kategori).')' : '' ?></div>
                 </div>
                 
                 <div class="cover-details">
