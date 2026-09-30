@@ -28,7 +28,7 @@
                 <a href="?" class="btn btn-secondary" style="padding:8px 15px; background:#f1f5f9; color:#475569; border:none; border-radius:6px; text-decoration:none;">Reset</a>
             <?php endif; ?>
         </form>
-        <a href="/admin/finance/komite/laporan/cetak?start_date=<?php echo isset($_GET['start_date']) ? $_GET['start_date'] : ''; ?>&end_date=<?php echo isset($_GET['end_date']) ? $_GET['end_date'] : ''; ?>&kategori=<?php echo isset($_GET['kategori']) ? urlencode($_GET['kategori']) : ''; ?>&petugas_id=<?php echo isset($_GET['petugas_id']) ? $_GET['petugas_id'] : ''; ?>" target="_blank" class="btn btn-primary" style="background:#16a34a; border-color:#16a34a; text-decoration:none;"><i data-lucide="printer" style="width:14px;height:14px;"></i> Cetak Detail Laporan</a>
+        <a href="/keuangan/komite/laporan/cetak?start_date=<?php echo isset($_GET['start_date']) ? $_GET['start_date'] : ''; ?>&end_date=<?php echo isset($_GET['end_date']) ? $_GET['end_date'] : ''; ?>&kategori=<?php echo isset($_GET['kategori']) ? urlencode($_GET['kategori']) : ''; ?>&petugas_id=<?php echo isset($_GET['petugas_id']) ? $_GET['petugas_id'] : ''; ?>" target="_blank" class="btn btn-primary" style="background:#16a34a; border-color:#16a34a; text-decoration:none;"><i data-lucide="printer" style="width:14px;height:14px;"></i> Cetak Detail Laporan</a>
     
     </div>
 </div>

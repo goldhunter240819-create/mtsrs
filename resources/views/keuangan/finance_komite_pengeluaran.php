@@ -49,7 +49,7 @@ foreach($pengeluaran as $p) {
                 <td>
                     <?php if(isset($_SESSION['role_id']) && in_array($_SESSION['role_id'], [1, 99])): ?>
                         <button class="btn btn-primary btn-sm" onclick="editPengeluaran(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars($p['keterangan'], ENT_QUOTES); ?>', '<?php echo $p['tanggal']; ?>', <?php echo $p['jumlah']; ?>, '<?php echo htmlspecialchars($p['kategori'], ENT_QUOTES); ?>')">Edit</button>
-                        <a href="/admin/finance/komite/transaksi/delete/<?php echo $p['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus pengeluaran ini?');">Hapus</a>
+                        <a href="/keuangan/komite/transaksi/delete/<?php echo $p['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus pengeluaran ini?');">Hapus</a>
                     <?php else: ?>
                         <span class="pill pill-blue" style="font-size:0.7rem;">Hubungi Developer</span>
                     <?php endif; ?>
@@ -70,7 +70,7 @@ foreach($pengeluaran as $p) {
             <div class="z-modal-title" id="mTitle"><i data-lucide="plus"></i> Tambah Pengeluaran</div>
             <div class="z-modal-close" onclick="document.getElementById('mOv').classList.remove('open')"><i data-lucide="x"></i></div>
         </div>
-        <form action="/admin/finance/komite/transaksi/save" method="POST" enctype="multipart/form-data">
+        <form action="/keuangan/komite/transaksi/save" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="jenis" value="Pengeluaran">
             <input type="hidden" name="id" id="t_id" value="0">
             <div class="z-modal-body">
