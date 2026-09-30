@@ -3161,10 +3161,11 @@ class AdminFinanceController {
             }
             
             $pemasukanSiswa = $db->query("
-                SELECT k.tanggal_bayar as tanggal, k.created_at as waktu, CONCAT(k.jenis_pembayaran, ' - ', s.nama) as keterangan, 'Pemasukan' as jenis, k.jumlah 
+                SELECT k.tanggal_bayar as tanggal, MAX(k.created_at) as waktu, CONCAT(k.jenis_pembayaran, ' - ', s.nama) as keterangan, 'Pemasukan' as jenis, SUM(k.jumlah) as jumlah 
                 FROM keuangan_komite_pembayaran k
                 JOIN siswa s ON k.siswa_id = s.id
                 WHERE $wherePemb
+                GROUP BY k.tanggal_bayar, k.jenis_pembayaran, s.nama
             ")->fetchAll();
             
             $manualTrans = $db->query("
