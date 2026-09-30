@@ -1629,13 +1629,39 @@ class AdminFinanceController {
         arsort($kategoriSummary);
 
         // Tagihan summary
-        $whereTagihanStats = "";
-        if (!in_array('ALL', $allowed_cats)) {
+        $whereTagihanStats = " WHERE 1=1";
+        
+        if (!empty($petugas_id)) {
+            $p_val = intval($petugas_id);
+            $guruIdsResult = $db->query("SELECT id FROM guru WHERE user_id = $p_val")->fetchAll();
+            $likeConditions = [];
+            foreach ($guruIdsResult as $g) {
+                $gid = intval($g['id']);
+                $likeConditions[] = "guru_ids LIKE '%\"$gid\"%'";
+            }
+            $guruIdCond = empty($likeConditions) ? "1=0" : "(" . implode(" OR ", $likeConditions) . ")";
+            $whereTagihanStats .= " AND nama_tagihan IN (
+                SELECT nama_tagihan FROM keuangan_komite_jenis WHERE kategori IN (
+                    SELECT nama_kategori FROM keuangan_komite_kategori WHERE $guruIdCond OR guru_id IN (
+                        SELECT id FROM guru WHERE user_id = $p_val
+                    )
+                )
+            )";
+        }
+
+        if (!empty($kategori)) {
+            if (!in_array('ALL', $allowed_cats) && !in_array($kategori, $allowed_cats)) {
+                $whereTagihanStats .= " AND 1=0";
+            } else {
+                $kategori_q = $db->quote($kategori);
+                $whereTagihanStats .= " AND nama_tagihan IN (SELECT nama_tagihan FROM keuangan_komite_jenis WHERE kategori = $kategori_q)";
+            }
+        } elseif (!in_array('ALL', $allowed_cats)) {
             if (empty($allowed_cats)) {
-                $whereTagihanStats = " WHERE 1=0";
+                $whereTagihanStats .= " AND 1=0";
             } else {
                 $quoted_cats = implode(',', array_map([$db, 'quote'], $allowed_cats));
-                $whereTagihanStats = " WHERE nama_tagihan IN (SELECT nama_tagihan FROM keuangan_komite_jenis WHERE kategori IN ($quoted_cats))";
+                $whereTagihanStats .= " AND nama_tagihan IN (SELECT nama_tagihan FROM keuangan_komite_jenis WHERE kategori IN ($quoted_cats))";
             }
         }
         $tagihanStats = $db->query("
@@ -1647,7 +1673,33 @@ class AdminFinanceController {
 
         // Pemasukan 6 bulan terakhir
         $whereBulanan = " WHERE tanggal_bayar >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
-        if (!in_array('ALL', $allowed_cats)) {
+        
+        if (!empty($petugas_id)) {
+            $p_val = intval($petugas_id);
+            $guruIdsResult = $db->query("SELECT id FROM guru WHERE user_id = $p_val")->fetchAll();
+            $likeConditions = [];
+            foreach ($guruIdsResult as $g) {
+                $gid = intval($g['id']);
+                $likeConditions[] = "guru_ids LIKE '%\"$gid\"%'";
+            }
+            $guruIdCond = empty($likeConditions) ? "1=0" : "(" . implode(" OR ", $likeConditions) . ")";
+            $whereBulanan .= " AND (petugas_id = $p_val OR (petugas_id IS NULL AND jenis_pembayaran IN (
+                SELECT nama_tagihan FROM keuangan_komite_jenis WHERE kategori IN (
+                    SELECT nama_kategori FROM keuangan_komite_kategori WHERE $guruIdCond OR guru_id IN (
+                        SELECT id FROM guru WHERE user_id = $p_val
+                    )
+                )
+            )))";
+        }
+
+        if (!empty($kategori)) {
+            if (!in_array('ALL', $allowed_cats) && !in_array($kategori, $allowed_cats)) {
+                $whereBulanan .= " AND 1=0";
+            } else {
+                $kategori_q = $db->quote($kategori);
+                $whereBulanan .= " AND jenis_pembayaran IN (SELECT nama_tagihan FROM keuangan_komite_jenis WHERE kategori = $kategori_q)";
+            }
+        } elseif (!in_array('ALL', $allowed_cats)) {
             if (empty($allowed_cats)) {
                 $whereBulanan .= " AND 1=0";
             } else {
