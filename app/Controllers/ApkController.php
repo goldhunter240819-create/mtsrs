@@ -6267,8 +6267,8 @@ class ApkController
         }
 
         // Insert transaksi
-        $stmt2 = $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, keterangan, jenis, jumlah, siswa_id, guru_id) VALUES (?, ?, 'Pemasukan', ?, ?, ?)");
-        $stmt2->execute([$tanggal_bayar, "Pembayaran Kas ($nama_tagihan): APK Kasir", $nominal, $siswa_id, $petugas_id]);
+        $stmt2 = $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, kategori, keterangan, jenis, jumlah, siswa_id, guru_id) VALUES (?, ?, ?, 'Pemasukan', ?, ?, ?)");
+        $stmt2->execute([$tanggal_bayar, $nama_tagihan, "Pembayaran Kas ($nama_tagihan): APK Kasir", $nominal, $siswa_id, $petugas_id]);
 
         // Kirim Notifikasi
         try {

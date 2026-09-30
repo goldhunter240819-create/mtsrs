@@ -724,10 +724,11 @@ class AdminFinanceController {
                         $hutang = $t['jumlah_tagihan'] - $t['jumlah_terbayar'];
                         $bayar = min($sisa_uang, $hutang);
                         
-                        $stmt_tx = $db->prepare("INSERT INTO keuangan_transaksi (tagihan_id, siswa_id, jenis, keterangan, jumlah, tanggal_bayar, guru_id) VALUES (?, ?, 'Pemasukan', ?, ?, ?, ?)");
+                        $stmt_tx = $db->prepare("INSERT INTO keuangan_transaksi (tagihan_id, siswa_id, jenis, keterangan, kategori, jumlah, tanggal_bayar, guru_id) VALUES (?, ?, 'Pemasukan', ?, ?, ?, ?, ?)");
                         $keterangan = "Bayar Kolektif (Prioritas) - " . $t['nama_tagihan'];
+                        $kategori = $t['nama_tagihan'];
                         $guru_id = $_SESSION['user_id'] ?? null;
-                        $stmt_tx->execute([$t['id'], $siswa_id, $keterangan, $bayar, $tanggal, $guru_id]);
+                        $stmt_tx->execute([$t['id'], $siswa_id, $keterangan, $kategori, $bayar, $tanggal, $guru_id]);
                         
                         $baru_terbayar = $t['jumlah_terbayar'] + $bayar;
                         $status = ($baru_terbayar >= $t['jumlah_tagihan']) ? 'Lunas' : 'Mengangsur';
@@ -773,8 +774,8 @@ class AdminFinanceController {
                             $db->prepare("UPDATE keuangan_tagihan SET jumlah_terbayar = ?, status = ? WHERE id = ?")->execute([$baru_terbayar, $status, $t['id']]);
                             
                             $keterangan = ($status === 'Lunas' ? "Pelunasan" : "Angsuran") . " (Auto-Split) - " . $t['nama_tagihan'];
-                            $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, keterangan, jenis, jumlah, siswa_id, guru_id) VALUES (?, ?, 'Pemasukan', ?, ?, ?)")
-                               ->execute([$tanggal, $keterangan, $bayar, $siswa_id, $petugas_id]);
+                            $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, kategori, keterangan, jenis, jumlah, siswa_id, guru_id) VALUES (?, ?, ?, 'Pemasukan', ?, ?, ?)")
+                               ->execute([$tanggal, $t['nama_tagihan'], $keterangan, $bayar, $siswa_id, $petugas_id]);
                             
                             $uang_teralokasi += $bayar;
                         }
@@ -803,8 +804,8 @@ class AdminFinanceController {
                             $db->prepare("UPDATE keuangan_tagihan SET jumlah_terbayar = ?, status = ? WHERE id = ?")->execute([$baru_terbayar, $status, $t_updated['id']]);
                             
                             $keterangan = ($status === 'Lunas' ? "Pelunasan" : "Angsuran") . " (Sisa Auto-Split) - " . $t_updated['nama_tagihan'];
-                            $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, keterangan, jenis, jumlah, siswa_id, guru_id) VALUES (?, ?, 'Pemasukan', ?, ?, ?)")
-                               ->execute([$tanggal, $keterangan, $bayar, $siswa_id, $petugas_id]);
+                            $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, kategori, keterangan, jenis, jumlah, siswa_id, guru_id) VALUES (?, ?, ?, 'Pemasukan', ?, ?, ?)")
+                               ->execute([$tanggal, $t_updated['nama_tagihan'], $keterangan, $bayar, $siswa_id, $petugas_id]);
                             
                             $sisa_uang -= $bayar;
                         }
@@ -2156,8 +2157,8 @@ class AdminFinanceController {
 
                 // 3. Catat ke transaksi umum
                 $ket = ($statusBaru === 'Lunas') ? "Pelunasan Tagihan: " : "Pembayaran Angsuran: ";
-                $stmt2 = $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, keterangan, jenis, jumlah, siswa_id, guru_id) VALUES (?, ?, 'Pemasukan', ?, ?, ?)");
-                $stmt2->execute([date('Y-m-d'), $ket . $t['nama_tagihan'], $jumlah_bayar, $t['siswa_id'], $petugas_id]);
+                $stmt2 = $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, kategori, keterangan, jenis, jumlah, siswa_id, guru_id) VALUES (?, ?, ?, 'Pemasukan', ?, ?, ?)");
+                $stmt2->execute([date('Y-m-d'), $t['nama_tagihan'], $ket . $t['nama_tagihan'], $jumlah_bayar, $t['siswa_id'], $petugas_id]);
 
                 // --- Kirim Notifikasi Personal ---
                 require_once __DIR__ . '/../Services/OneSignalService.php';
@@ -2216,8 +2217,8 @@ class AdminFinanceController {
                             if ($nominal_pembayaran < $jumlah_tagihan) {
                                 $ket_jurnal = "Pembayaran Angsuran: " . $nama_tagihan;
                             }
-                            $db->prepare("INSERT INTO keuangan_transaksi (tipe, nominal, keterangan, tanggal, siswa_id, user_id) VALUES ('Pemasukan', ?, ?, CURDATE(), ?, ?)")
-                               ->execute([$nominal_pembayaran, $ket_jurnal, $t['siswa_id'], $petugas_id]);
+                            $db->prepare("INSERT INTO keuangan_transaksi (jenis, jumlah, keterangan, kategori, tanggal_bayar, siswa_id, guru_id) VALUES ('Pemasukan', ?, ?, ?, CURDATE(), ?, ?)")
+                               ->execute([$nominal_pembayaran, $ket_jurnal, $nama_tagihan, $t['siswa_id'], $petugas_id]);
                         }
                         $totalBayar = $nominal_pembayaran;
                         $db->commit();
@@ -2669,8 +2670,8 @@ class AdminFinanceController {
             }
 
             // Optional: insert into transaction as well
-            $stmt2 = $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, keterangan, jenis, jumlah, siswa_id, guru_id) VALUES (?, ?, 'Pemasukan', ?, ?, ?)");
-            $stmt2->execute([$tanggal_bayar, "Pembayaran Kas ($jenis): Periode $periode", $jumlah, $siswa_id, $petugas_id]);
+            $stmt2 = $db->prepare("INSERT INTO keuangan_transaksi (tanggal_bayar, kategori, keterangan, jenis, jumlah, siswa_id, guru_id) VALUES (?, ?, ?, 'Pemasukan', ?, ?, ?)");
+            $stmt2->execute([$tanggal_bayar, $jenis, "Pembayaran Kas ($jenis): Periode $periode", $jumlah, $siswa_id, $petugas_id]);
             
             // --- Kirim Notifikasi Personal ---
             require_once __DIR__ . '/../Services/OneSignalService.php';
