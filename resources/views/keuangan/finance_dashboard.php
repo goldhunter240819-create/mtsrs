@@ -65,17 +65,7 @@
             <i data-lucide="chevron-right" class="quick-action-arrow"></i>
         </a>
         <div style="height:1px; background:rgba(0,0,0,0.05); margin:4px 0;"></div>
-        <a href="/keuangan/gaji" class="quick-action-item">
-            <div class="quick-action-icon" style="background:rgba(99,102,241,0.1); color:#6366f1;"><i data-lucide="users" style="width:18px;height:18px;"></i></div>
-            <div class="quick-action-text">Data Gaji</div>
-            <i data-lucide="chevron-right" class="quick-action-arrow"></i>
-        </a>
-        <a href="/keuangan/biaya" class="quick-action-item">
-            <div class="quick-action-icon" style="background:rgba(245,158,11,0.1); color:#f59e0b;"><i data-lucide="receipt" style="width:18px;height:18px;"></i></div>
-            <div class="quick-action-text">Biaya Sekolah</div>
-            <i data-lucide="chevron-right" class="quick-action-arrow"></i>
-        </a>
-        <a href="/admin/finance/laporan" class="quick-action-item">
+        <a href="/keuangan/laporan" class="quick-action-item">
             <div class="quick-action-icon" style="background:rgba(100,116,139,0.1); color:#64748b;"><i data-lucide="bar-chart-2" style="width:18px;height:18px;"></i></div>
             <div class="quick-action-text">Laporan Keuangan</div>
             <i data-lucide="chevron-right" class="quick-action-arrow"></i>

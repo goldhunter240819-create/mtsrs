@@ -156,8 +156,8 @@
                             <td align="center"><?php echo $no++; ?></td>
                             <td><?php echo date('d/m/Y', strtotime($t['tanggal'])); ?></td>
                             <td><?php echo htmlspecialchars($t['keterangan']); ?></td>
-                            <td align="right"><?php echo $pemasukan > 0 ? number_format($pemasukan, 0, ',', '.') : '-'; ?></td>
-                            <td align="right"><?php echo $pengeluaran > 0 ? number_format($pengeluaran, 0, ',', '.') : '-'; ?></td>
+                            <td align="right" <?php if($pemasukan > 0) echo 'style="background-color: #ecfdf5; color: #065f46; font-weight: bold;"'; ?>><?php echo $pemasukan > 0 ? number_format($pemasukan, 0, ',', '.') : '-'; ?></td>
+                            <td align="right" <?php if($pengeluaran > 0) echo 'style="background-color: #fef2f2; color: #991b1b; font-weight: bold;"'; ?>><?php echo $pengeluaran > 0 ? number_format($pengeluaran, 0, ',', '.') : '-'; ?></td>
                             <td align="right"><?php echo number_format($saldo, 0, ',', '.'); ?></td>
                             <td></td>
                         </tr>
