@@ -31,7 +31,7 @@ $tanggal_cetak = !empty($_GET['tanggal_cetak']) ? $_GET['tanggal_cetak'] : date(
     <title>Cetak Rekap Tagihan Siswa</title>
     <link rel="icon" type="image/png" href="<?php echo $logoUrl; ?>">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #000; font-size: 12px; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #000; font-size: 13px; }
         @media print {
             @page { size: A4 landscape; margin: 5mm; }
             body { padding: 0; }
@@ -47,15 +47,15 @@ $tanggal_cetak = !empty($_GET['tanggal_cetak']) ? $_GET['tanggal_cetak'] : date(
         .kop-surat p { margin: 0; font-size: 9px; font-family: "Times New Roman", Times, serif; }
         
         .header-laporan { text-align: center; margin-bottom: 5px; margin-top: 5px; }
-        .header-laporan h3 { margin: 0; font-size: 13px; text-transform: uppercase; }
+        .header-laporan h3 { margin: 0; font-size: 14px; text-transform: uppercase; }
         
-        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 9px; }
-        th, td { border: 1px solid #000; padding: 2px 4px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 11px; }
+        th, td { border: 1px solid #000; padding: 4px 6px; text-align: left; }
         th { background-color: #f1f5f9; font-weight: bold; text-align: center; }
         td.num { text-align: right; }
         td.center { text-align: center; }
         
-        .ttd { margin-top: 15px; float: right; width: 200px; text-align: center; font-size: 10px; }
+        .ttd { margin-top: 15px; float: right; width: 200px; text-align: center; font-size: 11px; }
         .ttd p { margin: 2px 0; }
         .ttd .nama-ttd { font-weight: bold; text-decoration: underline; margin-top: 40px; }
         
