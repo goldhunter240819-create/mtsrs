@@ -2140,9 +2140,10 @@ class AdminFinanceController {
                         $db->prepare("DELETE FROM keuangan_komite_pembayaran WHERE siswa_id = ? AND jenis_pembayaran = ?")->execute([$t['siswa_id'], $t['nama_tagihan']]);
                         
                         // Delete old transactions (jurnal)
-                        $like1 = "%Pelunasan Tagihan: " . $t['nama_tagihan'] . "%";
-                        $like2 = "%Pembayaran Angsuran: " . $t['nama_tagihan'] . "%";
-                        $db->prepare("DELETE FROM keuangan_transaksi WHERE siswa_id = ? AND (keterangan LIKE ? OR keterangan LIKE ?)")->execute([$t['siswa_id'], $like1, $like2]);
+                        $like1 = "%Pelunasan Tagihan:%" . preg_replace('/\s+/', '%', trim($t['nama_tagihan'])) . "%";
+                        $like2 = "%Pembayaran Angsuran:%" . preg_replace('/\s+/', '%', trim($t['nama_tagihan'])) . "%";
+                        $like3 = "%(Auto-Split)%" . preg_replace('/\s+/', '%', trim($t['nama_tagihan'])) . "%";
+                        $db->prepare("DELETE FROM keuangan_transaksi WHERE siswa_id = ? AND (keterangan LIKE ? OR keterangan LIKE ? OR keterangan LIKE ?)")->execute([$t['siswa_id'], $like1, $like2, $like3]);
 
                         if ($nominal_pembayaran > 0) {
                             // Insert 1 new payment with exact total
@@ -2209,10 +2210,11 @@ class AdminFinanceController {
                        ->execute([$siswa_id, $nama_tagihan]);
                        
                     // 3. Delete related general transactions in keuangan_transaksi
-                    $like1 = "%Pelunasan Tagihan: " . $nama_tagihan . "%";
-                    $like2 = "%Pembayaran Angsuran: " . $nama_tagihan . "%";
-                    $db->prepare("DELETE FROM keuangan_transaksi WHERE siswa_id = ? AND (keterangan LIKE ? OR keterangan LIKE ?)")
-                       ->execute([$siswa_id, $like1, $like2]);
+                    $like1 = "%Pelunasan Tagihan:%" . preg_replace('/\s+/', '%', trim($nama_tagihan)) . "%";
+                    $like2 = "%Pembayaran Angsuran:%" . preg_replace('/\s+/', '%', trim($nama_tagihan)) . "%";
+                    $like3 = "%(Auto-Split)%" . preg_replace('/\s+/', '%', trim($nama_tagihan)) . "%";
+                    $db->prepare("DELETE FROM keuangan_transaksi WHERE siswa_id = ? AND (keterangan LIKE ? OR keterangan LIKE ? OR keterangan LIKE ?)")
+                       ->execute([$siswa_id, $like1, $like2, $like3]);
                        
                     $db->commit();
                     header('Content-Type: application/json');
