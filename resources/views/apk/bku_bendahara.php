@@ -63,14 +63,17 @@
             backdrop-filter: blur(2px);
         }
         .bku-modal {
-            position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%) scale(0.95);
+            position: fixed; top: 42%; left: 50%; transform: translate(-50%, -50%) scale(0.95);
             background: #fff; border-radius: 20px;
             padding: 20px; z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            max-height: 85vh; overflow-y: auto;
+            max-height: 80vh; overflow-y: auto;
             width: 90%; max-width: 400px;
             opacity: 0; pointer-events: none;
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
         }
+        .bku-modal::-webkit-scrollbar { display: none; }
         .bku-modal.open { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
         .bku-modal-overlay.open { opacity: 1; pointer-events: auto; }
         .modal-close { position: absolute; top: 15px; right: 15px; width: 30px; height: 30px; border-radius: 50%; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; transition: 0.2s; }
