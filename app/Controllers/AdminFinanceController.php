@@ -2107,6 +2107,10 @@ class AdminFinanceController {
             'kasir_rekap' => 'Kasir - Rekap'
         ];
 
+        // Auto-migrate columns if they don't exist
+        try { $db->exec("ALTER TABLE institusi ADD COLUMN ketua_komite_nama VARCHAR(255) NULL AFTER bendahara_wa"); } catch(\Exception $e) {}
+        try { $db->exec("ALTER TABLE institusi ADD COLUMN ketua_yayasan_nama VARCHAR(255) NULL AFTER ketua_komite_nama"); } catch(\Exception $e) {}
+
         $institusi = $db->query("SELECT bendahara_nama, bendahara_wa, ketua_komite_nama, ketua_yayasan_nama, disable_web_trx FROM institusi LIMIT 1")->fetch();
 
         self::render('finance_akses', [
