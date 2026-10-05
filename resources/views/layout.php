@@ -411,9 +411,19 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
                         </div>
                     </div>
 
-                    <a href="<?php echo Helper::url('/keuangan/komite/laporan'); ?>" class="z-nav-item <?php echo strpos($activeMenu, 'komite_laporan') !== false ? 'active' : ''; ?>">
-                        <i data-lucide="file-text"></i> Laporan
-                    </a>
+                    <!-- Laporan Dropdown -->
+                    <?php $isOpenLaporan = strpos($activeMenu, 'komite_laporan') !== false || strpos($activeMenu, 'cetak_buku_kas') !== false || strpos($activeMenu, 'cetak_cover') !== false; ?>
+                    <div class="z-nav-dropdown <?php echo $isOpenLaporan ? 'open' : ''; ?>">
+                        <div class="z-nav-dropdown-toggle <?php echo $isOpenLaporan ? 'active' : ''; ?>" onclick="toggleDropdown(this)">
+                            <div class="dt-left"><i data-lucide="file-text"></i> Laporan & Cetak</div>
+                            <i data-lucide="chevron-down" class="dt-icon"></i>
+                        </div>
+                        <div class="z-nav-dropdown-menu">
+                            <a href="<?php echo Helper::url('/keuangan/komite/laporan'); ?>" class="z-nav-item <?php echo strpos($activeMenu, 'komite_laporan') !== false ? 'active' : ''; ?>"><i data-lucide="file-bar-chart"></i> Laporan Transaksi</a>
+                            <a href="<?php echo Helper::url('/keuangan/cetak/buku_kas'); ?>" class="z-nav-item <?php echo strpos($activeMenu, 'cetak_buku_kas') !== false ? 'active' : ''; ?>"><i data-lucide="book-open"></i> Cetak BKU</a>
+                            <a href="<?php echo Helper::url('/keuangan/cetak/cover'); ?>" class="z-nav-item <?php echo strpos($activeMenu, 'cetak_cover') !== false ? 'active' : ''; ?>"><i data-lucide="image"></i> Cetak Cover</a>
+                        </div>
+                    </div>
 
                     <a href="<?php echo Helper::url('/keuangan/akses'); ?>" class="z-nav-item <?php echo strpos($activeMenu, 'keuangan_akses') !== false || strpos($activeMenu, 'keuangan_finance_akses') !== false ? 'active' : ''; ?>">
                         <i data-lucide="shield-check"></i> Pengaturan & Akses
