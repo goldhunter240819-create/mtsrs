@@ -224,7 +224,11 @@
                 </div>
 
                 <div style="text-align: center; width: 24%;">
-                    <p style="margin: 0;"><?php echo !empty($inst['kota']) ? htmlspecialchars($inst['kota']) : '.....................'; ?>, <?php echo date('d F Y'); ?></p>
+                    <?php 
+                        $bulanIndo = array(1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember');
+                        $tglIndo = date('d') . ' ' . $bulanIndo[(int)date('m')] . ' ' . date('Y');
+                    ?>
+                    <p style="margin: 0;"><?php echo !empty($inst['kota']) ? htmlspecialchars($inst['kota']) : '.....................'; ?>, <?php echo $tglIndo; ?></p>
                     <p style="margin: 0; font-weight: bold;">Bendahara</p>
                     <br><br><br><br>
                     <p style="margin: 0; font-weight: bold; text-decoration: underline;"><?php echo !empty($inst['bendahara_nama']) ? htmlspecialchars($inst['bendahara_nama']) : '.......................................'; ?></p>
