@@ -420,7 +420,7 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
                         </div>
                         <div class="z-nav-dropdown-menu">
                             <a href="<?php echo Helper::url('/keuangan/komite/laporan'); ?>" class="z-nav-item <?php echo strpos($activeMenu, 'komite_laporan') !== false ? 'active' : ''; ?>"><i data-lucide="file-bar-chart"></i> Laporan Transaksi</a>
-                            <a href="<?php echo Helper::url('/keuangan/cetak/buku_kas'); ?>" class="z-nav-item <?php echo strpos($activeMenu, 'cetak_buku_kas') !== false ? 'active' : ''; ?>"><i data-lucide="book-open"></i> Cetak BKU</a>
+                            <a href="<?php echo Helper::url('/keuangan/cetak/buku-kas'); ?>" class="z-nav-item <?php echo strpos($activeMenu, 'cetak_buku_kas') !== false ? 'active' : ''; ?>"><i data-lucide="book-open"></i> Cetak BKU</a>
                             <a href="<?php echo Helper::url('/keuangan/cetak/cover'); ?>" class="z-nav-item <?php echo strpos($activeMenu, 'cetak_cover') !== false ? 'active' : ''; ?>"><i data-lucide="image"></i> Cetak Cover</a>
                         </div>
                     </div>
