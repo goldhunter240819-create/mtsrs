@@ -169,12 +169,23 @@
                         </tr>
                         <?php endforeach; endif; ?>
                         
-                        <tr class="data-row" style="background: #f1f5f9; font-weight: bold;">
-                            <td colspan="3" align="right">TOTAL</td>
-                            <td align="right" style="color: #065f46;"><?php echo number_format($total_masuk_all, 0, ',', '.'); ?></td>
-                            <td align="right" style="color: #991b1b;"><?php echo number_format($total_keluar_all, 0, ',', '.'); ?></td>
-                            <td align="right"><?php echo number_format($saldo, 0, ',', '.'); ?></td>
-                            <td></td>
+                        <tr class="data-row">
+                            <td colspan="3" align="center" style="background: #1e293b; color: #ffffff; padding: 12px; font-size: 13px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; border: 2px solid #1e293b;">
+                                <span style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                                    REKAPITULASI TOTAL KESELURUHAN
+                                </span>
+                            </td>
+                            <td align="right" style="background: #ecfdf5; color: #065f46; font-weight: 900; font-size: 12px; padding: 12px; border-top: 2px solid #1e293b; border-bottom: 2px solid #1e293b;">
+                                <?php echo number_format($total_masuk_all, 0, ',', '.'); ?>
+                            </td>
+                            <td align="right" style="background: #fef2f2; color: #991b1b; font-weight: 900; font-size: 12px; padding: 12px; border-top: 2px solid #1e293b; border-bottom: 2px solid #1e293b;">
+                                <?php echo number_format($total_keluar_all, 0, ',', '.'); ?>
+                            </td>
+                            <td align="right" style="background: #f1f5f9; color: #0f172a; font-weight: 900; font-size: 12px; padding: 12px; border-top: 2px solid #1e293b; border-bottom: 2px solid #1e293b;">
+                                <?php echo number_format($saldo, 0, ',', '.'); ?>
+                            </td>
+                            <td style="background: #f8fafc; border-top: 2px solid #1e293b; border-bottom: 2px solid #1e293b;"></td>
                         </tr>
 
                         <?php endif; ?>
