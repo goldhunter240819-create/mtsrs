@@ -167,6 +167,23 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Tanda Tangan -->
+            <div style="margin-top: 30px; display: flex; justify-content: space-between; font-size: 14px; font-family: 'Times New Roman', Times, serif;">
+                <div style="text-align: center; width: 30%;">
+                    <p style="margin: 0;">Mengetahui,</p>
+                    <p style="margin: 0; font-weight: bold;">Kepala Madrasah</p>
+                    <br><br><br><br>
+                    <p style="margin: 0; font-weight: bold;">( <?php echo !empty($inst['kepala_nama']) ? htmlspecialchars($inst['kepala_nama']) : '.......................................'; ?> )</p>
+                </div>
+                <div style="text-align: center; width: 30%;">
+                    <p style="margin: 0;"><?php echo !empty($inst['kota']) ? htmlspecialchars($inst['kota']) : '.....................'; ?>, <?php echo date('d F Y'); ?></p>
+                    <p style="margin: 0; font-weight: bold;">Bendahara</p>
+                    <br><br><br><br>
+                    <p style="margin: 0; font-weight: bold;">( <?php echo !empty($inst['bendahara_nama']) ? htmlspecialchars($inst['bendahara_nama']) : '.......................................'; ?> )</p>
+                </div>
+            </div>
+            
         </div>
         
     </div>
