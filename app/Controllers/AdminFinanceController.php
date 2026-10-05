@@ -2107,7 +2107,7 @@ class AdminFinanceController {
             'kasir_rekap' => 'Kasir - Rekap'
         ];
 
-        $institusi = $db->query("SELECT bendahara_nama, bendahara_wa, disable_web_trx FROM institusi LIMIT 1")->fetch();
+        $institusi = $db->query("SELECT bendahara_nama, bendahara_wa, ketua_komite_nama, ketua_yayasan_nama, disable_web_trx FROM institusi LIMIT 1")->fetch();
 
         self::render('finance_akses', [
             'aksesList' => $aksesList,
@@ -2122,10 +2122,12 @@ class AdminFinanceController {
         $db = Database::connect('core');
         $nama = $_POST['bendahara_nama'] ?? '';
         $wa = $_POST['bendahara_wa'] ?? '';
+        $ketua_komite = $_POST['ketua_komite_nama'] ?? '';
+        $ketua_yayasan = $_POST['ketua_yayasan_nama'] ?? '';
         $disable = isset($_POST['disable_web_trx']) ? 1 : 0;
         
-        $stmt = $db->prepare("UPDATE institusi SET bendahara_nama = ?, bendahara_wa = ?, disable_web_trx = ?");
-        $stmt->execute([$nama, $wa, $disable]);
+        $stmt = $db->prepare("UPDATE institusi SET bendahara_nama = ?, bendahara_wa = ?, ketua_komite_nama = ?, ketua_yayasan_nama = ?, disable_web_trx = ?");
+        $stmt->execute([$nama, $wa, $ketua_komite, $ketua_yayasan, $disable]);
         
         header('Location: /keuangan/akses?msg=saved');
         exit;

@@ -170,18 +170,38 @@
 
             <!-- Tanda Tangan -->
             <div style="margin-top: 30px; display: flex; justify-content: space-between; font-size: 14px; font-family: 'Times New Roman', Times, serif;">
-                <div style="text-align: center; width: 30%;">
+                
+                <div style="text-align: center; width: 24%;">
+                    <p style="margin: 0; color: transparent;">-</p>
+                    <p style="margin: 0; font-weight: bold;">Ketua Yayasan</p>
+                    <br><br><br><br>
+                    <p style="margin: 0; font-weight: bold; text-decoration: underline;"><?php echo !empty($inst['ketua_yayasan_nama']) ? htmlspecialchars($inst['ketua_yayasan_nama']) : '.......................................'; ?></p>
+                </div>
+
+                <div style="text-align: center; width: 24%;">
+                    <p style="margin: 0; color: transparent;">-</p>
+                    <p style="margin: 0; font-weight: bold;">Ketua Komite</p>
+                    <br><br><br><br>
+                    <p style="margin: 0; font-weight: bold; text-decoration: underline;"><?php echo !empty($inst['ketua_komite_nama']) ? htmlspecialchars($inst['ketua_komite_nama']) : '.......................................'; ?></p>
+                </div>
+                
+                <div style="text-align: center; width: 24%;">
                     <p style="margin: 0;">Mengetahui,</p>
                     <p style="margin: 0; font-weight: bold;">Kepala Madrasah</p>
                     <br><br><br><br>
-                    <p style="margin: 0; font-weight: bold;">( <?php echo !empty($inst['kepala_nama']) ? htmlspecialchars($inst['kepala_nama']) : '.......................................'; ?> )</p>
+                    <p style="margin: 0; font-weight: bold; text-decoration: underline;"><?php echo !empty($inst['nama_kepala']) ? htmlspecialchars($inst['nama_kepala']) : '.......................................'; ?></p>
+                    <?php if(!empty($inst['nip_kepala'])): ?>
+                    <p style="margin: 0;">NIP. <?php echo htmlspecialchars($inst['nip_kepala']); ?></p>
+                    <?php endif; ?>
                 </div>
-                <div style="text-align: center; width: 30%;">
+
+                <div style="text-align: center; width: 24%;">
                     <p style="margin: 0;"><?php echo !empty($inst['kota']) ? htmlspecialchars($inst['kota']) : '.....................'; ?>, <?php echo date('d F Y'); ?></p>
                     <p style="margin: 0; font-weight: bold;">Bendahara</p>
                     <br><br><br><br>
-                    <p style="margin: 0; font-weight: bold;">( <?php echo !empty($inst['bendahara_nama']) ? htmlspecialchars($inst['bendahara_nama']) : '.......................................'; ?> )</p>
+                    <p style="margin: 0; font-weight: bold; text-decoration: underline;"><?php echo !empty($inst['bendahara_nama']) ? htmlspecialchars($inst['bendahara_nama']) : '.......................................'; ?></p>
                 </div>
+
             </div>
             
         </div>

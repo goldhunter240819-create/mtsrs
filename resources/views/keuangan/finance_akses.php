@@ -31,6 +31,14 @@
                 <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: #475569;">No WhatsApp Bendahara Umum</label>
                 <input type="text" name="bendahara_wa" class="z-input" placeholder="Contoh: 08123456789" value="<?= htmlspecialchars($institusi['bendahara_wa'] ?? '') ?>" style="width: 100%;">
             </div>
+            <div style="flex: 1; min-width: 250px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: #475569;">Nama Ketua Komite Madrasah</label>
+                <input type="text" name="ketua_komite_nama" class="z-input" placeholder="Contoh: H. Ahmad" value="<?= htmlspecialchars($institusi['ketua_komite_nama'] ?? '') ?>" style="width: 100%;">
+            </div>
+            <div style="flex: 1; min-width: 250px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: #475569;">Nama Ketua Yayasan</label>
+                <input type="text" name="ketua_yayasan_nama" class="z-input" placeholder="Contoh: KH. Abdullah" value="<?= htmlspecialchars($institusi['ketua_yayasan_nama'] ?? '') ?>" style="width: 100%;">
+            </div>
             <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-top: 5px;">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px 15px; background: #fff; border: 1px solid var(--z-border); border-radius: 8px;">
                     <input type="checkbox" name="disable_web_trx" value="1" <?= (!empty($institusi['disable_web_trx'])) ? 'checked' : '' ?> style="width: 18px; height: 18px; accent-color: #dc2626;">
