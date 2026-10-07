@@ -408,9 +408,9 @@ $inst = $db->query("SELECT * FROM institusi LIMIT 1")->fetch();
                 <p class="mph-subtitle">Manajemen biodata, identitas, dan cetak kartu pelajar.</p>
             </div>
             <div class="mph-actions" style="flex-wrap: wrap; justify-content: flex-end;">
-                <button class="btn" onclick="document.getElementById('modal-export-siswa').style.display='flex'">
-                    <i data-lucide="printer"></i> Export / PDF
-                </button>
+                <a href="/siakad/siswa/export-custom<?php echo $selected_kelas ? '?kelas_id='.$selected_kelas : ''; ?>" class="btn" style="text-decoration:none;">
+                    <i data-lucide="printer"></i> Export Data
+                </a>
                 <a href="/siakad/siswa/cetak-kartu<?php echo $selected_kelas ? '?kelas_id='.$selected_kelas : ''; ?>" target="_blank" class="btn" style="text-decoration:none;">
                     <i data-lucide="id-card"></i> Cetak Massal
                 </a>
@@ -720,6 +720,13 @@ $inst = $db->query("SELECT * FROM institusi LIMIT 1")->fetch();
                         <div class="option-content">
                             <span class="option-title">Data Lengkap</span>
                             <span class="option-sub">Biodata, Alamat & Data Orang Tua</span>
+                        </div>
+                    </label>
+                    <label class="export-label">
+                        <input type="radio" name="mode" value="excel">
+                        <div class="option-content">
+                            <span class="option-title">Export Excel</span>
+                            <span class="option-sub">Format data lengkap (.xls)</span>
                         </div>
                     </label>
                 </div>

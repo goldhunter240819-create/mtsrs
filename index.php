@@ -140,6 +140,9 @@ $router->add('POST', '/siakad/siswa/delete-bulk', [\App\Controllers\SiakadContro
 $router->add('POST', '/siakad/siswa/reset-password-bulk', [\App\Controllers\SiakadController::class, 'siswaResetPasswordBulk']);
 $router->add('POST', '/siakad/siswa/import', [\App\Controllers\SiakadController::class, 'siswaImport']);
 $router->add('GET', '/siakad/siswa/template-import', [\App\Controllers\SiakadController::class, 'siswaTemplateImport']);
+$router->add('GET', '/siakad/siswa/export', [\App\Controllers\SiakadController::class, 'siswaExport']);
+$router->add('GET', '/siakad/siswa/export-custom', [\App\Controllers\SiakadController::class, 'siswaExportCustom']);
+$router->add('POST', '/siakad/siswa/export-process', [\App\Controllers\SiakadController::class, 'siswaExportProcess']);
 $router->add('GET', '/siakad/siswa/naik-kelas', [\App\Controllers\SiakadController::class, 'siswaNaikKelas']);
 $router->add('POST', '/siakad/siswa/naik-kelas/process', [\App\Controllers\SiakadController::class, 'siswaNaikKelasProcess']);
 $router->add('GET', '/siakad/siswa/alumni', [\App\Controllers\SiakadController::class, 'siswaAlumni']);

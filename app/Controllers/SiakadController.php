@@ -2167,6 +2167,263 @@ class SiakadController {
         exit;
     }
 
+    public function siswaExport() {
+        $db = Database::connect();
+        $kelas_id = $_GET['kelas_id'] ?? '';
+        $mode = $_GET['mode'] ?? 'public';
+
+        $where = "WHERE s.status = 'Aktif'";
+        $params = [];
+        if (!empty($kelas_id)) {
+            $where .= " AND s.kelas_id = ?";
+            $params[] = $kelas_id;
+            $k = $db->prepare("SELECT nama_kelas FROM kelas WHERE id = ?");
+            $k->execute([$kelas_id]);
+            $kelas_nama = $k->fetchColumn() ?: 'Semua Kelas';
+        } else {
+            $kelas_nama = 'Semua Kelas';
+        }
+
+        $stmt = $db->prepare("
+            SELECT s.*, k.nama_kelas 
+            FROM siswa s 
+            LEFT JOIN kelas k ON s.kelas_id = k.id 
+            $where 
+            ORDER BY k.nama_kelas ASC, s.nama ASC
+        ");
+        $stmt->execute($params);
+        $siswas = $stmt->fetchAll();
+
+        $inst = $db->query("SELECT * FROM institusi LIMIT 1")->fetch();
+
+        if ($mode === 'excel') {
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=Data_Siswa_{$kelas_nama}.xls");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+        }
+
+        echo "<!DOCTYPE html><html><head><title>Export Data Siswa</title>";
+        if ($mode !== 'excel') {
+            echo "<style>
+                body { font-family: Arial, sans-serif; font-size: 12px; }
+                table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+                th, td { border: 1px solid #000; padding: 5px; text-align: left; }
+                th { background-color: #f1f5f9; text-align: center; }
+                .center { text-align: center; }
+            </style>";
+        } else {
+            echo "<style>
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #000; padding: 5px; }
+                th { background-color: #f1f5f9; font-weight: bold; }
+            </style>";
+        }
+        echo "</head><body " . ($mode !== 'excel' ? "onload='window.print()'" : "") . ">";
+        
+        echo "<div class='center' style='text-align: center;'>
+                <h2>DATA SISWA " . strtoupper($inst['nama']) . "</h2>
+                <h3>KELAS: " . strtoupper($kelas_nama) . "</h3>
+              </div>";
+
+        echo "<table border='1'>";
+        if ($mode === 'public') {
+            echo "<tr>
+                    <th>No</th><th>NISN</th><th>NIS</th><th>Nama Siswa</th><th>L/P</th><th>Tempat, Tgl Lahir</th><th>Kelas</th>
+                  </tr>";
+            $no = 1;
+            foreach ($siswas as $s) {
+                echo "<tr>
+                        <td align='center'>".$no++."</td>
+                        <td style='mso-number-format:\"\\@\"'>{$s['nisn']}</td>
+                        <td style='mso-number-format:\"\\@\"'>{$s['nis']}</td>
+                        <td>{$s['nama']}</td>
+                        <td align='center'>{$s['jk']}</td>
+                        <td>{$s['tempat_lahir']}, {$s['tanggal_lahir']}</td>
+                        <td align='center'>{$s['nama_kelas']}</td>
+                      </tr>";
+            }
+        } else {
+            // mode = full or excel
+            echo "<tr>
+                    <th>No</th><th>NISN</th><th>NIS</th><th>NIK</th><th>Nama Siswa</th><th>L/P</th>
+                    <th>Tempat, Tgl Lahir</th><th>Agama</th><th>Kelas</th>
+                    <th>Nama Ayah</th><th>Nama Ibu</th><th>No. HP</th><th>Alamat Lengkap</th>
+                  </tr>";
+            $no = 1;
+            foreach ($siswas as $s) {
+                echo "<tr>
+                        <td align='center'>".$no++."</td>
+                        <td style='mso-number-format:\"\\@\"'>{$s['nisn']}</td>
+                        <td style='mso-number-format:\"\\@\"'>{$s['nis']}</td>
+                        <td style='mso-number-format:\"\\@\"'>{$s['nik']}</td>
+                        <td>{$s['nama']}</td>
+                        <td align='center'>{$s['jk']}</td>
+                        <td>{$s['tempat_lahir']}, {$s['tanggal_lahir']}</td>
+                        <td>{$s['agama']}</td>
+                        <td align='center'>{$s['nama_kelas']}</td>
+                        <td>{$s['ayah_nama']}</td>
+                        <td>{$s['ibu_nama']}</td>
+                        <td style='mso-number-format:\"\\@\"'>{$s['ortu_hp']}</td>
+                        <td>{$s['alamat_jalan']} RT {$s['alamat_rt']}/RW {$s['alamat_rw']}, {$s['alamat_desa']}, {$s['alamat_kecamatan']}, {$s['alamat_kota']}</td>
+                      </tr>";
+            }
+        }
+        echo "</table>";
+        
+        if ($mode !== 'excel') {
+            echo "<div style='margin-top: 30px; float: right; text-align: center; margin-right: 50px;'>
+                    <p>".$inst['kabupaten'].", ".date('d M Y')."</p>
+                    <p>Mengetahui,</p>
+                    <br><br><br>
+                    <p><b>_______________________</b></p>
+                  </div>";
+        }
+        echo "</body></html>";
+        exit;
+    }
+
+    public function siswaExportCustom() {
+        $db = Database::connect();
+        $kelasList = $db->query("SELECT * FROM kelas ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll();
+        $selected_kelas = $_GET['kelas_id'] ?? '';
+        
+        $title = "Export Data Siswa - SIAKAD MTs RS";
+        $activeMenu = 'siakad_siswa';
+
+        ob_start();
+        include __DIR__ . '/../../resources/views/siakad/siswa_export_custom.php';
+        $content = ob_get_clean();
+
+        include __DIR__ . '/../../resources/views/layout.php';
+    }
+
+    public function siswaExportProcess() {
+        $db = Database::connect();
+        $kelas_id = $_POST['kelas_id'] ?? '';
+        $kolom = $_POST['kolom'] ?? [];
+        $format = $_POST['format'] ?? 'pdf';
+
+        if (empty($kolom)) {
+            die("Pilih minimal satu kolom data untuk di-export.");
+        }
+
+        $all_columns = [
+            'nis' => 'NIS', 'nisn' => 'NISN', 'nik' => 'NIK', 'nama' => 'Nama Lengkap', 'jk' => 'L/P',
+            'tempat_lahir' => 'Tempat Lahir', 'tanggal_lahir' => 'Tgl Lahir', 'agama' => 'Agama',
+            'gol_darah' => 'Gol. Darah', 'warga_negara' => 'Warga Negara', 'anak_ke' => 'Anak Ke-',
+            'kelas' => 'Kelas', 'pend_terakhir' => 'Pend. Terakhir', 'sekolah_asal' => 'Sekolah Asal',
+            'no_ijazah' => 'No Ijazah', 'ayah_nama' => 'Nama Ayah', 'ayah_pekerjaan' => 'Pekerjaan Ayah',
+            'ibu_nama' => 'Nama Ibu', 'ibu_pekerjaan' => 'Pekerjaan Ibu', 'ortu_gaji' => 'Penghasilan Ortu',
+            'ortu_hp' => 'No HP Ortu', 'wali_nama' => 'Nama Wali', 'wali_pekerjaan' => 'Pekerjaan Wali',
+            'wali_hp' => 'No HP Wali', 'alamat_jalan' => 'Jalan', 'alamat_rt' => 'RT', 'alamat_rw' => 'RW',
+            'alamat_desa' => 'Desa', 'alamat_kecamatan' => 'Kecamatan', 'alamat_kota' => 'Kota',
+            'alamat_provinsi' => 'Provinsi', 'alamat_kodepos' => 'Kode Pos'
+        ];
+
+        $selects = [];
+        $headers = [];
+        foreach ($kolom as $k) {
+            if (isset($all_columns[$k])) {
+                $headers[] = $all_columns[$k];
+                if ($k === 'kelas') {
+                    $selects[] = 'k.nama_kelas';
+                } else {
+                    $selects[] = "s.$k";
+                }
+            }
+        }
+        
+        $selectStr = implode(", ", $selects);
+
+        $where = "WHERE s.status = 'Aktif'";
+        $params = [];
+        if (!empty($kelas_id)) {
+            $where .= " AND s.kelas_id = ?";
+            $params[] = $kelas_id;
+            $k = $db->prepare("SELECT nama_kelas FROM kelas WHERE id = ?");
+            $k->execute([$kelas_id]);
+            $kelas_nama = $k->fetchColumn() ?: 'Semua Kelas';
+        } else {
+            $kelas_nama = 'Semua Kelas';
+        }
+
+        $stmt = $db->prepare("
+            SELECT $selectStr 
+            FROM siswa s 
+            LEFT JOIN kelas k ON s.kelas_id = k.id 
+            $where 
+            ORDER BY k.nama_kelas ASC, s.nama ASC
+        ");
+        $stmt->execute($params);
+        $siswas = $stmt->fetchAll(\PDO::FETCH_NUM);
+
+        $inst = $db->query("SELECT * FROM institusi LIMIT 1")->fetch();
+
+        if ($format === 'excel') {
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=Data_Siswa_Custom_{$kelas_nama}.xls");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+        }
+
+        echo "<!DOCTYPE html><html><head><title>Export Data Siswa</title>";
+        if ($format !== 'excel') {
+            echo "<style>
+                body { font-family: Arial, sans-serif; font-size: 11px; }
+                table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+                th, td { border: 1px solid #000; padding: 4px; text-align: left; }
+                th { background-color: #f1f5f9; text-align: center; }
+                .center { text-align: center; }
+            </style>";
+        } else {
+            echo "<style>
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #000; padding: 5px; }
+                th { background-color: #f1f5f9; font-weight: bold; }
+            </style>";
+        }
+        echo "</head><body " . ($format !== 'excel' ? "onload='window.print()'" : "") . ">";
+        
+        echo "<div class='center' style='text-align: center;'>
+                <h2>DATA SISWA " . strtoupper($inst['nama']) . "</h2>
+                <h3>KELAS: " . strtoupper($kelas_nama) . "</h3>
+              </div>";
+
+        echo "<table border='1'>";
+        echo "<tr><th>No</th>";
+        foreach ($headers as $h) {
+            echo "<th>$h</th>";
+        }
+        echo "</tr>";
+
+        $no = 1;
+        foreach ($siswas as $row) {
+            echo "<tr><td align='center'>".$no++."</td>";
+            foreach ($row as $idx => $val) {
+                $colKey = $kolom[$idx];
+                if ($format === 'excel' && in_array($colKey, ['nis', 'nisn', 'nik', 'ortu_hp', 'wali_hp'])) {
+                    echo "<td style='mso-number-format:\"\\@\"'>".htmlspecialchars($val ?? '')."</td>";
+                } else {
+                    echo "<td>".htmlspecialchars($val ?? '')."</td>";
+                }
+            }
+            echo "</tr>";
+        }
+        echo "</table>";
+        
+        if ($format !== 'excel') {
+            echo "<div style='margin-top: 30px; float: right; text-align: center; margin-right: 50px;'>
+                    <p>".$inst['kabupaten'].", ".date('d M Y')."</p>
+                    <p>Mengetahui,</p>
+                    <br><br><br>
+                    <p><b>_______________________</b></p>
+                  </div>";
+        }
+        echo "</body></html>";
+        exit;
+    }
+
     public function siswaNaikKelas() {
         $db = Database::connect();
         $kelasList = $db->query("SELECT * FROM kelas ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll();
