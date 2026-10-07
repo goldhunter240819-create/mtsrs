@@ -2309,16 +2309,16 @@ class SiakadController {
         }
 
         $all_columns = [
-            'nis' => 'NIS', 'nisn' => 'NISN', 'nik' => 'NIK', 'nama' => 'Nama Lengkap', 'jk' => 'L/P',
+            'nis' => 'NIS', 'nisn' => 'NISN', 'nik' => 'NIK', 'nama' => 'Nama Lengkap', 'jenis_kelamin' => 'L/P',
             'tempat_lahir' => 'Tempat Lahir', 'tanggal_lahir' => 'Tgl Lahir', 'agama' => 'Agama',
-            'gol_darah' => 'Gol. Darah', 'warga_negara' => 'Warga Negara', 'anak_ke' => 'Anak Ke-',
-            'kelas' => 'Kelas', 'pend_terakhir' => 'Pend. Terakhir', 'sekolah_asal' => 'Sekolah Asal',
-            'no_ijazah' => 'No Ijazah', 'ayah_nama' => 'Nama Ayah', 'ayah_pekerjaan' => 'Pekerjaan Ayah',
-            'ibu_nama' => 'Nama Ibu', 'ibu_pekerjaan' => 'Pekerjaan Ibu', 'ortu_gaji' => 'Penghasilan Ortu',
-            'ortu_hp' => 'No HP Ortu', 'wali_nama' => 'Nama Wali', 'wali_pekerjaan' => 'Pekerjaan Wali',
-            'wali_hp' => 'No HP Wali', 'alamat_jalan' => 'Jalan', 'alamat_rt' => 'RT', 'alamat_rw' => 'RW',
-            'alamat_desa' => 'Desa', 'alamat_kecamatan' => 'Kecamatan', 'alamat_kota' => 'Kota',
-            'alamat_provinsi' => 'Provinsi', 'alamat_kodepos' => 'Kode Pos'
+            'gol_darah' => 'Gol. Darah', 'kewarganegaraan' => 'Warga Negara', 'anak_ke' => 'Anak Ke-',
+            'kelas' => 'Kelas', 'pendidikan_terakhir' => 'Pend. Terakhir', 'sekolah_asal' => 'Sekolah Asal',
+            'no_ijazah' => 'No Ijazah', 'nama_ayah' => 'Nama Ayah', 'pekerjaan_ayah' => 'Pekerjaan Ayah',
+            'nama_ibu' => 'Nama Ibu', 'pekerjaan_ibu' => 'Pekerjaan Ibu', 'penghasilan_ortu' => 'Penghasilan Ortu',
+            'no_hp_ortu' => 'No HP Ortu', 'nama_wali' => 'Nama Wali', 'pekerjaan_wali' => 'Pekerjaan Wali',
+            'no_hp_wali' => 'No HP Wali', 'alamat' => 'Jalan', 'rt' => 'RT', 'rw' => 'RW',
+            'desa' => 'Desa', 'kecamatan' => 'Kecamatan', 'kota' => 'Kota',
+            'provinsi' => 'Provinsi', 'kode_pos' => 'Kode Pos'
         ];
 
         $selects = [];
