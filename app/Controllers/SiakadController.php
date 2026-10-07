@@ -2368,6 +2368,9 @@ class SiakadController {
         }
 
         echo "<!DOCTYPE html><html><head><title>Export Data Siswa</title>";
+        if (!empty($inst['logo'])) {
+            echo "<link rel='icon' type='image/png' href='/public/uploads/logo/{$inst['logo']}'>";
+        }
         if ($format !== 'excel') {
             echo "<style>
                 body { font-family: Arial, sans-serif; font-size: 11px; }
