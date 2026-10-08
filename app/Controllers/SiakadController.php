@@ -2421,8 +2421,13 @@ class SiakadController {
         echo "</table>";
         
         if ($format !== 'excel') {
+            $bulanIndo = [
+                1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            $tglSekarang = date('d') . ' ' . $bulanIndo[(int)date('m')] . ' ' . date('Y');
             echo "<div style='margin-top: 30px; float: right; text-align: center; margin-right: 50px;'>
-                    <p>Gunung Terang, ".date('d M Y')."</p>
+                    <p>Gunung Terang, " . $tglSekarang . "</p>
                     <p>Mengetahui,</p>
                     <p>Admin Madrasah</p>
                     <br><br><br>
