@@ -2405,10 +2405,15 @@ class SiakadController {
             echo "<tr><td align='center'>".$no++."</td>";
             foreach ($row as $idx => $val) {
                 $colKey = $kolom[$idx];
+                $printVal = htmlspecialchars($val ?? '');
+                if ($colKey === 'tanggal_lahir' && !empty($val) && $val !== '0000-00-00') {
+                    $printVal = date('d-m-Y', strtotime($val));
+                }
+
                 if ($format === 'excel' && in_array($colKey, ['nis', 'nisn', 'nik', 'ortu_hp', 'wali_hp'])) {
-                    echo "<td style='mso-number-format:\"\\@\"'>".htmlspecialchars($val ?? '')."</td>";
+                    echo "<td style='mso-number-format:\"\\@\"'>".$printVal."</td>";
                 } else {
-                    echo "<td>".htmlspecialchars($val ?? '')."</td>";
+                    echo "<td>".$printVal."</td>";
                 }
             }
             echo "</tr>";
@@ -2417,10 +2422,11 @@ class SiakadController {
         
         if ($format !== 'excel') {
             echo "<div style='margin-top: 30px; float: right; text-align: center; margin-right: 50px;'>
-                    <p>".$inst['kabupaten'].", ".date('d M Y')."</p>
+                    <p>Gunung Terang, ".date('d M Y')."</p>
                     <p>Mengetahui,</p>
+                    <p>Admin Madrasah</p>
                     <br><br><br>
-                    <p><b>_______________________</b></p>
+                    <p><b>Mahfudzun</b></p>
                   </div>";
         }
         echo "</body></html>";
