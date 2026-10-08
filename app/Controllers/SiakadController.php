@@ -2426,7 +2426,7 @@ class SiakadController {
                     <p>Mengetahui,</p>
                     <p>Admin Madrasah</p>
                     <br><br><br>
-                    <p><b>Mahfudzun</b></p>
+                    <p><b>MUHAMMAD MAFFUDHUN, S.Kom.</b></p>
                   </div>";
         }
         echo "</body></html>";
