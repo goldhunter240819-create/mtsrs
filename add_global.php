@@ -3,6 +3,11 @@
 $file = 'app/Controllers/KurikulumController.php';
 $content = file_get_contents($file);
 
+if (strpos($content, 'function monitoringNilaiGlobal') !== false) {
+    echo "Method monitoringNilaiGlobal already exists in $file. No changes needed.";
+    exit;
+}
+
 $insert = <<<'EOD'
     public function monitoringNilaiGlobal() {
         $db = Database::connect();
