@@ -162,6 +162,13 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
     }
     .card-evoting:hover { border-color: rgba(225,29,72,0.4); }
 
+    .card-pkkm {
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+        box-shadow: 0 8px 25px -5px rgba(5,150,105,0.15);
+        border-color: rgba(5,150,105,0.2);
+    }
+    .card-pkkm:hover { border-color: rgba(5,150,105,0.4); }
+
     .card-dev {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         box-shadow: 0 8px 25px -5px rgba(15,23,42,0.3);
@@ -187,6 +194,7 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
     .card-kurikulum .pm-icon { color: #0ea5e9; }
     .card-apk .pm-icon { color: #c026d3; }
     .card-evoting .pm-icon { color: #e11d48; }
+    .card-pkkm .pm-icon { color: #059669; }
     .card-dev .pm-icon { color: #0f172a; }
 
     .pm-info {
@@ -220,6 +228,7 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
     .card-kurikulum .card-arrow { color: #0ea5e9; }
     .card-apk .card-arrow { color: #c026d3; }
     .card-evoting .card-arrow { color: #e11d48; }
+    .card-pkkm .card-arrow { color: #059669; }
     .card-dev .card-arrow { color: #0f172a; }
     
     .portal-module-card:hover .card-arrow {

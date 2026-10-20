@@ -151,6 +151,17 @@ class Helper {
                 'badge_class' => 'pill-red',
                 'badge_style' => 'background: rgba(225,29,72,0.15); color: #e11d48;',
             ],
+            'pkkm' => [
+                'url' => '/admin/pkkm',
+                'title' => 'PKKM Digital',
+                'subtitle' => 'Penilaian Kinerja Kepala Madrasah',
+                'icon' => 'award',
+                'color' => '#059669',
+                'card_class' => 'card-pkkm',
+                'badge_text' => 'Live',
+                'badge_class' => 'pill-green',
+                'badge_style' => 'background: rgba(5,150,105,0.15); color: #059669;',
+            ],
         ];
     }
 

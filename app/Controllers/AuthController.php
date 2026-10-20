@@ -130,6 +130,11 @@ class AuthController {
                 $_SESSION['nama'] = $siswa ? $siswa['nama'] : $user['username'];
                 $_SESSION['siswa_id'] = $siswa ? $siswa['id'] : null;
                 $_SESSION['kelas_id'] = $siswa ? $siswa['kelas_id'] : null;
+            } elseif ($user['role_id'] == 5) {
+                $stmtP = $db->prepare("SELECT nama FROM pkkm_pengawas WHERE user_id = ?");
+                $stmtP->execute([$user['id']]);
+                $pengawas = $stmtP->fetch();
+                $_SESSION['nama'] = $pengawas ? $pengawas['nama'] : $user['username'];
             } else {
                 $_SESSION['nama'] = ucfirst($user['username']);
             }
@@ -140,6 +145,8 @@ class AuthController {
                 Helper::redirect('/guru');
             } elseif ($user['role_id'] == 3) {
                 Helper::redirect('/siswa');
+            } elseif ($user['role_id'] == 5) {
+                Helper::redirect('/pengawas/pkkm');
             } else {
                 Helper::redirect('/portal');
             }

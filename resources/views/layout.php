@@ -30,6 +30,7 @@ $isDev = (strpos($activeMenu, 'dev') === 0);
 $isGuruWeb = (strpos($activeMenu, 'guru_') === 0);
 $isSiswaWeb = (strpos($activeMenu, 'siswa_') === 0);
 $isEvoting = (strpos($activeMenu, 'evoting_') === 0);
+$isPkkm = (strpos($activeMenu, 'pkkm') === 0);
 
 $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institusi['logo']) : Helper::url('/assets/images/logo.png');
 ?>
@@ -489,6 +490,31 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
                     </a>
                     <a href="<?php echo Helper::url('/dev/cctv'); ?>" class="z-nav-item <?php echo $activeMenu === 'dev_cctv' ? 'active' : ''; ?>">
                         <i data-lucide="cctv"></i> CCTV Monitoring
+                    </a>
+                <?php endif; ?>
+
+                <?php if ($isPkkm): ?>
+                    <div class="z-nav-cat">PKKM DIGITAL</div>
+                    <a href="<?php echo Helper::url('/admin/pkkm'); ?>" class="z-nav-item <?php echo in_array($activeMenu, ['pkkm_dashboard', 'pkkm_overview']) ? 'active' : ''; ?>">
+                        <i data-lucide="layout-dashboard"></i> Dashboard PKKM
+                    </a>
+                    <a href="<?php echo Helper::url('/admin/pkkm/instrumen'); ?>" class="z-nav-item <?php echo $activeMenu === 'pkkm_instrumen' ? 'active' : ''; ?>">
+                        <i data-lucide="list-checks"></i> Instrumen 42 Indikator
+                    </a>
+                    <a href="<?php echo Helper::url('/admin/pkkm/master-berkas'); ?>" class="z-nav-item <?php echo $activeMenu === 'pkkm_master_berkas' ? 'active' : ''; ?>">
+                        <i data-lucide="folder-kanban"></i> Master Berkas
+                    </a>
+                    <a href="<?php echo Helper::url('/admin/pkkm/bukti-digital'); ?>" class="z-nav-item <?php echo $activeMenu === 'pkkm_bukti_digital' ? 'active' : ''; ?>">
+                        <i data-lucide="cpu"></i> Bukti Digital & TIK
+                    </a>
+                    <a href="<?php echo Helper::url('/admin/pkkm/tim'); ?>" class="z-nav-item <?php echo in_array($activeMenu, ['pkkm_tim', 'pkkm_tim_pkkm']) ? 'active' : ''; ?>">
+                        <i data-lucide="users"></i> Tim Komponen
+                    </a>
+                    <a href="<?php echo Helper::url('/admin/pkkm/pengawas'); ?>" class="z-nav-item <?php echo $activeMenu === 'pkkm_pengawas' ? 'active' : ''; ?>">
+                        <i data-lucide="user-check"></i> Akun Pengawas
+                    </a>
+                    <a href="<?php echo Helper::url('/pengawas/pkkm'); ?>" target="_blank" class="z-nav-item">
+                        <i data-lucide="external-link"></i> Portal Penilai Asesor
                     </a>
                 <?php endif; ?>
 

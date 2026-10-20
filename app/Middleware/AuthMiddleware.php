@@ -68,18 +68,12 @@ class AuthMiddleware {
                         '/absen' => 'absen',
                         '/pengaturan-apk' => 'pengaturan_apk',
                         '/evoting' => 'evoting',
+                        '/admin/pkkm' => 'pkkm',
+                        '/pkkm' => 'pkkm',
+                        '/guru/pkkm' => 'pkkm',
                     ];
 
-                    // Always blocked for guru regardless
-                    $alwaysBlocked = ['/dev', '/admin'];
-                    foreach ($alwaysBlocked as $bp) {
-                        if (strpos($path, $bp) === 0) {
-                            @file_put_contents(__DIR__ . '/../../scratch/auth_debug.log', "  -> BLOCKED: always blocked path $bp\n", FILE_APPEND);
-                            Helper::redirect('/guru');
-                        }
-                    }
-
-                    // Check portal modules
+                    // Check portal modules first before generic admin blocks
                     $matchedModule = false;
                     foreach ($portalModuleMap as $routePrefix => $moduleKey) {
                         if (strpos($path, $routePrefix) === 0) {
@@ -115,6 +109,17 @@ class AuthMiddleware {
                         }
                     }
 
+                    // Always blocked for guru regardless (if not an allowed portal module like /admin/pkkm)
+                    if (!$matchedModule) {
+                        $alwaysBlocked = ['/dev', '/admin'];
+                        foreach ($alwaysBlocked as $bp) {
+                            if (strpos($path, $bp) === 0) {
+                                @file_put_contents(__DIR__ . '/../../scratch/auth_debug.log', "  -> BLOCKED: always blocked path $bp\n", FILE_APPEND);
+                                Helper::redirect('/guru');
+                            }
+                        }
+                    }
+
                     if (!$matchedModule) {
                         @file_put_contents(__DIR__ . '/../../scratch/auth_debug.log', "  -> NO MATCH: path not a portal module, allowing through\n", FILE_APPEND);
                     }
@@ -126,9 +131,24 @@ class AuthMiddleware {
             
             // Siswa cannot access admin portal/modules or guru portal
             if ($role_id == 3) {
-                $adminPaths = ['/portal', '/siakad', '/keuangan', '/tabungan', '/bos', '/dev', '/bk', '/guru'];
+                $adminPaths = ['/portal', '/siakad', '/keuangan', '/tabungan', '/bos', '/dev', '/bk', '/guru', '/admin', '/pkkm'];
                 foreach ($adminPaths as $p) {
                     if (strpos($path, $p) === 0) Helper::redirect('/siswa');
+                }
+            }
+
+            // Pengawas role (role_id == 5)
+            if ($role_id == 5) {
+                $allowedPengawasPaths = ['/pengawas', '/admin/pkkm/cetak-bukti', '/admin/pkkm/bukti', '/logout', '/auth/logout'];
+                $isAllowed = false;
+                foreach ($allowedPengawasPaths as $ap) {
+                    if (strpos($path, $ap) === 0) {
+                        $isAllowed = true;
+                        break;
+                    }
+                }
+                if (!$isAllowed) {
+                    Helper::redirect('/pengawas/pkkm');
                 }
             }
 
