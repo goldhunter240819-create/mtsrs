@@ -243,6 +243,19 @@ try {
         $logs[] = ["status" => "info", "msg" => "Akun Penilai 2 sudah ada (User: " . ($check2['username'] ?? 'penilai2') . ")."];
     }
 
+    // 15. Auto-Aktifkan akses PKKM ke akun admin di portal_access
+    $admins = $db->query("SELECT id, username, portal_access FROM users WHERE role_id = 1")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($admins as $adm) {
+        if (!empty($adm['portal_access'])) {
+            $acc = array_filter(array_map('trim', explode(',', $adm['portal_access'])));
+            if (!in_array('pkkm', $acc)) {
+                $acc[] = 'pkkm';
+                $db->prepare("UPDATE users SET portal_access = ? WHERE id = ?")->execute([implode(',', $acc), $adm['id']]);
+                $logs[] = ["status" => "ok", "msg" => "Akses modul PKKM diaktifkan pada akun Admin: " . $adm['username']];
+            }
+        }
+    }
+
 } catch (\Exception $e) {
     $success = false;
     $logs[] = ["status" => "error", "msg" => "Terjadi kesalahan: " . $e->getMessage()];
