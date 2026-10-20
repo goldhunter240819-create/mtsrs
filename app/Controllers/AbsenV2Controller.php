@@ -7,6 +7,61 @@ use App\Core\Branding;
 
 class AbsenV2Controller {
     
+    /**
+     * Memeriksa apakah user memiliki hak akses ke modul Absensi V2.
+     * Mengizinkan Superadmin, Developer, Kamad, serta Guru yang diaktifkan akses modul 'absen'-nya di portal-users.
+     */
+    public static function canAccess() {
+        if (!isset($_SESSION['user_id'])) {
+            return false;
+        }
+
+        $roleId = (int)($_SESSION['role_id'] ?? 0);
+
+        // Superadmin (1) & Developer (99)
+        if (in_array($roleId, [1, 99])) {
+            return true;
+        }
+
+        // Kamad
+        if (!empty($_SESSION['is_kamad'])) {
+            return true;
+        }
+
+        // Guru (role_id = 2) - Cek apakah guru diizinkan mengakses modul absen
+        if ($roleId === 2) {
+            $db = Database::connect('core');
+            $stmt = $db->prepare("SELECT portal_enabled, portal_access FROM users WHERE id = ?");
+            $stmt->execute([$_SESSION['user_id']]);
+            $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($user && $user['portal_enabled']) {
+                $accessStr = $user['portal_access'];
+                // NULL = Akses penuh ke semua modul
+                if (is_null($accessStr)) {
+                    return true;
+                }
+                $allowed = array_map('trim', explode(',', $accessStr));
+                if (in_array('absen', $allowed)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static function checkAccess() {
+        if (!self::canAccess()) {
+            if (!isset($_SESSION['user_id'])) {
+                header('Location: /login');
+            } else {
+                header('Location: /portal');
+            }
+            exit;
+        }
+    }
+    
     public static function dashboard() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: /login');
@@ -429,9 +484,7 @@ class AbsenV2Controller {
     // REKAP HARIAN SISWA
     // ─────────────────────────────────────────────────────────
     public static function rekapHarian() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $tanggal  = isset($_GET['tanggal']) ? $_GET['tanggal'] : date('Y-m-d');
         $kelas_id = isset($_GET['kelas_id']) ? $_GET['kelas_id'] : '';
@@ -544,7 +597,7 @@ class AbsenV2Controller {
     }
 
     public static function updateStatusSiswa() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
+        if (!self::canAccess()) {
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => 'Unauthorized']);
             exit;
@@ -589,9 +642,7 @@ class AbsenV2Controller {
     // CETAK ABSEN MANUAL
     // ─────────────────────────────────────────────────────────
     public static function cetakManual() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $kelas_id = isset($_GET['kelas_id']) ? $_GET['kelas_id'] : '';
         $bulan_name = date('F Y');
@@ -684,9 +735,7 @@ class AbsenV2Controller {
     // REKAP DETAIL (TIMELINE)
     // ─────────────────────────────────────────────────────────
     public static function rekapDetail() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $tanggal = isset($_GET['tanggal']) ? $_GET['tanggal'] : date('Y-m-d');
         $kelas_id = isset($_GET['kelas_id']) ? $_GET['kelas_id'] : '';
@@ -820,9 +869,7 @@ class AbsenV2Controller {
     }
 
     public static function rekapDetailCetak() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $tanggal = isset($_GET['tanggal']) ? $_GET['tanggal'] : date('Y-m-d');
         $kelas_id = isset($_GET['kelas_id']) ? $_GET['kelas_id'] : '';
@@ -1062,9 +1109,7 @@ class AbsenV2Controller {
     // CETAK BULANAN SISWA DETAIL (DAFTAR SCAN QR)
     // ─────────────────────────────────────────────────────────
     public static function cetakBulananSiswaDetail() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $bulan    = isset($_GET['bulan']) ? $_GET['bulan'] : date('m');
         $tahun    = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
@@ -1168,9 +1213,7 @@ class AbsenV2Controller {
     // CETAK TOP 3 SISWA (PENGHARGAAN)
     // ─────────────────────────────────────────────────────────
     public static function cetakTop3Siswa() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $bulan = isset($_GET['bulan']) ? $_GET['bulan'] : date('m');
         $tahun = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
@@ -1237,9 +1280,7 @@ class AbsenV2Controller {
     // REKAP BULANAN SISWA
     // ─────────────────────────────────────────────────────────
     public static function rekapBulanan() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $bulan    = isset($_GET['bulan']) ? $_GET['bulan'] : date('m');
         $tahun    = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
@@ -1341,9 +1382,7 @@ class AbsenV2Controller {
     // REKAP HARIAN GURU
     // ─────────────────────────────────────────────────────────
     public static function rekapHarianGuru() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $tanggal = isset($_GET['tanggal']) ? $_GET['tanggal'] : date('Y-m-d');
         $jabatan = isset($_GET['jabatan']) ? $_GET['jabatan'] : '';
@@ -1440,9 +1479,7 @@ class AbsenV2Controller {
     // REKAP BULANAN GURU
     // ─────────────────────────────────────────────────────────
     public static function rekapBulananGuru() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $bulan   = isset($_GET['bulan']) ? $_GET['bulan'] : date('m');
         $tahun   = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
@@ -1499,9 +1536,7 @@ class AbsenV2Controller {
     // CETAK BULANAN GURU PER GURU
     // ─────────────────────────────────────────────────────────
     public static function cetakBulananGuruDetail() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $bulan   = isset($_GET['bulan']) ? $_GET['bulan'] : date('m');
         $tahun   = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
@@ -1650,9 +1685,7 @@ class AbsenV2Controller {
     // INPUT MANUAL ABSEN GURU
     // ─────────────────────────────────────────────────────────
     public static function inputAbsenGuru() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $db_core   = Database::connect();
         $db_siakad = Database::connect();
@@ -1691,9 +1724,7 @@ class AbsenV2Controller {
     // SIMPAN ABSEN GURU MANUAL
     // ─────────────────────────────────────────────────────────
     public static function inputAbsenGuruSave() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $db_siakad = Database::connect();
         $tanggal   = $_POST['tanggal'] ?? date('Y-m-d');
@@ -1726,9 +1757,7 @@ class AbsenV2Controller {
     // KETIDAKHADIRAN SISWA
     // ─────────────────────────────────────────────────────────
     public static function ketidakhadiran() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $tanggal = isset($_GET['tanggal']) ? $_GET['tanggal'] : date('Y-m-d');
         
@@ -1765,9 +1794,7 @@ class AbsenV2Controller {
     }
 
     public static function statistikSiswa() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $start_date = $_GET['start_date'] ?? date('Y-m-01');
         $end_date   = $_GET['end_date'] ?? date('Y-m-t');
@@ -1829,9 +1856,7 @@ class AbsenV2Controller {
     }
 
     public static function statistikSiswaCetak() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $start_date = $_GET['start_date'] ?? date('Y-m-01');
         $end_date   = $_GET['end_date'] ?? date('Y-m-t');
@@ -1881,9 +1906,7 @@ class AbsenV2Controller {
     // PENGATURAN
     // ─────────────────────────────────────────────────────────
     public static function pengaturan() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            header('Location: /login'); exit;
-        }
+        self::checkAccess();
 
         $db_core = Database::connect();
         
@@ -1931,9 +1954,7 @@ class AbsenV2Controller {
     }
 
     public static function savePengaturan() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            echo "Unauthorized"; exit;
-        }
+        if (!self::canAccess()) { echo "Unauthorized"; exit; }
 
         $db_core = Database::connect();
         $db_siakad = Database::connect('siakad');
@@ -1980,9 +2001,7 @@ class AbsenV2Controller {
     }
 
     public static function pengaturanGuruCustom() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            echo "Unauthorized"; exit;
-        }
+        if (!self::canAccess()) { echo "Unauthorized"; exit; }
 
         $title = "Konfigurasi Jam Khusus Guru";
         $activeMenu = "absen-pengaturan-guru";
@@ -2002,9 +2021,7 @@ class AbsenV2Controller {
     }
 
     public static function savePengaturanGuruCustom() {
-        if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role_id'], [1, 99])) {
-            echo "Unauthorized"; exit;
-        }
+        if (!self::canAccess()) { echo "Unauthorized"; exit; }
 
         $db_core = Database::connect();
         $gurus = $_POST['gurus'] ?? [];

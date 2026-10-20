@@ -56,7 +56,7 @@
                     <div class="z-avatar-premium" style="width:36px;height:36px;color:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 4px 12px rgba(16,185,129,0.2);"><?php echo $initial; ?></div>
                     <div class="z-user-info">
                         <div class="name" style="font-weight:800;font-size:0.9rem;color:#0f172a;"><?php echo $nama; ?></div>
-                        <div class="role" style="font-size:0.75rem;color:#64748b;">Super Administrator</div>
+                        <div class="role" style="font-size:0.75rem;color:#64748b;"><?php echo !empty($_SESSION['role_name']) ? ucwords($_SESSION['role_name']) : 'Administrator'; ?></div>
                     </div>
                 </div>
             </div>
