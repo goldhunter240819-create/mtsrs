@@ -28,10 +28,10 @@
 
 <!-- Filter Box -->
 <div class="z-card" style="margin-bottom: 25px; padding: 20px;">
-    <form method="GET" action="<?= Helper::url('/kurikulum/syarat-pas') ?>" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+    <form id="filterForm" method="GET" action="<?= Helper::url('/kurikulum/syarat-pas') ?>" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
         <div style="flex: 1; min-width: 200px;">
             <label style="font-size: 0.8rem; font-weight: 700; color: var(--z-muted); margin-bottom: 8px; display: block;">Pilih Kelas</label>
-            <select name="kelas_id" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none; font-weight: 600;">
+            <select name="kelas_id" id="filterKelas" onchange="this.form.submit()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none; font-weight: 600; cursor: pointer;">
                 <?php foreach($kelas_list as $k): ?>
                     <option value="<?= $k['id'] ?>" <?= $kelas_id == $k['id'] ? 'selected' : '' ?>><?= htmlspecialchars($k['nama_kelas']) ?></option>
                 <?php endforeach; ?>
@@ -40,7 +40,7 @@
 
         <div style="flex: 1; min-width: 200px;">
             <label style="font-size: 0.8rem; font-weight: 700; color: var(--z-muted); margin-bottom: 8px; display: block;">Status Kelayakan</label>
-            <select name="status" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none; font-weight: 500;">
+            <select name="status" id="selectStatus" onchange="applyInstantFilter()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none; font-weight: 500; cursor: pointer;">
                 <option value="all" <?= $filter_status == 'all' ? 'selected' : '' ?>>-- Semua Siswa --</option>
                 <option value="layak" <?= $filter_status == 'layak' ? 'selected' : '' ?>>✅ Hanya yang Boleh Ikut PAS (100%)</option>
                 <option value="tidak_layak" <?= $filter_status == 'tidak_layak' ? 'selected' : '' ?>>⛔ Hanya yang Belum Boleh Ikut PAS (&lt; 100%)</option>
@@ -49,12 +49,15 @@
 
         <div style="flex: 1.5; min-width: 240px;">
             <label style="font-size: 0.8rem; font-weight: 700; color: var(--z-muted); margin-bottom: 8px; display: block;">Cari Siswa</label>
-            <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="Ketik nama atau NIS siswa..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
+            <div style="position: relative;">
+                <input type="text" name="q" id="searchSiswaInput" value="<?= htmlspecialchars($search) ?>" oninput="applyInstantFilter()" placeholder="Ketik nama atau NIS siswa..." style="width: 100%; padding: 10px 35px 10px 12px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
+                <i data-lucide="search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--z-muted); pointer-events: none;"></i>
+            </div>
         </div>
 
         <div>
             <button type="submit" class="btn btn-primary" style="padding: 10px 22px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 8px; height: 42px;">
-                <i data-lucide="filter" style="width: 16px; height: 16px;"></i> Tampilkan Data
+                <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i> Muat Ulang
             </button>
         </div>
     </form>
@@ -152,7 +155,7 @@
                 <i data-lucide="clipboard-check" style="color: #0284c7; width: 20px; height: 20px;"></i>
                 Daftar Verifikasi Kelayakan Peserta PAS
             </h3>
-            <span style="background: #f1f5f9; color: #475569; font-size: 0.8rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">
+            <span id="counterSiswa" style="background: #f1f5f9; color: #475569; font-size: 0.8rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">
                 <?= count($display_siswa) ?> Siswa Ditampilkan
             </span>
         </div>
@@ -189,7 +192,7 @@
                     <?php $no = 1; foreach ($display_siswa as $s): 
                         $statusClass = $s['is_layak'] ? 'row-layak' : 'row-tidak-layak';
                     ?>
-                    <tr class="student-row <?= $statusClass ?>" data-status="<?= $s['is_layak'] ? 'layak' : 'tidak_layak' ?>" style="<?= !$s['is_layak'] ? 'background: #fffcfc;' : '' ?>">
+                    <tr class="student-row <?= $statusClass ?>" data-status="<?= $s['is_layak'] ? 'layak' : 'tidak_layak' ?>" data-search="<?= htmlspecialchars(strtolower($s['nama'] . ' ' . ($s['nis'] ?? ''))) ?>" style="<?= !$s['is_layak'] ? 'background: #fffcfc;' : '' ?>">
                         <td style="text-align: center; font-weight: 600; color: var(--z-muted);"><?= $no++ ?></td>
                         <td style="text-align: center; font-family: monospace; font-weight: 700; color: var(--z-muted);"><?= htmlspecialchars($s['nis']) ?></td>
                         <td>
@@ -343,23 +346,57 @@
         lucide.createIcons();
     });
 
-    function filterTableQuick(mode) {
+    function applyInstantFilter() {
+        const select = document.getElementById('selectStatus');
+        const statusVal = select ? select.value : 'all';
+        const searchInput = document.getElementById('searchSiswaInput');
+        const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+        // Update quick filter buttons active state
         document.querySelectorAll('.quick-filter').forEach(b => b.classList.remove('active'));
-        if (mode === 'all') document.getElementById('btn-q-all').classList.add('active');
-        if (mode === 'layak') document.getElementById('btn-q-layak').classList.add('active');
-        if (mode === 'tidak_layak') document.getElementById('btn-q-tidak').classList.add('active');
+        if (statusVal === 'all') {
+            const b = document.getElementById('btn-q-all'); if (b) b.classList.add('active');
+        } else if (statusVal === 'layak') {
+            const b = document.getElementById('btn-q-layak'); if (b) b.classList.add('active');
+        } else if (statusVal === 'tidak_layak') {
+            const b = document.getElementById('btn-q-tidak'); if (b) b.classList.add('active');
+        }
 
         const rows = document.querySelectorAll('.student-row');
+        let visibleCount = 0;
+
         rows.forEach(r => {
-            const st = r.getAttribute('data-status');
-            if (mode === 'all') {
+            const rowStatus = r.getAttribute('data-status');
+            const rowSearch = (r.getAttribute('data-search') || r.textContent).toLowerCase();
+
+            let matchStatus = (statusVal === 'all' || rowStatus === statusVal);
+            let matchSearch = (searchVal === '' || rowSearch.includes(searchVal));
+
+            if (matchStatus && matchSearch) {
                 r.style.display = '';
-            } else if (mode === 'layak') {
-                r.style.display = (st === 'layak') ? '' : 'none';
-            } else if (mode === 'tidak_layak') {
-                r.style.display = (st === 'tidak_layak') ? '' : 'none';
+                visibleCount++;
+            } else {
+                r.style.display = 'none';
             }
         });
+
+        const counter = document.getElementById('counterSiswa');
+        if (counter) {
+            counter.textContent = visibleCount + ' Siswa Ditampilkan';
+        }
+
+        const emptyRow = document.getElementById('rowEmptyFiltered');
+        if (emptyRow) {
+            emptyRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+        }
+    }
+
+    function filterTableQuick(mode) {
+        const select = document.getElementById('selectStatus');
+        if (select) {
+            select.value = mode;
+        }
+        applyInstantFilter();
     }
 
     function showStudentDetail(siswa) {
