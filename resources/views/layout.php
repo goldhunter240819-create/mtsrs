@@ -294,7 +294,7 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
                     </a>
                     
                     <!-- Dropdown: Akademik & Monitoring -->
-                    <?php $isOpenMonitoring = in_array($activeMenu, ['kurikulum_jadwal', 'kurikulum_kkm', 'kurikulum_rekap_ketuntasan', 'kurikulum_monitoring_jurnal', 'kurikulum_monitoring_nilai']); ?>
+                    <?php $isOpenMonitoring = in_array($activeMenu, ['kurikulum_jadwal', 'kurikulum_kkm', 'kurikulum_rekap_ketuntasan', 'kurikulum_monitoring_jurnal', 'kurikulum_monitoring_nilai', 'kurikulum_syarat_pas']); ?>
                     <div class="z-nav-dropdown <?php echo $isOpenMonitoring ? 'open' : ''; ?>">
                         <div class="z-nav-dropdown-toggle <?php echo $isOpenMonitoring ? 'active' : ''; ?>" onclick="toggleDropdown(this)">
                             <div class="dt-left"><i data-lucide="activity"></i> Akademik & Monitoring</div>
@@ -304,6 +304,7 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
                             <a href="<?php echo Helper::url('/kurikulum/jadwal-pelajaran'); ?>" class="z-nav-item <?php echo ($activeMenu === 'kurikulum_jadwal') ? 'active' : ''; ?>">Monitoring Jadwal</a>
                             <a href="<?php echo Helper::url('/kurikulum/monitoring-jurnal'); ?>" class="z-nav-item <?php echo ($activeMenu === 'kurikulum_monitoring_jurnal') ? 'active' : ''; ?>">Monitoring Jurnal</a>
                             <a href="<?php echo Helper::url('/kurikulum/monitoring-nilai'); ?>" class="z-nav-item <?php echo ($activeMenu === 'kurikulum_monitoring_nilai') ? 'active' : ''; ?>">Monitoring Nilai</a>
+                            <a href="<?php echo Helper::url('/kurikulum/syarat-pas'); ?>" class="z-nav-item <?php echo ($activeMenu === 'kurikulum_syarat_pas') ? 'active' : ''; ?>">Kelayakan Ikut PAS</a>
                             <a href="<?php echo Helper::url('/kurikulum/monitoring-kkm'); ?>" class="z-nav-item <?php echo ($activeMenu === 'kurikulum_kkm') ? 'active' : ''; ?>">Pengaturan KKM</a>
                             <a href="<?php echo Helper::url('/kurikulum/rekap-ketuntasan'); ?>" class="z-nav-item <?php echo ($activeMenu === 'kurikulum_rekap_ketuntasan') ? 'active' : ''; ?>">Rekap Ketuntasan</a>
                         </div>

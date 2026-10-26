@@ -336,6 +336,9 @@ $router->add('POST', '/kurikulum/monitoring-nilai/simpan-bobot', [\App\Controlle
 $router->add('GET', '/kurikulum/monitoring-nilai/detail', [\App\Controllers\KurikulumController::class, 'monitoringNilaiDetail']);
 $router->add('GET', '/kurikulum/monitoring-nilai/global', [\App\Controllers\KurikulumController::class, 'monitoringNilaiGlobal']);
 $router->add('GET', '/kurikulum/monitoring-nilai/cetak', [\App\Controllers\KurikulumController::class, 'monitoringNilaiCetak']);
+$router->add('GET', '/kurikulum/syarat-pas', [\App\Controllers\KurikulumController::class, 'syaratPas']);
+$router->add('GET', '/kurikulum/syarat-pas/cetak', [\App\Controllers\KurikulumController::class, 'syaratPasCetak']);
+$router->add('GET', '/kurikulum/syarat-pas/cetak-tagihan', [\App\Controllers\KurikulumController::class, 'syaratPasCetakTagihan']);
 $router->add('GET', '/kurikulum/supervisi-penilaian', [\App\Controllers\KurikulumController::class, 'supervisiPenilaian']);
 $router->add('POST', '/kurikulum/supervisi-penilaian/save', [\App\Controllers\KurikulumController::class, 'supervisiPenilaianSave']);
 $router->add('GET', '/kurikulum/jadwal-pelajaran', [\App\Controllers\KurikulumController::class, 'jadwalPelajaran']);

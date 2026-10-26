@@ -1248,4 +1248,279 @@ public function monitoringNilai() {
 
         require __DIR__ . '/../../resources/views/kurikulum/monitoring_nilai_global.php';
     }
+
+    private static function getKelayakanPasData($db, $tahun_ajaran_id, $semester, $kelas_id) {
+        if (!$kelas_id) return null;
+
+        // Ambil info Kelas
+        $stmt_k = $db->prepare("SELECT * FROM kelas WHERE id = ?");
+        $stmt_k->execute([$kelas_id]);
+        $kelas = $stmt_k->fetch(\PDO::FETCH_ASSOC);
+        if (!$kelas) return null;
+
+        // Ambil Wali Kelas
+        $activeYear = AcademicYear::current();
+        $stmt_wali = $db->prepare("SELECT g.nama FROM guru_tugas gt JOIN guru g ON gt.guru_id = g.id WHERE gt.tugas = 'Wali Kelas' AND gt.keterangan = ? AND gt.tahun_ajaran = ?");
+        $stmt_wali->execute(['Kelas ' . $kelas['nama_kelas'], $activeYear['name'] ?? $tahun_ajaran_id]);
+        $kelas['wali_kelas'] = $stmt_wali->fetchColumn() ?: '-';
+
+        // Ambil Siswa aktif
+        $stmt_s = $db->prepare("SELECT id, nis, nama, jenis_kelamin FROM siswa WHERE kelas_id = ? AND status = 'Aktif' ORDER BY nama ASC");
+        $stmt_s->execute([$kelas_id]);
+        $siswa_list = $stmt_s->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Ambil Mata Pelajaran dan Guru Pengampu dari jadwal_pelajaran
+        $stmt_m = $db->prepare("
+            SELECT DISTINCT j.mapel_id, m.nama_mapel, g.nama as nama_guru
+            FROM jadwal_pelajaran j
+            JOIN mapel m ON m.id = j.mapel_id
+            LEFT JOIN guru g ON g.id = j.guru_id
+            WHERE j.kelas_id = ?
+            ORDER BY m.nama_mapel ASC
+        ");
+        $stmt_m->execute([$kelas_id]);
+        $mapel_list = $stmt_m->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Ambil komponen evaluasi PH dan PTS yang ada di nilai_harian untuk kelas ini
+        $stmt_ev = $db->prepare("
+            SELECT mapel_id, jenis_evaluasi
+            FROM nilai_harian
+            WHERE kelas_id = ? AND tahun_ajaran_id = ? AND semester = ?
+              AND (jenis_evaluasi LIKE 'PH %' OR jenis_evaluasi = 'PTS')
+            GROUP BY mapel_id, jenis_evaluasi
+            ORDER BY mapel_id ASC, (CASE WHEN jenis_evaluasi LIKE 'PH %' THEN CAST(SUBSTRING(jenis_evaluasi, 4) AS UNSIGNED) WHEN jenis_evaluasi = 'PTS' THEN 998 ELSE 1000 END) ASC
+        ");
+        $stmt_ev->execute([$kelas_id, $tahun_ajaran_id, $semester]);
+        $eval_raw = $stmt_ev->fetchAll(\PDO::FETCH_ASSOC);
+
+        $mapel_eval = [];
+        foreach ($eval_raw as $er) {
+            $mapel_eval[$er['mapel_id']][] = $er['jenis_evaluasi'];
+        }
+
+        // Tentukan target evaluasi per mapel (minimal PH 1 dan PTS, serta seluruh PH yang pernah diinput)
+        $target_evaluasi = [];
+        foreach ($mapel_list as $mp) {
+            $m_id = $mp['mapel_id'];
+            $items = $mapel_eval[$m_id] ?? [];
+            if (empty($items)) {
+                $items = ['PH 1', 'PTS'];
+            } else {
+                if (!in_array('PTS', $items)) {
+                    $items[] = 'PTS';
+                }
+            }
+            $target_evaluasi[$m_id] = $items;
+        }
+
+        // Ambil semua nilai_harian siswa di kelas ini
+        $stmt_nilai = $db->prepare("
+            SELECT siswa_id, mapel_id, jenis_evaluasi, nilai
+            FROM nilai_harian
+            WHERE kelas_id = ? AND tahun_ajaran_id = ? AND semester = ?
+              AND (jenis_evaluasi LIKE 'PH %' OR jenis_evaluasi = 'PTS')
+        ");
+        $stmt_nilai->execute([$kelas_id, $tahun_ajaran_id, $semester]);
+        $nilai_raw = $stmt_nilai->fetchAll(\PDO::FETCH_ASSOC);
+
+        $nilai_map = [];
+        foreach ($nilai_raw as $n) {
+            $nilai_map[$n['siswa_id']][$n['mapel_id']][$n['jenis_evaluasi']] = $n['nilai'];
+        }
+
+        // Hitung status kelayakan tiap siswa
+        $siswa_data = [];
+        $stat = [
+            'total_siswa' => count($siswa_list),
+            'layak' => 0,
+            'tidak_layak' => 0,
+            'total_tagihan_global' => 0,
+            'total_terisi_global' => 0
+        ];
+
+        foreach ($siswa_list as $s) {
+            $s_id = $s['id'];
+            $total_tagihan = 0;
+            $total_terisi = 0;
+            $tagihan_kosong = [];
+            $rincian_mapel = [];
+
+            foreach ($mapel_list as $mp) {
+                $m_id = $mp['mapel_id'];
+                $evals = $target_evaluasi[$m_id] ?? ['PH 1', 'PTS'];
+
+                $items = [];
+                foreach ($evals as $ev) {
+                    $total_tagihan++;
+                    $val = $nilai_map[$s_id][$m_id][$ev] ?? null;
+                    $is_filled = ($val !== null && $val !== '' && is_numeric($val));
+
+                    if ($is_filled) {
+                        $total_terisi++;
+                        $items[] = [
+                            'jenis' => $ev,
+                            'nilai' => $val,
+                            'is_filled' => true
+                        ];
+                    } else {
+                        $items[] = [
+                            'jenis' => $ev,
+                            'nilai' => null,
+                            'is_filled' => false
+                        ];
+                        $tagihan_kosong[] = [
+                            'mapel_id' => $m_id,
+                            'mapel' => $mp['nama_mapel'],
+                            'guru' => $mp['nama_guru'] ?? '-',
+                            'jenis' => $ev
+                        ];
+                    }
+                }
+
+                $rincian_mapel[] = [
+                    'mapel_id' => $m_id,
+                    'nama_mapel' => $mp['nama_mapel'],
+                    'nama_guru' => $mp['nama_guru'] ?? '-',
+                    'evaluasi' => $items
+                ];
+            }
+
+            $persen = $total_tagihan > 0 ? round(($total_terisi / $total_tagihan) * 100) : 0;
+            if ($persen > 100) $persen = 100;
+            $is_layak = ($total_tagihan > 0 && count($tagihan_kosong) === 0);
+
+            if ($is_layak) {
+                $stat['layak']++;
+            } else {
+                $stat['tidak_layak']++;
+            }
+            $stat['total_tagihan_global'] += $total_tagihan;
+            $stat['total_terisi_global'] += $total_terisi;
+
+            $siswa_data[] = [
+                'id' => $s['id'],
+                'nis' => $s['nis'] ?? '-',
+                'nama' => $s['nama'],
+                'jk' => $s['jenis_kelamin'] ?? '-',
+                'total_tagihan' => $total_tagihan,
+                'total_terisi' => $total_terisi,
+                'total_kosong' => count($tagihan_kosong),
+                'persen' => $persen,
+                'is_layak' => $is_layak,
+                'tagihan_kosong' => $tagihan_kosong,
+                'rincian_mapel' => $rincian_mapel
+            ];
+        }
+
+        $stat['persen_kesiapan_kelas'] = ($stat['total_siswa'] > 0) ? round(($stat['layak'] / $stat['total_siswa']) * 100) : 0;
+
+        return [
+            'kelas' => $kelas,
+            'mapel_list' => $mapel_list,
+            'target_evaluasi' => $target_evaluasi,
+            'siswa_data' => $siswa_data,
+            'stat' => $stat
+        ];
+    }
+
+    public function syaratPas() {
+        self::checkAccess();
+        $db = Database::connect();
+        $institusi = Branding::getInstitusi();
+        $activeYear = AcademicYear::current();
+        
+        $tahun_ajaran_id = $institusi['tahun_ajaran_id'] ?? $activeYear['id'];
+        $semester = $institusi['semester'] ?? 'Ganjil';
+
+        $kelas_list = $db->query("SELECT * FROM kelas ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll(\PDO::FETCH_ASSOC);
+        $kelas_id = $_GET['kelas_id'] ?? ($kelas_list[0]['id'] ?? null);
+        $filter_status = $_GET['status'] ?? 'all';
+        $search = trim($_GET['q'] ?? '');
+
+        $pasData = null;
+        if ($kelas_id) {
+            $pasData = self::getKelayakanPasData($db, $tahun_ajaran_id, $semester, $kelas_id);
+        }
+
+        // Terapkan filter ke tampilan
+        $display_siswa = [];
+        if ($pasData) {
+            foreach ($pasData['siswa_data'] as $s) {
+                if ($filter_status === 'layak' && !$s['is_layak']) continue;
+                if ($filter_status === 'tidak_layak' && $s['is_layak']) continue;
+                if (!empty($search)) {
+                    $term = strtolower($search);
+                    if (strpos(strtolower($s['nama']), $term) === false && strpos(strtolower($s['nis']), $term) === false) {
+                        continue;
+                    }
+                }
+                $display_siswa[] = $s;
+            }
+        }
+
+        $title = "Verifikasi Syarat Mengikuti PAS";
+        $activeMenu = "kurikulum_syarat_pas";
+
+        ob_start();
+        include __DIR__ . '/../../resources/views/kurikulum/syarat_pas.php';
+        $content = ob_get_clean();
+        include __DIR__ . '/../../resources/views/layout.php';
+    }
+
+    public function syaratPasCetak() {
+        self::checkAccess();
+        $db = Database::connect();
+        $institusi = Branding::getInstitusi();
+        $activeYear = AcademicYear::current();
+        
+        $tahun_ajaran_id = $institusi['tahun_ajaran_id'] ?? $activeYear['id'];
+        $semester = $institusi['semester'] ?? 'Ganjil';
+
+        $kelas_id = $_GET['kelas_id'] ?? 0;
+        if (!$kelas_id) {
+            die("Pilih kelas terlebih dahulu.");
+        }
+
+        $pasData = self::getKelayakanPasData($db, $tahun_ajaran_id, $semester, $kelas_id);
+        if (!$pasData) {
+            die("Data kelas tidak ditemukan.");
+        }
+
+        require __DIR__ . '/../../resources/views/kurikulum/syarat_pas_cetak.php';
+    }
+
+    public function syaratPasCetakTagihan() {
+        self::checkAccess();
+        $db = Database::connect();
+        $institusi = Branding::getInstitusi();
+        $activeYear = AcademicYear::current();
+        
+        $tahun_ajaran_id = $institusi['tahun_ajaran_id'] ?? $activeYear['id'];
+        $semester = $institusi['semester'] ?? 'Ganjil';
+
+        $kelas_id = $_GET['kelas_id'] ?? 0;
+        $siswa_id = $_GET['siswa_id'] ?? null;
+
+        if (!$kelas_id) {
+            die("Pilih kelas terlebih dahulu.");
+        }
+
+        $pasData = self::getKelayakanPasData($db, $tahun_ajaran_id, $semester, $kelas_id);
+        if (!$pasData) {
+            die("Data kelas tidak ditemukan.");
+        }
+
+        // Filter hanya siswa yang TIDAK LAYAK (< 100%), atau siswa_id tertentu
+        $tagihan_siswa = [];
+        foreach ($pasData['siswa_data'] as $s) {
+            if ($siswa_id && $s['id'] != $siswa_id) {
+                continue;
+            }
+            if (!$s['is_layak']) {
+                $tagihan_siswa[] = $s;
+            }
+        }
+
+        require __DIR__ . '/../../resources/views/kurikulum/syarat_pas_cetak_tagihan.php';
+    }
 }

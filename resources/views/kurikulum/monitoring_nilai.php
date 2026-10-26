@@ -4,9 +4,14 @@
             <h1 class="mph-title"><i data-lucide="bar-chart-2" style="color: #bfdbfe;"></i> Monitoring Nilai Mapel</h1>
             <p class="mph-subtitle">Pantau progres pengisian nilai oleh guru untuk setiap mata pelajaran.</p>
         </div>
-        <a href="<?= \App\Core\Helper::url('/kurikulum/monitoring-nilai/global') ?>" target="_blank" class="btn" style="color: white; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.1);">
-            <i data-lucide="globe" style="color: white;"></i> Detail Global
-        </a>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <a href="<?= \App\Core\Helper::url('/kurikulum/syarat-pas') ?>" class="btn" style="color: white; border: 1px solid rgba(255,255,255,0.4); background: rgba(16, 185, 129, 0.25); display: inline-flex; align-items: center; gap: 8px;">
+                <i data-lucide="shield-check" style="color: #6ee7b7;"></i> Kelayakan Ikut PAS (100%)
+            </a>
+            <a href="<?= \App\Core\Helper::url('/kurikulum/monitoring-nilai/global') ?>" target="_blank" class="btn" style="color: white; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); display: inline-flex; align-items: center; gap: 8px;">
+                <i data-lucide="globe" style="color: white;"></i> Detail Global
+            </a>
+        </div>
     </div>
 </div>
 

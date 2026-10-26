@@ -175,9 +175,14 @@
             <h1><i class="fa-solid fa-globe"></i> Detail Global Monitoring Nilai</h1>
             <p>Tahun Ajaran <?= htmlspecialchars($activeYear['name'] ?? '-') ?> | Semester <?= htmlspecialchars($semester) ?></p>
         </div>
-        <button class="btn-print" onclick="window.close()" style="background: rgba(239, 68, 68, 0.9); border: 1px solid rgba(255, 255, 255, 0.4);">
-            <i class="fa-solid fa-xmark"></i> Tutup Tab
-        </button>
+        <div style="display: flex; gap: 10px;">
+            <a href="/kurikulum/syarat-pas" target="_blank" class="btn-print" style="background: rgba(16, 185, 129, 0.9); border: 1px solid rgba(255, 255, 255, 0.4);">
+                <i class="fa-solid fa-shield-halved"></i> Kelayakan Peserta PAS
+            </a>
+            <button class="btn-print" onclick="window.close()" style="background: rgba(239, 68, 68, 0.9); border: 1px solid rgba(255, 255, 255, 0.4);">
+                <i class="fa-solid fa-xmark"></i> Tutup Tab
+            </button>
+        </div>
     </div>
 
     <?php 
@@ -196,8 +201,11 @@
         if (empty($siswas)) continue; // Skip jika tidak ada siswa
     ?>
     <div class="section">
-        <div class="section-header">
-            Kelas: <?= htmlspecialchars($kls['nama_kelas']) ?>
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Kelas: <?= htmlspecialchars($kls['nama_kelas']) ?></span>
+            <a href="/kurikulum/syarat-pas?kelas_id=<?= $kls_id ?>" target="_blank" style="font-size: 13px; color: #2563eb; text-decoration: none; font-weight: 600;">
+                <i class="fa-solid fa-shield-halved"></i> Verifikasi Syarat PAS Kelas Ini &rarr;
+            </a>
         </div>
         
         <div class="table-wrapper">
