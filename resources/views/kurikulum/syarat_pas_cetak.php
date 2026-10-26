@@ -10,11 +10,12 @@
     <style>
         @page {
             size: 21.59cm 33.02cm portrait; /* F4 Folio portrait */
-            margin: 1.2cm 1cm 1cm 1cm;
+            margin: 8mm 10mm 6mm 10mm;
         }
+        * { box-sizing: border-box; }
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 12px;
+            font-size: 11px;
             color: #000;
             background: #fff;
             margin: 0;
@@ -31,73 +32,74 @@
         .kop-surat {
             display: flex;
             align-items: center;
-            border-bottom: 3px double #000;
-            padding-bottom: 6px;
-            margin-bottom: 12px;
+            border-bottom: 2px double #000;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
         }
         .kop-surat .logo {
-            width: 65px;
+            width: 55px;
             height: auto;
-            margin-right: 15px;
+            margin-right: 12px;
         }
         .kop-surat .kop-text {
             flex: 1;
             text-align: center;
-            padding-right: 80px;
+            padding-right: 67px;
         }
         .kop-surat .kop-text h2 {
             margin: 0;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
         .kop-surat .kop-text h1 {
-            margin: 2px 0 0 0;
-            font-size: 20px;
+            margin: 1px 0 0 0;
+            font-size: 18px;
             font-weight: bold;
             text-transform: uppercase;
         }
         .kop-surat .kop-text p {
-            margin: 3px 0 0 0;
-            font-size: 11px;
-            line-height: 1.3;
+            margin: 2px 0 0 0;
+            font-size: 9.5px;
+            line-height: 1.25;
         }
 
         .title {
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             text-transform: uppercase;
-            margin: 10px 0 3px 0;
+            margin: 6px 0 2px 0;
             text-decoration: underline;
         }
         .subtitle {
             text-align: center;
-            font-size: 11px;
-            margin-bottom: 15px;
+            font-size: 10px;
+            margin-bottom: 8px;
             font-style: italic;
         }
 
         .info-table {
             width: 100%;
-            margin-bottom: 10px;
-            font-size: 11px;
+            margin-bottom: 8px;
+            font-size: 10.5px;
+            line-height: 1.25;
         }
         .info-table td {
-            padding: 2px 4px;
+            padding: 1.5px 3px;
             vertical-align: top;
         }
 
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
-            font-size: 11px;
+            margin-bottom: 10px;
+            font-size: 10px;
         }
         .data-table th, .data-table td {
             border: 1px solid #000;
-            padding: 4px 6px;
+            padding: 3px 5px;
             vertical-align: middle;
         }
         .data-table th {
@@ -117,20 +119,20 @@
 
         .summary-box {
             display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
-            font-size: 11px;
+            gap: 15px;
+            margin-bottom: 10px;
+            font-size: 10px;
             border: 1px dashed #666;
-            padding: 8px 12px;
+            padding: 5px 10px;
             background: #fafafa;
         }
 
         .signature-section {
             width: 100%;
-            margin-top: 25px;
+            margin-top: 15px;
             display: flex;
             justify-content: space-between;
-            font-size: 11.5px;
+            font-size: 10.5px;
             page-break-inside: avoid;
         }
         .signature-box {
@@ -138,7 +140,7 @@
             text-align: center;
         }
         .signature-space {
-            height: 60px;
+            height: 45px;
         }
 
         @media print {
