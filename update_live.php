@@ -28,8 +28,12 @@ $gitOutput = [];
 $isGitSuccess = false;
 
 // 1. Coba eksekusi Git Pull jika server mengizinkan exec
+if (function_exists('opcache_reset')) {
+    @opcache_reset();
+}
+
 if (function_exists('exec')) {
-    @exec('git pull origin main 2>&1', $gitOutput, $gitRet);
+    @exec('git -c safe.directory=* pull origin main 2>&1', $gitOutput, $gitRet);
     if ($gitRet === 0) {
         $isGitSuccess = true;
         $logs[] = ['status' => 'ok', 'msg' => 'Git Pull berhasil: ' . (implode(' | ', $gitOutput) ?: 'Up-to-date')];
