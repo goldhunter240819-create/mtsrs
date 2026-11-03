@@ -732,5 +732,38 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
 
     lucide.createIcons();
 </script>
+
+<?php if (!empty($_SESSION['flash_error'])): ?>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof Swal !== "undefined") {
+            Swal.fire({
+                icon: "error",
+                title: "Gagal",
+                text: "<?= addslashes($_SESSION['flash_error']); ?>"
+            });
+        }
+    });
+</script>
+<?php unset($_SESSION['flash_error']); ?>
+<?php endif; ?>
+
+<?php if (!empty($_SESSION['flash_success'])): ?>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof Swal !== "undefined") {
+            Swal.fire({
+                icon: "success",
+                title: "Berhasil",
+                text: "<?= addslashes($_SESSION['flash_success']); ?>",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    });
+</script>
+<?php unset($_SESSION['flash_success']); ?>
+<?php endif; ?>
+
 </body>
 </html>

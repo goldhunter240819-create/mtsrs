@@ -87,12 +87,16 @@ $activeMenu = $activeMenu ?? 'manajemen_berkas_pribadi';
                     </td>
                     <td style="text-align: center;">
                         <div style="display: flex; gap: 8px; justify-content: center;">
-                            <a href="<?= \App\Core\Helper::url('/manajemen-berkas/view-pdf/' . $d['file_nama']) ?>" class="btn btn-primary btn-sm" title="Lihat Berkas" style="display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; font-weight: 600; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);" target="_blank">
-                                <i data-lucide="eye" style="width:14px; height:14px;"></i> Lihat
-                            </a>
-                            <a href="<?= \App\Core\Helper::url('/manajemen-berkas/download/pribadi/' . $d['file_nama']) ?>" class="btn btn-sm" title="Download Berkas" style="display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; font-weight: 600; color: #10b981; background: #ecfdf5; border: 1px solid #a7f3d0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);">
-                                <i data-lucide="download" style="width:14px; height:14px;"></i> Unduh
-                            </a>
+                            <?php if (!empty($d['file_nama'])): ?>
+                                <a href="<?= \App\Core\Helper::url('/manajemen-berkas/view-pdf/' . rawurlencode($d['file_nama'])) ?>" class="btn btn-primary btn-sm" title="Lihat Berkas" style="display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; font-weight: 600; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);" target="_blank">
+                                    <i data-lucide="eye" style="width:14px; height:14px;"></i> Lihat
+                                </a>
+                                <a href="<?= \App\Core\Helper::url('/manajemen-berkas/download/pribadi/' . rawurlencode($d['file_nama'])) ?>" class="btn btn-sm" title="Download Berkas" style="display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; font-weight: 600; color: #10b981; background: #ecfdf5; border: 1px solid #a7f3d0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);">
+                                    <i data-lucide="download" style="width:14px; height:14px;"></i> Unduh
+                                </a>
+                            <?php else: ?>
+                                <span class="text-muted" style="font-size: 0.75rem; font-style: italic;">Tidak ada file</span>
+                            <?php endif; ?>
                         </div>
                     </td>
                 </tr>

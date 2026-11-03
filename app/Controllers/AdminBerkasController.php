@@ -90,13 +90,36 @@ class AdminBerkasController {
         include __DIR__ . '/../../resources/views/layout.php';
     }
 
+    private static function findBerkasFile($filename) {
+        $filename = basename(rawurldecode($filename));
+        if (empty($filename)) return null;
+
+        $candidates = [
+            __DIR__ . '/../../public/uploads/berkas/' . $filename,
+            __DIR__ . '/../../uploads/berkas/' . $filename,
+            __DIR__ . '/../../public/uploads/perangkat/' . $filename,
+            __DIR__ . '/../../uploads/perangkat/' . $filename,
+            __DIR__ . '/../../public/uploads/' . $filename,
+            __DIR__ . '/../../uploads/' . $filename,
+            __DIR__ . '/../../storage/berkas/' . $filename,
+            __DIR__ . '/../../storage/' . $filename,
+            ($_SERVER['DOCUMENT_ROOT'] ?? '') . '/public/uploads/berkas/' . $filename,
+            ($_SERVER['DOCUMENT_ROOT'] ?? '') . '/uploads/berkas/' . $filename,
+        ];
+
+        foreach ($candidates as $path) {
+            if (!empty($path) && file_exists($path) && !is_dir($path)) {
+                return $path;
+            }
+        }
+        return null;
+    }
+
     public function download($type, $filename) {
         $this->checkAccess();
-        // Prevent path traversal
-        $filename = basename($filename);
-        $filepath = __DIR__ . '/../../public/uploads/berkas/' . $filename;
+        $filepath = self::findBerkasFile($filename);
         
-        if (file_exists($filepath)) {
+        if ($filepath) {
             header('Content-Description: File Transfer');
             header('Content-Type: application/octet-stream');
             header('Content-Disposition: attachment; filename="'.basename($filepath).'"');
@@ -107,20 +130,48 @@ class AdminBerkasController {
             readfile($filepath);
             exit;
         } else {
-            $_SESSION['flash_error'] = 'File tidak ditemukan.';
-            Helper::redirect('/manajemen-berkas?tab=' . $type);
+            $_SESSION['flash_error'] = 'File fisik "' . htmlspecialchars(basename($filename)) . '" tidak ditemukan di disk server.';
+            $redirectTarget = ($type === 'perangkat') ? '/manajemen-berkas/perangkat' : '/manajemen-berkas/pribadi';
+            Helper::redirect($redirectTarget);
+            exit;
         }
     }
 
     public function viewPdf($filename) {
         $this->checkAccess();
-        $filename = basename($filename);
-        $filepath = __DIR__ . '/../../public/uploads/berkas/' . $filename;
+        $filepath = self::findBerkasFile($filename);
         
-        if (!file_exists($filepath)) {
-            $_SESSION['flash_error'] = 'File tidak ditemukan.';
-            Helper::redirect('/manajemen-berkas');
-            return;
+        if (!$filepath) {
+            http_response_code(404);
+            echo "<!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='utf-8'>
+                <title>Berkas Tidak Ditemukan</title>
+                <meta name='viewport' content='width=device-width, initial-scale=1'>
+                <link href='https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap' rel='stylesheet'>
+                <style>
+                    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; color: #1e293b; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+                    .card { background: white; padding: 32px; border-radius: 18px; max-width: 480px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+                    .icon { width: 56px; height: 56px; border-radius: 14px; background: #fef2f2; color: #dc2626; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px; }
+                    h2 { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0; }
+                    p { font-size: 0.88rem; color: #64748b; line-height: 1.5; margin: 0 0 20px 0; }
+                    .file-tag { background: #f1f5f9; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-family: monospace; color: #0f172a; display: inline-block; margin-bottom: 16px; border: 1px solid #e2e8f0; }
+                    .btn { display: inline-block; padding: 10px 22px; background: #2563eb; color: white; border-radius: 10px; font-weight: 700; font-size: 0.85rem; text-decoration: none; transition: 0.2s; cursor: pointer; border: none; }
+                    .btn:hover { background: #1d4ed8; }
+                </style>
+            </head>
+            <body>
+                <div class='card'>
+                    <div class='icon'>📁</div>
+                    <h2>File Berkas Tidak Ditemukan di Server</h2>
+                    <div class='file-tag'>" . htmlspecialchars(basename($filename)) . "</div>
+                    <p>File fisik arsip perangkat ini tidak ditemukan di direktori penyimpanan disk server. Kemungkinan berkas belum diunggah secara lengkap oleh guru yang bersangkutan atau terhapus saat sinkronisasi sebelumnya.</p>
+                    <button onclick='window.close();' class='btn'>Tutup Tab</button>
+                </div>
+            </body>
+            </html>";
+            exit;
         }
 
         $ext = strtolower(pathinfo($filepath, PATHINFO_EXTENSION));
@@ -156,7 +207,7 @@ class AdminBerkasController {
             readfile($filepath);
             exit;
         } else {
-            $mime = mime_content_type($filepath);
+            $mime = function_exists('mime_content_type') ? @mime_content_type($filepath) : 'application/octet-stream';
             header('Content-Type: ' . $mime);
             header('Content-Disposition: inline; filename="' . basename($filepath) . '"');
             header('Content-Length: ' . filesize($filepath));
