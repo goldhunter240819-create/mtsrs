@@ -72,6 +72,25 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
         }
         .academic-year-select option { background: #0f172a; color: #fff; }
         .academic-year-select:focus { border-color: var(--z-primary); }
+
+        /* Anti-Underline Global Enforcement (Sidebar, Header, Buttons) */
+        .z-sidebar a,
+        .z-sidebar a:hover,
+        .z-sidebar a:focus,
+        .z-sidebar a:visited,
+        .z-nav-item,
+        .z-nav-item:hover,
+        .z-nav-item:focus,
+        .z-nav-dropdown-toggle,
+        .z-nav-dropdown-toggle:hover,
+        .z-nav-dropdown-menu a,
+        .z-nav-dropdown-menu a:hover,
+        .z-sidebar-foot a,
+        .z-sidebar-foot a:hover,
+        .z-header a,
+        .z-header a:hover {
+            text-decoration: none !important;
+        }
     </style>
 </head>
 <body>
@@ -152,6 +171,23 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
                     <a href="<?php echo Helper::url('/guru/berkas'); ?>" class="z-nav-item <?php echo $activeMenu === 'guru_berkas' ? 'active' : ''; ?>">
                         <i data-lucide="folder"></i> Arsip Berkas
                     </a>
+
+                    <!-- Dropdown: PKKM Digital Guru -->
+                    <?php $isOpenPkkmGuru = (strpos($activeMenu, 'guru_pkkm') === 0); ?>
+                    <div class="z-nav-dropdown <?php echo $isOpenPkkmGuru ? 'open' : ''; ?>">
+                        <div class="z-nav-dropdown-toggle <?php echo $isOpenPkkmGuru ? 'active' : ''; ?>" onclick="toggleDropdown(this)">
+                            <div class="dt-left"><i data-lucide="award"></i> Penilaian PKKM</div>
+                            <i data-lucide="chevron-down" class="dt-icon"></i>
+                        </div>
+                        <div class="z-nav-dropdown-menu">
+                            <a href="<?php echo Helper::url('/guru/pkkm/instrumen'); ?>" class="z-nav-item <?php echo $activeMenu === 'guru_pkkm_instrumen' ? 'active' : ''; ?>">
+                                <i data-lucide="clipboard-check"></i> Instrumen Penilaian
+                            </a>
+                            <a href="<?php echo Helper::url('/guru/pkkm/master-berkas'); ?>" class="z-nav-item <?php echo $activeMenu === 'guru_pkkm_master_berkas' ? 'active' : ''; ?>">
+                                <i data-lucide="folder-kanban"></i> Daftar Berkas
+                            </a>
+                        </div>
+                    </div>
                 <?php elseif ($isSiswaWeb): ?>
                     <div class="z-nav-cat">PORTAL SISWA</div>
                     <a href="<?php echo Helper::url('/siswa'); ?>" class="z-nav-item <?php echo $activeMenu === 'siswa_dashboard' ? 'active' : ''; ?>">

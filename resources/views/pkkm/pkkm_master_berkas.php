@@ -1,6 +1,9 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <style>
+        a { text-decoration: none; }
+        .z-sidebar a, .z-nav-item, .z-nav-dropdown-toggle, .z-nav-dropdown-menu a, .z-sidebar-foot a { text-decoration: none !important; }
+
         /* Zamrud UI Integration Overrides */
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
         .z-scroll { padding-bottom: 3rem !important; }

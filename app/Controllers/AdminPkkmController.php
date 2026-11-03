@@ -1814,6 +1814,246 @@ class AdminPkkmController {
 
         include __DIR__ . '/../../resources/views/layout.php';
     }
-}
 
 
+    public static function attachVisiMisiToPkkm() {
+        self::checkAuth();
+        $db = Database::connect('core');
+        $url = '/admin/pkkm/cetak-bukti/visi-misi';
+        $nama_file = 'Portal Monitoring & Bukti Visi Misi Madrasah (Plang, SK Kamad & Rekomendasi Pengawas)';
+
+        $count = 0;
+
+        // 1. Tautkan langsung ke pkkm_berkas untuk Indikator 1.2.1 (ID 4) dan 2.1.2 (ID 27) jika ada
+        $indTargets = [4, 27];
+        foreach ($indTargets as $indId) {
+            $chk = $db->prepare("SELECT id FROM pkkm_berkas WHERE indikator_id = ? AND url = ?");
+            $chk->execute([$indId, $url]);
+            if (!$chk->fetch()) {
+                $db->prepare("INSERT INTO pkkm_berkas (indikator_id, tipe, url, nama_file, created_at) VALUES (?, 'link', ?, ?, NOW())")
+                   ->execute([$indId, $url, $nama_file]);
+                $count++;
+            }
+        }
+
+        // 2. Tautkan juga ke Master Berkas terkait visi misi (ID 11, 231, 232 atau pencarian kata kunci)
+        $masters = $db->query("
+            SELECT id FROM pkkm_master_berkas 
+            WHERE nama_berkas LIKE '%visi%misi%' 
+               OR nama_berkas LIKE '%visi dan misi%' 
+               OR id IN (11, 231, 232)
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($masters as $m) {
+            $mid = $m['id'];
+            $stmt = $db->prepare("SELECT id FROM pkkm_master_berkas_file WHERE master_berkas_id = ? AND url = ?");
+            $stmt->execute([$mid, $url]);
+            if (!$stmt->fetch()) {
+                $db->prepare("INSERT INTO pkkm_master_berkas_file (master_berkas_id, tipe, url, nama_file_asli, created_at) VALUES (?, 'link', ?, ?, NOW())")
+                   ->execute([$mid, $url, $nama_file]);
+                $count++;
+            }
+        }
+
+        header("Location: /admin/pkkm/cetak-bukti/visi-misi?msg=attached&count=" . $count);
+        exit;
+    }
+
+    public static function detachVisiMisiFromPkkm() {
+        self::checkAuth();
+        $db = Database::connect('core');
+        $url = '/admin/pkkm/cetak-bukti/visi-misi';
+        
+        $db->prepare("DELETE FROM pkkm_berkas WHERE url = ?")->execute([$url]);
+        $db->prepare("DELETE FROM pkkm_master_berkas_file WHERE url = ?")->execute([$url]);
+
+        header("Location: /admin/pkkm/cetak-bukti/visi-misi?msg=detached");
+        exit;
+    }
+
+    public static function saveCatatanPengawasVisiMisi() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $storageDir = __DIR__ . '/../../storage';
+        if (!is_dir($storageDir)) {
+            @mkdir($storageDir, 0777, true);
+        }
+
+        $data = [
+            'updated_at' => date('Y-m-d H:i:s'),
+            'nama_penilai' => $_POST['nama_penilai'] ?? 'Pengawas Penilai',
+            'status_verifikasi' => $_POST['status_verifikasi'] ?? 'Sangat Baik',
+            'skor_rekomendasi' => $_POST['skor_rekomendasi'] ?? '4',
+            'catatan' => $_POST['catatan'] ?? '',
+            'checklist' => $_POST['chk'] ?? []
+        ];
+
+        file_put_contents($storageDir . '/pkkm_visi_misi_notes.json', json_encode($data, JSON_PRETTY_PRINT));
+
+        // Simpan juga skor rekomendasi jika dipilih ke pkkm_nilai untuk indikator 4 (1.2.1)
+        if (isset($_POST['simpan_skor_pkkm']) && $_POST['simpan_skor_pkkm'] == '1') {
+            try {
+                $db = Database::connect('core');
+                $skor = (int)($_POST['skor_rekomendasi'] ?? 4);
+                $db->prepare("INSERT INTO pkkm_nilai (indikator_id, skor) VALUES (4, ?) ON DUPLICATE KEY UPDATE skor = ?")
+                   ->execute([$skor, $skor]);
+            } catch (\Exception $e) {}
+        }
+
+        $isPengawas = isset($_SESSION['role_id']) && (int)$_SESSION['role_id'] === 5;
+        $redir = $isPengawas ? '/pengawas/pkkm/cetak-bukti/visi-misi?tab=pengawas&msg=saved' : '/admin/pkkm/cetak-bukti/visi-misi?tab=pengawas&msg=saved';
+        header("Location: " . $redir);
+        exit;
+    }
+
+    public static function saveCatatanPengawasSupervisi() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $storageDir = __DIR__ . '/../../storage';
+        if (!is_dir($storageDir)) {
+            @mkdir($storageDir, 0777, true);
+        }
+
+        $data = [
+            'updated_at' => date('Y-m-d H:i:s'),
+            'nama_penilai' => $_POST['nama_penilai'] ?? 'Pengawas Pembina PKKM',
+            'status_verifikasi' => $_POST['status_verifikasi'] ?? 'Sangat Memadai',
+            'skor_rekomendasi' => $_POST['skor_rekomendasi'] ?? '4',
+            'catatan' => $_POST['catatan'] ?? '',
+            'checklist' => $_POST['chk'] ?? []
+        ];
+
+        file_put_contents($storageDir . '/pkkm_supervisi_notes.json', json_encode($data, JSON_PRETTY_PRINT));
+
+        // Simpan juga skor rekomendasi jika dipilih ke pkkm_nilai untuk indikator Komponen 4
+        if (isset($_POST['simpan_skor_pkkm']) && $_POST['simpan_skor_pkkm'] == '1') {
+            try {
+                $db = Database::connect('core');
+                $skor = (int)($_POST['skor_rekomendasi'] ?? 4);
+                $indTargetIds = [87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 40, 41, 42];
+                foreach ($indTargetIds as $targetIndId) {
+                    $chk = $db->query("SELECT id FROM pkkm_indikator WHERE id = $targetIndId")->fetch();
+                    if ($chk) {
+                        $db->prepare("INSERT INTO pkkm_nilai (indikator_id, skor) VALUES (?, ?) ON DUPLICATE KEY UPDATE skor = ?")
+                           ->execute([$targetIndId, $skor, $skor]);
+                    }
+                }
+            } catch (\Exception $e) {}
+        }
+
+        $isPengawas = isset($_SESSION['role_id']) && (int)$_SESSION['role_id'] === 5;
+        $redir = $isPengawas ? '/pengawas/pkkm/monitoring-supervisi?tab=pengawas&msg=saved' : '/admin/pkkm/monitoring-supervisi?tab=pengawas&msg=saved';
+        header("Location: " . $redir);
+        exit;
+    }
+
+    public static function cetakBuktiPersuratan() {
+        self::checkAuthBukti();
+        $db = \App\Core\Database::connect('core');
+        
+        $inst = null;
+        $kamad = null;
+        $tu = null;
+        try {
+            $inst = $db->query("SELECT * FROM institusi LIMIT 1")->fetch(\PDO::FETCH_ASSOC);
+            $kamad = $db->query("SELECT nama, nip FROM guru WHERE is_kamad = 1 LIMIT 1")->fetch(\PDO::FETCH_ASSOC);
+            $tu = $db->query("SELECT nama, nip FROM guru WHERE jabatan LIKE '%Tata Usaha%' OR jabatan LIKE '%TU%' OR jabatan LIKE '%Operator%' LIMIT 1")->fetch(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {}
+
+        // Statistik Persuratan
+        $total_masuk = (int)$db->query("SELECT COUNT(*) FROM persuratan_masuk")->fetchColumn();
+        $total_keluar = (int)$db->query("SELECT COUNT(*) FROM persuratan_keluar")->fetchColumn();
+        $total_disposisi = (int)$db->query("SELECT COUNT(*) FROM persuratan_disposisi")->fetchColumn();
+        $total_sk = 0;
+        try {
+            $total_sk = (int)$db->query("SELECT COUNT(*) FROM persuratan_sk")->fetchColumn();
+        } catch (\Exception $e) {}
+
+        // Data Buku Register Surat Masuk & Keluar
+        $list_masuk = $db->query("SELECT * FROM persuratan_masuk ORDER BY id DESC LIMIT 15")->fetchAll(\PDO::FETCH_ASSOC);
+        $list_keluar = $db->query("SELECT * FROM persuratan_keluar ORDER BY id DESC LIMIT 15")->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Disposisi Sampel
+        $list_disposisi = [];
+        try {
+            $list_disposisi = $db->query("
+                SELECT d.*, m.no_agenda, m.perihal as perihal_surat, m.asal
+                FROM persuratan_disposisi d 
+                JOIN persuratan_masuk m ON d.surat_masuk_id = m.id 
+                ORDER BY d.id DESC LIMIT 8
+            ")->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {}
+
+        // Cek keterkaitan PKKM
+        $url_bukti = '/admin/pkkm/cetak-bukti/persuratan';
+        $linked_count = (int)$db->query("SELECT COUNT(*) FROM pkkm_master_berkas_file WHERE url = '$url_bukti'")->fetchColumn();
+        $is_pkkm_linked = ($linked_count > 0);
+
+        include __DIR__ . '/../../resources/views/pkkm/pkkm_bukti_persuratan_pdf.php';
+    }
+
+    public static function attachPersuratanToPkkm() {
+        self::checkAuth();
+        $db = \App\Core\Database::connect('core');
+        $url = '/admin/pkkm/cetak-bukti/persuratan';
+        $nama_file = 'Buku Agenda Register Surat Masuk, Keluar Kode 422 & Disposisi Digital';
+
+        $count = 0;
+        // 1. Tautkan langsung ke pkkm_berkas untuk Indikator 59 (2.9.1) jika ada
+        $indTargets = [59];
+        try {
+            $moreInds = $db->query("SELECT id FROM pkkm_indikator WHERE kriteria LIKE '%surat masuk%' OR kriteria LIKE '%surat keluar%' OR indikator LIKE '%surat masuk%'")->fetchAll(\PDO::FETCH_COLUMN);
+            if ($moreInds) {
+                $indTargets = array_unique(array_merge($indTargets, $moreInds));
+            }
+        } catch (\Exception $e) {}
+
+        foreach ($indTargets as $indId) {
+            $chk = $db->prepare("SELECT id FROM pkkm_berkas WHERE indikator_id = ? AND url = ?");
+            $chk->execute([$indId, $url]);
+            if (!$chk->fetch()) {
+                $db->prepare("INSERT INTO pkkm_berkas (indikator_id, tipe, url, nama_file, created_at) VALUES (?, 'link', ?, ?, NOW())")
+                   ->execute([$indId, $url, $nama_file]);
+                $count++;
+            }
+        }
+
+        // 2. Tautkan juga ke Master Berkas terkait surat masuk / keluar
+        $masters = $db->query("
+            SELECT id FROM pkkm_master_berkas 
+            WHERE nama_berkas LIKE '%surat masuk%' 
+               OR nama_berkas LIKE '%surat keluar%' 
+               OR nama_berkas LIKE '%persuratan%'
+        ")->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($masters as $m) {
+            $mid = $m['id'];
+            $stmt = $db->prepare("SELECT id FROM pkkm_master_berkas_file WHERE master_berkas_id = ? AND url = ?");
+            $stmt->execute([$mid, $url]);
+            if (!$stmt->fetch()) {
+                $db->prepare("INSERT INTO pkkm_master_berkas_file (master_berkas_id, tipe, url, nama_file_asli, created_at) VALUES (?, 'link', ?, ?, NOW())")
+                   ->execute([$mid, $url, $nama_file]);
+                $count++;
+            }
+        }
+
+        header("Location: /admin/pkkm/cetak-bukti/persuratan?msg=attached&count=" . $count);
+        exit;
+    }
+
+    public static function detachPersuratanFromPkkm() {
+        self::checkAuth();
+        $db = \App\Core\Database::connect('core');
+        $url = '/admin/pkkm/cetak-bukti/persuratan';
+        
+        $db->prepare("DELETE FROM pkkm_berkas WHERE url = ?")->execute([$url]);
+        $db->prepare("DELETE FROM pkkm_master_berkas_file WHERE url = ?")->execute([$url]);
+
+        header("Location: /admin/pkkm/cetak-bukti/persuratan?msg=detached");
+        exit;
+    }
+
+
+    }

@@ -504,6 +504,16 @@ $router->add('GET', '/guru/berkas/hapus/{id}', [\App\Controllers\WebGuruControll
 $router->add('GET', '/guru/berkas-pribadi/hapus/{id}', [\App\Controllers\WebGuruController::class, 'hapusBerkasPribadi']);
 $router->add('POST', '/guru/berkas/salin-paralel', [\App\Controllers\WebGuruController::class, 'berkasSalinParalel']);
 
+// Portal Guru - PKKM (Penilaian Kinerja Kepala Madrasah)
+$router->add('GET', '/guru/pkkm/instrumen', [\App\Controllers\PortalGuruPkkmController::class, 'instrumen']);
+$router->add('GET', '/guru/pkkm/master-berkas', [\App\Controllers\PortalGuruPkkmController::class, 'masterBerkas']);
+$router->add('POST', '/guru/pkkm/berkas/save', [\App\Controllers\PortalGuruPkkmController::class, 'saveBerkas']);
+$router->add('POST', '/guru/pkkm/berkas/delete', [\App\Controllers\PortalGuruPkkmController::class, 'deleteBerkas']);
+$router->add('POST', '/guru/pkkm/master-berkas/upload', [\App\Controllers\PortalGuruPkkmController::class, 'uploadMasterBerkas']);
+$router->add('POST', '/guru/pkkm/master-berkas/delete', [\App\Controllers\PortalGuruPkkmController::class, 'deleteMasterBerkas']);
+$router->add('POST', '/guru/pkkm/master-berkas/attach-digital', [\App\Controllers\PortalGuruPkkmController::class, 'attachDigitalToMaster']);
+$router->add('POST', '/guru/pkkm/bukti-attach-website', [\App\Controllers\PortalGuruPkkmController::class, 'attachWebsiteLink']);
+
 // ROUTE: Apk Guru Izin
 $router->add('GET', '/apk/izin-guru', [\App\Controllers\ApkController::class, 'izinGuru']);
 $router->add('POST', '/apk/izin-guru', [\App\Controllers\ApkController::class, 'submitIzinGuru']);
@@ -587,6 +597,13 @@ $router->add('POST', '/admin/pkkm/cetak-bukti/supervisi-guru/detach', [\App\Cont
 $router->add('GET', '/admin/pkkm/cetak-bukti/ekstrakurikuler', [\App\Controllers\AdminPkkmController::class, 'cetakBuktiEkstrakurikuler']);
 $router->add('GET', '/admin/pkkm/cetak-bukti/prestasi-siswa', [\App\Controllers\AdminPkkmController::class, 'cetakBuktiPrestasiSiswa']);
 $router->add('GET', '/admin/pkkm/cetak-bukti/kewirausahaan', [\App\Controllers\AdminPkkmController::class, 'cetakBuktiKewirausahaan']);
+$router->add('GET', '/admin/pkkm/cetak-bukti/persuratan', [\App\Controllers\AdminPkkmController::class, 'cetakBuktiPersuratan']);
+$router->add('POST', '/admin/pkkm/attach-persuratan', [\App\Controllers\AdminPkkmController::class, 'attachPersuratanToPkkm']);
+$router->add('POST', '/admin/pkkm/detach-persuratan', [\App\Controllers\AdminPkkmController::class, 'detachPersuratanFromPkkm']);
+$router->add('POST', '/admin/pkkm/attach-visi-misi', [\App\Controllers\AdminPkkmController::class, 'attachVisiMisiToPkkm']);
+$router->add('POST', '/admin/pkkm/detach-visi-misi', [\App\Controllers\AdminPkkmController::class, 'detachVisiMisiFromPkkm']);
+$router->add('POST', '/admin/pkkm/save-catatan-visi-misi', [\App\Controllers\AdminPkkmController::class, 'saveCatatanPengawasVisiMisi']);
+$router->add('POST', '/admin/pkkm/save-catatan-supervisi', [\App\Controllers\AdminPkkmController::class, 'saveCatatanPengawasSupervisi']);
 
 // Kelola Tim Komponen PKKM
 $router->add('GET', '/admin/pkkm/tim', [\App\Controllers\AdminPkkmController::class, 'tim']);
@@ -606,6 +623,7 @@ $router->add('POST', '/pengawas/pkkm/nilai', [\App\Controllers\PengawasPkkmContr
 $router->add('POST', '/pengawas/pkkm/reset-nilai', [\App\Controllers\PengawasPkkmController::class, 'resetNilai']);
 $router->add('POST', '/pengawas/pkkm/simpan-ttd', [\App\Controllers\PengawasPkkmController::class, 'saveTtd']);
 $router->add('GET', '/pengawas/pkkm/cetak-rekap', [\App\Controllers\PengawasPkkmController::class, 'cetakRekap']);
+$router->add('GET', '/pengawas/pkkm/cetak-bukti/persuratan', [\App\Controllers\AdminPkkmController::class, 'cetakBuktiPersuratan']);
 
 // Default fallback 404
 $router->run();

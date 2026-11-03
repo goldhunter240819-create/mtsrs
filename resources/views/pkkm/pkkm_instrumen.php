@@ -1,5 +1,8 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
+        a { text-decoration: none; }
+        .z-sidebar a, .z-nav-item, .z-nav-dropdown-toggle, .z-nav-dropdown-menu a, .z-sidebar-foot a { text-decoration: none !important; }
+
     /* Scoped UI Overrides for PKKM Instrumen */
     .table-responsive { overflow-x: auto; border-radius: 8px; }
 

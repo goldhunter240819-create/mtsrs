@@ -32,7 +32,7 @@ class PkkmPanduanService {
                 'contoh' => [
                     'Screenshot halaman beranda (Homepage) website resmi madrasah.',
                     'Screenshot dashboard admin website / cPanel / hosting domain madrasah.',
-                    'Screenshot inbox email resmi madrasah (@mismifhda.sch.id atau email kedinasan).',
+                    'Screenshot inbox email resmi madrasah (@mtsroudlotussholihin.sch.id atau email kedinasan).',
                     'Screenshot akun media sosial resmi madrasah (Facebook/Instagram/YouTube/TikTok) yang memuat berita kegiatan.'
                 ],
                 'tips' => 'Pastikan website memuat informasi profil madrasah, visi misi, dan berita kegiatan terbaru. Tautan link bisa dilampirkan langsung.'
@@ -481,22 +481,13 @@ class PkkmPanduanService {
                 'title' => 'Bukti Struktur Organisasi Resmi (PDF)',
                 'url' => '/admin/pkkm/cetak-bukti/struktur-organisasi'
             ];
-        } elseif (stripos($clean, 'dokumen hasil sosialisasi visi misi') !== false) {
-            $judul = 'Dokumen Sosialisasi Visi Misi & Tujuan Lembaga';
-            $deskripsi = 'Brosur, spanduk, website, dan dokumentasi peninjauan visi-misi bersama warga madrasah.';
-            $kategori = 'notulen';
-            $buktiDigital = [
-                'slug' => 'visi-misi',
-                'title' => 'Bukti Visi Misi & Sosialisasi (PDF)',
-                'url' => '/admin/pkkm/cetak-bukti/visi-misi'
-            ];
-        } elseif (stripos($clean, 'visi, misi dan tujuan') !== false) {
-            $judul = 'Dokumen Penetapan Visi, Misi & Tujuan Madrasah';
-            $deskripsi = 'Naskah resmi rumusan visi, misi, dan tujuan madrasah yang telah disahkan oleh Kepala Madrasah.';
+        } elseif (stripos($clean, 'visi') !== false && (stripos($clean, 'misi') !== false || stripos($clean, 'tujuan') !== false)) {
+            $judul = 'Dokumen Resmi Visi, Misi, Tujuan & Sasaran Mutu Madrasah';
+            $deskripsi = 'Naskah resmi SK penetapan, berita acara perumusan, publikasi plang kelembagaan, dan pemenuhan ketercapaian visi misi.';
             $kategori = 'program';
             $buktiDigital = [
                 'slug' => 'visi-misi',
-                'title' => 'Bukti Visi Misi & Sosialisasi (PDF)',
+                'title' => 'Monitoring & Verifikasi Visi Misi (Pengawas & PKKM)',
                 'url' => '/admin/pkkm/cetak-bukti/visi-misi'
             ];
         } elseif (stripos($clean, 'laporan kegiatan workshop, pelatihan kompetensi guru') !== false) {
@@ -519,7 +510,7 @@ class PkkmPanduanService {
             $buktiDigital = [
                 'slug' => 'supervisi-guru',
                 'title' => 'Monitoring Rekomendasi Supervisi GTK',
-                'url' => '/admin/pkkm/cetak-bukti/supervisi-guru?tab=rekomendasi'
+                'url' => '/admin/pkkm/monitoring-supervisi?tab=rekomendasi'
             ];
         } elseif (stripos($clean, 'rencana tindak lanjut hasil supervisi') !== false) {
             $judul = 'Rencana Tindak Lanjut (RTL) Hasil Supervisi Guru';
@@ -528,7 +519,7 @@ class PkkmPanduanService {
             $buktiDigital = [
                 'slug' => 'supervisi-guru',
                 'title' => 'Monitoring RTL & Realisasi Pembinaan Guru',
-                'url' => '/admin/pkkm/cetak-bukti/supervisi-guru?tab=rtl'
+                'url' => '/admin/pkkm/monitoring-supervisi?tab=rtl'
             ];
         } elseif (stripos($clean, 'laporan hasil supervisi') !== false) {
             $judul = 'Laporan Pelaksanaan Supervisi Guru dan Tenaga Kependidikan';
@@ -537,34 +528,43 @@ class PkkmPanduanService {
             $buktiDigital = [
                 'slug' => 'supervisi-guru',
                 'title' => 'Laporan Rekapitulasi Nilai Supervisi GTK',
-                'url' => '/admin/pkkm/cetak-bukti/supervisi-guru?tab=laporan'
+                'url' => '/admin/pkkm/monitoring-supervisi?tab=laporan'
             ];
-        } elseif (stripos($clean, 'instrumen hasil supervisi') !== false) {
+        } elseif ((stripos($clean, 'instrumen') !== false || stripos($clean, 'instrument') !== false) && (stripos($clean, 'supervisi') !== false || stripos($clean, 'supervise') !== false)) {
             $judul = 'Instrumen & Lembar Penilaian Observasi Supervisi Guru';
             $deskripsi = 'Format instrumen telaah modul ajar/RPP dan lembar pengamatan proses pembelajaran di kelas.';
             $kategori = 'laporan';
             $buktiDigital = [
                 'slug' => 'supervisi-guru',
                 'title' => 'Instrumen Hasil Observasi KBM Per Guru',
-                'url' => '/admin/pkkm/cetak-bukti/supervisi-guru?tab=instrumen'
+                'url' => '/admin/pkkm/monitoring-supervisi?tab=instrumen'
             ];
-        } elseif (stripos($clean, 'sk tim supervisor') !== false) {
+        } elseif (stripos($clean, 'sk tim supervisor') !== false || (stripos($clean, 'tim supervisor') !== false && stripos($clean, 'sk') !== false)) {
             $judul = 'SK Tim Supervisor & Jadwal Pelaksanaan Supervisi GTK';
             $deskripsi = 'Surat Keputusan penunjukan tim supervisi pembelajaran beserta jadwal visitasi kelas.';
             $kategori = 'sk';
             $buktiDigital = [
                 'slug' => 'supervisi-guru',
                 'title' => 'Bukti Program & Supervisi GTK (Portal)',
-                'url' => '/admin/pkkm/cetak-bukti/supervisi-guru'
+                'url' => '/admin/pkkm/monitoring-supervisi'
             ];
-        } elseif (stripos($clean, 'laporan pelaksanaan tindak lanjut supervise') !== false) {
+        } elseif (stripos($clean, 'laporan pelaksanaan tindak lanjut supervise') !== false || stripos($clean, 'tindak lanjut supervise') !== false || stripos($clean, 'tindak lanjut supervisi') !== false) {
             $judul = 'Laporan Realisasi Tindak Lanjut Hasil Supervisi Guru';
             $deskripsi = 'Bukti pelaksanaan perbaikan kinerja mengajar dan tindak lanjut pasca supervisi akademik.';
             $kategori = 'laporan';
             $buktiDigital = [
                 'slug' => 'supervisi-guru',
                 'title' => 'Monitoring Realisasi RTL Supervisi Guru',
-                'url' => '/admin/pkkm/cetak-bukti/supervisi-guru?tab=rtl'
+                'url' => '/admin/pkkm/monitoring-supervisi?tab=rtl'
+            ];
+        } elseif (stripos($clean, 'dokumen supervise') !== false || stripos($clean, 'program pengawasan pembelajaran') !== false || stripos($clean, 'supervisi pembelajaran') !== false) {
+            $judul = 'Program Kerja & Laporan Supervisi Pembelajaran Guru';
+            $deskripsi = 'Dokumen program pengawasan pembelajaran, visitasi kelas, dan evaluasi hasil supervisi akademik.';
+            $kategori = 'program';
+            $buktiDigital = [
+                'slug' => 'supervisi-guru',
+                'title' => 'Portal Monitoring Supervisi GTK',
+                'url' => '/admin/pkkm/monitoring-supervisi?tab=laporan'
             ];
         } elseif (stripos($clean, 'pembagian jam mengajar') !== false || stripos($clean, 'jadwal') !== false || stripos($clean, 'kalender') !== false) {
             $judul = (stripos($clean, 'kalender') !== false)
@@ -595,8 +595,8 @@ class PkkmPanduanService {
                 'url' => '/admin/pkkm/cetak-bukti/lingkungan-sehat'
             ];
         } elseif (stripos($clean, 'webset') !== false || (stripos($clean, 'email') !== false && stripos($clean, 'alamat') !== false)) {
-            $judul = 'Dokumen Domain & Email Dinas Madrasah (mismifhda.sch.id)';
-            $deskripsi = 'Screenshot website resmi madrasah, panel domain, dan akun email dinas lembaga @mismifhda.sch.id.';
+            $judul = 'Dokumen Domain & Email Dinas Madrasah (mtsroudlotussholihin.sch.id)';
+            $deskripsi = 'Screenshot website resmi madrasah, panel domain, dan akun email dinas lembaga @mtsroudlotussholihin.sch.id.';
             $kategori = 'digital';
             $buktiDigital = [
                 'slug' => 'website-email',
@@ -687,6 +687,15 @@ class PkkmPanduanService {
                 'title' => 'Monitoring Perangkat Guru (View Only)',
                 'url' => '/admin/pkkm/cetak-bukti/perangkat-guru'
             ];
+        } elseif (stripos($clean, 'surat masuk') !== false || stripos($clean, 'surat keluar') !== false || stripos($clean, 'persuratan') !== false) {
+            $judul = 'Buku Agenda & Rekapitulasi Dokumen Surat Masuk dan Keluar';
+            $deskripsi = 'Buku register agenda surat masuk, register surat keluar standar kode 422, lembar disposisi digital, dan ekspedisi persuratan madrasah.';
+            $kategori = 'digital';
+            $buktiDigital = [
+                'slug' => 'persuratan',
+                'title' => 'Bukti Persuratan Digital Resmi (PDF)',
+                'url' => '/admin/pkkm/cetak-bukti/persuratan'
+            ];
         }
 
         // === FALLBACK CATEGORIZATION BY KEYWORD IF STILL GENERAL ===
@@ -706,7 +715,7 @@ class PkkmPanduanService {
             } elseif (preg_match('/internet|website|email|tik|aplikasi|medsos|komputer|laptop|elektronik/i', $clean)) {
                 $kategori = 'digital';
                 $deskripsi = 'Bukti pemanfaatan teknologi informasi dan komunikasi di madrasah.';
-            } elseif (preg_match('/buku induk|inventaris|sarana|gedung|ruang|lingkungan|surat masuk|buku penerimaan|kesiswaan|referensi/i', $clean)) {
+            } elseif (preg_match('/buku induk|inventaris|sarana|gedung|ruang|lingkungan|buku penerimaan|kesiswaan|referensi/i', $clean)) {
                 $kategori = 'sarpras';
                 $deskripsi = 'Dokumen pengelolaan sarana prasarana, fasilitas atau administrasi umum madrasah.';
             }

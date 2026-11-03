@@ -152,7 +152,7 @@ class Helper {
                 'badge_style' => 'background: rgba(225,29,72,0.15); color: #e11d48;',
             ],
             'pkkm' => [
-                'url' => '/admin/pkkm',
+                'url' => (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 2) ? '/guru/pkkm/instrumen' : '/admin/pkkm',
                 'title' => 'PKKM Digital',
                 'subtitle' => 'Penilaian Kinerja Kepala Madrasah',
                 'icon' => 'award',
