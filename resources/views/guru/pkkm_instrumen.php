@@ -393,7 +393,7 @@
                                                         <?php if(!empty($b['is_master'])): ?>
                                                             <span class="badge-master">Master</span>
                                                         <?php else: ?>
-                                                            <form method="POST" action="/guru/pkkm/berkas/delete" onsubmit="return confirm('Hapus berkas ini?');" style="margin:0;">
+                                                            <form method="POST" action="/guru/pkkm/berkas/delete" onsubmit="return confirmDeleteBerkas(event, this);" style="margin:0;">
                                                                 <input type="hidden" name="id" value="<?php echo $b['id']; ?>">
                                                                 <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Hapus"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i></button>
                                                             </form>
@@ -567,6 +567,26 @@
                 card.style.display = 'none';
             }
         });
+    }
+
+        function confirmDeleteBerkas(event, form) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Hapus Bukti Fisik?',
+            text: 'File bukti fisik yang telah diunggah akan dihapus secara permanen.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+        return false;
     }
 
     function openUploadModal(indikatorId, indikatorText) {

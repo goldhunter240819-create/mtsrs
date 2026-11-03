@@ -626,7 +626,7 @@ $categoryCounts = $categoryCounts ?? [];
                                                         <?php echo htmlspecialchars($f['nama_file_asli']); ?>
                                                     </a>
                                                 </div>
-                                                <form method="POST" action="/guru/pkkm/master-berkas/delete" onsubmit="return confirm('Hapus file ini?');" style="margin:0;">
+                                                <form method="POST" action="/guru/pkkm/master-berkas/delete" onsubmit="return confirmDeleteMasterFile(event, this);" style="margin:0;">
                                                     <input type="hidden" name="id" value="<?php echo $f['id']; ?>">
                                                     <button type="submit" style="border:none; background:transparent; color:#ef4444; cursor:pointer; padding:2px; display:inline-flex; align-items:center;" title="Hapus"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>
                                                 </form>
@@ -844,6 +844,26 @@ $categoryCounts = $categoryCounts ?? [];
 
     function closeUploadModal() {
         document.getElementById('uploadModal').classList.remove('show');
+    }
+
+        function confirmDeleteMasterFile(event, form) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Hapus Dokumen Ini?',
+            text: 'Berkas dokumen yang telah diunggah akan dihapus secara permanen.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+        return false;
     }
 
     function attachDigital(id, url, nama) {
