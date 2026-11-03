@@ -66,7 +66,13 @@ use App\Middleware\AuthMiddleware;
 
 // --- Static Uploaded Media & Documents Fallback Delivery ---
 $reqUri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
-if (preg_match('#^/uploads/(.+)$#', $reqUri, $matches)) {
+$scriptName = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
+$basePath = str_replace('\\', '/', dirname($scriptName));
+if (!empty($basePath) && $basePath !== '/' && stripos($reqUri, $basePath) === 0) {
+    $reqUri = substr($reqUri, strlen($basePath));
+}
+
+if (preg_match('#^/(?:public/)?uploads/(.+)$#', $reqUri, $matches)) {
     $subPath = $matches[1];
     $candidates = [
         __DIR__ . '/public/uploads/' . $subPath,
@@ -547,6 +553,8 @@ $router->add('POST', '/guru/pkkm/master-berkas/upload', [\App\Controllers\Portal
 $router->add('POST', '/guru/pkkm/master-berkas/delete', [\App\Controllers\PortalGuruPkkmController::class, 'deleteMasterBerkas']);
 $router->add('POST', '/guru/pkkm/master-berkas/attach-digital', [\App\Controllers\PortalGuruPkkmController::class, 'attachDigitalToMaster']);
 $router->add('POST', '/guru/pkkm/bukti-attach-website', [\App\Controllers\PortalGuruPkkmController::class, 'attachWebsiteLink']);
+$router->add('GET', '/uploads/pkkm/{filename}', [\App\Controllers\PortalGuruPkkmController::class, 'viewPkkmFile']);
+$router->add('GET', '/public/uploads/pkkm/{filename}', [\App\Controllers\PortalGuruPkkmController::class, 'viewPkkmFile']);
 
 // ROUTE: Apk Guru Izin
 $router->add('GET', '/apk/izin-guru', [\App\Controllers\ApkController::class, 'izinGuru']);

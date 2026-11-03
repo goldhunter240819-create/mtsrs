@@ -590,5 +590,67 @@ class PortalGuruPkkmController {
         header("Location: /guru/pkkm/instrumen?msg=website_attached");
         exit;
     }
-}
+    public static function viewPkkmFile($filename) {
+        $filename = basename($filename);
+        $candidates = [
+            __DIR__ . '/../../public/uploads/pkkm/' . $filename,
+            __DIR__ . '/../../uploads/pkkm/' . $filename,
+        ];
 
+        foreach ($candidates as $filePath) {
+            if (file_exists($filePath) && !is_dir($filePath)) {
+                $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                $mimes = [
+                    'pdf' => 'application/pdf',
+                    'jpg' => 'image/jpeg',
+                    'jpeg' => 'image/jpeg',
+                    'png' => 'image/png',
+                    'webp' => 'image/webp',
+                    'gif' => 'image/gif',
+                    'doc' => 'application/msword',
+                    'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'xls' => 'application/vnd.ms-excel',
+                    'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                ];
+                $contentType = $mimes[$ext] ?? 'application/octet-stream';
+                header('Content-Type: ' . $contentType);
+                header('Content-Length: ' . filesize($filePath));
+                header('Content-Disposition: inline; filename="' . $filename . '"');
+                header('Cache-Control: public, max-age=86400');
+                readfile($filePath);
+                exit;
+            }
+        }
+
+        http_response_code(404);
+        echo "<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='utf-8'>
+            <title>Dokumen PKKM</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1'>
+            <link href='https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap' rel='stylesheet'>
+            <style>
+                body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; color: #1e293b; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+                .card { background: white; padding: 32px; border-radius: 18px; max-width: 480px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+                .icon { width: 56px; height: 56px; border-radius: 14px; background: #fef2f2; color: #dc2626; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px; }
+                h2 { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0; }
+                p { font-size: 0.88rem; color: #64748b; line-height: 1.5; margin: 0 0 20px 0; }
+                .file-tag { background: #f1f5f9; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-family: monospace; color: #0f172a; display: inline-block; margin-bottom: 16px; border: 1px solid #e2e8f0; }
+                .btn { display: inline-block; padding: 10px 22px; background: #047857; color: white; border-radius: 10px; font-weight: 700; font-size: 0.85rem; text-decoration: none; transition: 0.2s; cursor: pointer; border: none; }
+                .btn:hover { background: #065f46; }
+            </style>
+        </head>
+        <body>
+            <div class='card'>
+                <div class='icon'>📁</div>
+                <h2>Dokumen Belum Tersedia di Server</h2>
+                <div class='file-tag'>" . htmlspecialchars($filename) . "</div>
+                <p>File fisik dokumen ini belum tersimpan di server atau perlu diunggah ulang. Silakan hapus item file ini di tabel, lalu klik tombol <strong>Upload</strong> untuk mengunggah berkas kembali.</p>
+                <button onclick='window.close();' class='btn'>Tutup Tab</button>
+            </div>
+        </body>
+        </html>";
+        exit;
+    }
+}

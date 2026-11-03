@@ -335,6 +335,80 @@ $categoryCounts = $categoryCounts ?? [];
             from { transform: translateY(-20px) scale(0.97); opacity: 0; }
             to { transform: translateY(0) scale(1); opacity: 1; }
         }
+
+        /* Minimalist Clean Isolation Banner (Zamrud) */
+        .isolation-notice-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #059669;
+            border-radius: 10px;
+            padding: 9px 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+        .inb-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .inb-badge {
+            background: #047857;
+            color: #ffffff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            letter-spacing: 0.3px;
+        }
+        .inb-text {
+            font-size: 0.8rem;
+            color: #1e293b;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .inb-label {
+            font-weight: 700;
+            color: #475569;
+        }
+        .inb-tag {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #14532d;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.76rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .inb-tag strong {
+            color: #047857;
+            font-weight: 800;
+        }
+        .inb-right {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
 </style>
 
 <div class="elite-page-header">
@@ -390,21 +464,24 @@ $categoryCounts = $categoryCounts ?? [];
 
             <!-- Banner Isolasi Berkas Tugas -->
             <?php if(!empty($myAssignments)): ?>
-                <div class="d-flex align-items-center justify-content-between mb-2 p-2 px-3 bg-white border rounded-3 shadow-sm flex-wrap gap-2" style="font-size:0.8rem;">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-success" style="font-size:0.72rem; padding:4px 8px; border-radius:6px;">
-                            <i data-lucide="lock" style="width:11px;height:11px;vertical-align:text-bottom;"></i> Berkas Terisolasi
+                <div class="isolation-notice-banner">
+                    <div class="inb-left">
+                        <span class="inb-badge">
+                            <i data-lucide="lock" style="width:12px;height:12px;"></i> Berkas Terisolasi
                         </span>
-                        <span style="font-weight:700; color:#0f172a;">
-                            Khusus Terkait: 
+                        <div class="inb-text">
+                            <span class="inb-label">Khusus Terkait:</span>
                             <?php foreach($myAssignments as $idx => $ma): ?>
-                                <strong>Komponen <?php echo $ma['komponen_urutan']; ?> (<?php echo htmlspecialchars($ma['nama_komponen']); ?>)</strong><?php echo $idx < count($myAssignments)-1 ? ', ' : ''; ?>
+                                <span class="inb-tag">
+                                    <strong>Komponen <?php echo $ma['komponen_urutan']; ?></strong> (<?php echo htmlspecialchars($ma['nama_komponen']); ?>)
+                                </span><?php echo $idx < count($myAssignments)-1 ? ' ' : ''; ?>
                             <?php endforeach; ?>
-                        </span>
+                        </div>
                     </div>
-                    <span class="badge bg-light text-muted border" style="font-size:0.7rem;">
-                        <i data-lucide="shield-check" style="width:11px;height:11px;vertical-align:text-bottom;"></i> Komponen lain disembunyikan
-                    </span>
+                    <div class="inb-right">
+                        <i data-lucide="shield-check" style="width:13px;height:13px;color:#059669;"></i>
+                        <span>Komponen lain disembunyikan</span>
+                    </div>
                 </div>
             <?php endif; ?>
 
@@ -551,17 +628,17 @@ $categoryCounts = $categoryCounts ?? [];
                                                 </div>
                                                 <form method="POST" action="/guru/pkkm/master-berkas/delete" onsubmit="return confirm('Hapus file ini?');" style="margin:0;">
                                                     <input type="hidden" name="id" value="<?php echo $f['id']; ?>">
-                                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Hapus"><i data-lucide="trash-2" style="width:11px;height:11px;"></i></button>
+                                                    <button type="submit" style="border:none; background:transparent; color:#ef4444; cursor:pointer; padding:2px; display:inline-flex; align-items:center;" title="Hapus"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>
                                                 </form>
                                             </div>
                                         <?php endforeach; ?>
                                     <?php else: ?>
-                                        <span class="badge bg-light text-danger border border-danger-subtle" style="font-size:0.7rem; padding:3px 7px;">
+                                        <span style="display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; padding:3px 7px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:6px;">
                                             <i data-lucide="clock" style="width:10px;height:10px;vertical-align:text-bottom;"></i> Belum ada file
                                         </span>
                                         <?php if(!empty($mb['bukti_digital'])): ?>
                                             <div style="margin-top:4px;">
-                                                <a href="<?= htmlspecialchars($mb['bukti_digital']['url']); ?>" target="_blank" class="badge bg-success-subtle text-success border border-success-subtle text-decoration-none" style="font-size:0.67rem; padding:2px 7px;">
+                                                <a href="<?= htmlspecialchars($mb['bukti_digital']['url']); ?>" target="_blank" style="display:inline-flex; align-items:center; gap:4px; font-size:0.68rem; padding:2px 8px; background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; border-radius:6px; text-decoration:none;">
                                                     <i data-lucide="sparkles" style="width:9px;height:9px;vertical-align:text-bottom;"></i> <?= htmlspecialchars($mb['bukti_digital']['title'] ?? 'Portal Digital'); ?>
                                                 </a>
                                             </div>
