@@ -80,7 +80,9 @@ class AdminPkkmController {
         if (count($imagesToMerge) > 1) {
             $albumFilename = 'pkkm_' . time() . '_' . rand(100,999) . '_Album_Foto.pdf';
             $dest = __DIR__ . '/../../public/uploads/pkkm/' . $albumFilename;
+            $mirror = __DIR__ . '/../../uploads/pkkm/' . $albumFilename;
             if (!is_dir(__DIR__ . '/../../public/uploads/pkkm')) mkdir(__DIR__ . '/../../public/uploads/pkkm', 0777, true);
+            if (!is_dir(__DIR__ . '/../../uploads/pkkm')) mkdir(__DIR__ . '/../../uploads/pkkm', 0777, true);
             
             if (!class_exists('FPDF')) require_once __DIR__ . '/../../vendor/fpdf/fpdf.php';
             
@@ -102,6 +104,7 @@ class AdminPkkmController {
                 }
             }
             $pdf->Output('F', $dest);
+            @copy($dest, $mirror);
             
             $url = '/uploads/pkkm/' . $albumFilename;
             $nfa = !empty($nama_file_asli) ? $nama_file_asli : 'Album Foto Dokumentasi';
@@ -121,7 +124,9 @@ class AdminPkkmController {
         foreach ($otherFiles as $index => $file) {
             $filename = 'pkkm_' . time() . '_' . rand(100,999) . '_' . preg_replace('/[^a-zA-Z0-9_.-]/', '', $file['name']);
             $dest = __DIR__ . '/../../public/uploads/pkkm/' . $filename;
+            $mirror = __DIR__ . '/../../uploads/pkkm/' . $filename;
             if (!is_dir(__DIR__ . '/../../public/uploads/pkkm')) mkdir(__DIR__ . '/../../public/uploads/pkkm', 0777, true);
+            if (!is_dir(__DIR__ . '/../../uploads/pkkm')) mkdir(__DIR__ . '/../../uploads/pkkm', 0777, true);
             
             $isImg = in_array($file['ext'], ['jpg', 'jpeg', 'png']);
             $uploaded = false;
@@ -133,6 +138,7 @@ class AdminPkkmController {
             }
             
             if ($uploaded) {
+                @copy($dest, $mirror);
                 $url = '/uploads/pkkm/' . $filename;
                 $nfa = !empty($nama_file_asli) ? $nama_file_asli : $file['name'];
                 if (!empty($nama_file_asli) && count($otherFiles) > 1) {

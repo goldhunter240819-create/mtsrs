@@ -114,7 +114,9 @@ class PortalGuruPkkmController {
                 $pdf = new \FPDF('P', 'mm', 'A4');
                 $albumFilename = 'pkkm_album_' . time() . '_' . rand(100,999) . '.pdf';
                 $dest = __DIR__ . '/../../public/uploads/pkkm/' . $albumFilename;
+                $mirror = __DIR__ . '/../../uploads/pkkm/' . $albumFilename;
                 if (!is_dir(__DIR__ . '/../../public/uploads/pkkm')) mkdir(__DIR__ . '/../../public/uploads/pkkm', 0777, true);
+                if (!is_dir(__DIR__ . '/../../uploads/pkkm')) mkdir(__DIR__ . '/../../uploads/pkkm', 0777, true);
 
                 foreach ($imagesToMerge as $img) {
                     $tmp = $img['tmp'];
@@ -129,6 +131,7 @@ class PortalGuruPkkmController {
                     }
                 }
                 $pdf->Output('F', $dest);
+                @copy($dest, $mirror);
 
                 $url = '/uploads/pkkm/' . $albumFilename;
                 $nfa = !empty($nama_file_asli) ? $nama_file_asli : 'Album Foto Dokumentasi PKKM';
@@ -150,7 +153,9 @@ class PortalGuruPkkmController {
         foreach ($otherFiles as $index => $file) {
             $filename = 'pkkm_' . time() . '_' . rand(100,999) . '_' . preg_replace('/[^a-zA-Z0-9_.-]/', '', $file['name']);
             $dest = __DIR__ . '/../../public/uploads/pkkm/' . $filename;
+            $mirror = __DIR__ . '/../../uploads/pkkm/' . $filename;
             if (!is_dir(__DIR__ . '/../../public/uploads/pkkm')) mkdir(__DIR__ . '/../../public/uploads/pkkm', 0777, true);
+            if (!is_dir(__DIR__ . '/../../uploads/pkkm')) mkdir(__DIR__ . '/../../uploads/pkkm', 0777, true);
 
             $isImg = in_array($file['ext'], ['jpg', 'jpeg', 'png']);
             $uploaded = false;
@@ -162,6 +167,7 @@ class PortalGuruPkkmController {
             }
 
             if ($uploaded) {
+                @copy($dest, $mirror);
                 $url = '/uploads/pkkm/' . $filename;
                 $nfa = !empty($nama_file_asli) ? $nama_file_asli : $file['name'];
                 if (!empty($nama_file_asli) && count($otherFiles) > 1) {
@@ -452,6 +458,9 @@ class PortalGuruPkkmController {
                 $categoryCounts['umum']++;
             }
         }
+
+        $totalMaster = count($master_berkas);
+        $percentUploaded = $totalMaster > 0 ? round(($totalUploaded / $totalMaster) * 100) : 0;
 
         $title = "Daftar Berkas Master PKKM - Portal Guru | MTs RS";
         $activeMenu = 'guru_pkkm_master_berkas';

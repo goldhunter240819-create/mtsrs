@@ -1,3 +1,11 @@
+<?php
+$totalMaster = $totalMaster ?? count($master_berkas ?? []);
+$totalUploaded = $totalUploaded ?? 0;
+$totalPending = $totalPending ?? 0;
+$totalDigitalReady = $totalDigitalReady ?? 0;
+$percentUploaded = $percentUploaded ?? ($totalMaster > 0 ? round(($totalUploaded / $totalMaster) * 100) : 0);
+$categoryCounts = $categoryCounts ?? [];
+?>
 <style>
         a { text-decoration: none; }
         .z-sidebar a, .z-nav-item, .z-nav-dropdown-toggle, .z-nav-dropdown-menu a, .z-sidebar-foot a { text-decoration: none !important; }
@@ -133,6 +141,193 @@
             display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);
         }
         .modal-custom.show { display: flex; align-items: center; justify-content: center; }
+        /* DataTables Custom Polish (Zamrud Design System) */
+        .dataTables_wrapper {
+            margin-top: 14px;
+            font-size: 0.8rem;
+            color: #475569;
+        }
+        .dataTables_wrapper .dataTables_length {
+            float: left;
+            margin-bottom: 12px;
+        }
+        .dataTables_wrapper .dataTables_length label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            color: #475569;
+        }
+        .dataTables_wrapper .dataTables_length select {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #0f172a;
+            font-size: 0.8rem;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.15s;
+        }
+        .dataTables_wrapper .dataTables_length select:focus {
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+        }
+        .dataTables_wrapper .dataTables_filter {
+            float: right;
+            margin-bottom: 12px;
+        }
+        .dataTables_wrapper .dataTables_filter label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: #334155;
+        }
+        .dataTables_wrapper .dataTables_filter input {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #0f172a;
+            font-size: 0.82rem;
+            outline: none;
+            min-width: 220px;
+            transition: all 0.15s ease;
+        }
+        .dataTables_wrapper .dataTables_filter input:focus {
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+        }
+        .dataTables_wrapper::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+        .dataTables_wrapper .dataTables_info {
+            float: left;
+            padding-top: 14px;
+            font-size: 0.78rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .dataTables_wrapper .dataTables_paginate {
+            float: right;
+            padding-top: 10px;
+            display: flex;
+            gap: 4px;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 5px 11px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #475569 !important;
+            font-size: 0.76rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none !important;
+            transition: all 0.15s;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            background: #047857 !important;
+            border-color: #047857 !important;
+            color: #ffffff !important;
+            font-weight: 700;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f8fafc;
+        }
+
+        /* Modal Upload Form Styling */
+        .modal-custom .form-label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.78rem;
+            color: #334155;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .modal-custom .form-control {
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #0f172a;
+            font-size: 0.84rem;
+            outline: none;
+            transition: all 0.15s ease;
+            box-sizing: border-box;
+        }
+        .modal-custom .form-control:focus {
+            border-color: #059669;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+        }
+        .modal-custom input[type="file"].form-control {
+            padding: 7px 9px;
+            background: #f1f5f9;
+            cursor: pointer;
+        }
+        .modal-custom input[type="file"]::file-selector-button {
+            background: #047857;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 13px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-right: 12px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .modal-custom input[type="file"]::file-selector-button:hover {
+            background: #065f46;
+        }
+        .modal-custom .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+            text-decoration: none !important;
+        }
+        .modal-custom .btn-light {
+            background: #f1f5f9;
+            color: #475569;
+            border-color: #e2e8f0;
+        }
+        .modal-custom .btn-light:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+        .modal-custom .btn-success {
+            background: #047857;
+            color: #ffffff;
+            border-color: #047857;
+            box-shadow: 0 2px 6px rgba(4, 120, 87, 0.25);
+        }
+        .modal-custom .btn-success:hover {
+            background: #065f46;
+            border-color: #065f46;
+            transform: translateY(-1px);
+        }
         .modal-dialog-custom {
             background: #ffffff; border-radius: 20px; width: 100%; max-width: 520px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #e2e8f0; overflow: hidden; animation: modalIn 0.2s ease-out;
         }

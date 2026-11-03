@@ -119,6 +119,88 @@
             display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);
         }
         .modal-custom.show { display: flex; align-items: center; justify-content: center; }
+        /* Modal Upload Form Styling */
+        .modal-custom .form-label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.78rem;
+            color: #334155;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .modal-custom .form-control,
+        .modal-custom .form-select {
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #0f172a;
+            font-size: 0.84rem;
+            outline: none;
+            transition: all 0.15s ease;
+            box-sizing: border-box;
+        }
+        .modal-custom .form-control:focus,
+        .modal-custom .form-select:focus {
+            border-color: #059669;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+        }
+        .modal-custom input[type="file"].form-control {
+            padding: 7px 9px;
+            background: #f1f5f9;
+            cursor: pointer;
+        }
+        .modal-custom input[type="file"]::file-selector-button {
+            background: #047857;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 13px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-right: 12px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .modal-custom input[type="file"]::file-selector-button:hover {
+            background: #065f46;
+        }
+        .modal-custom .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+            text-decoration: none !important;
+        }
+        .modal-custom .btn-light {
+            background: #f1f5f9;
+            color: #475569;
+            border-color: #e2e8f0;
+        }
+        .modal-custom .btn-light:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+        .modal-custom .btn-success {
+            background: #047857;
+            color: #ffffff;
+            border-color: #047857;
+            box-shadow: 0 2px 6px rgba(4, 120, 87, 0.25);
+        }
+        .modal-custom .btn-success:hover {
+            background: #065f46;
+            border-color: #065f46;
+            transform: translateY(-1px);
+        }
         .modal-dialog-custom {
             background: #ffffff; border-radius: 20px; width: 100%; max-width: 520px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #e2e8f0; overflow: hidden; animation: modalIn 0.2s ease-out;
         }

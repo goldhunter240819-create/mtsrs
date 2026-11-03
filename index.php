@@ -64,6 +64,40 @@ spl_autoload_register(function ($class) {
 use App\Core\Router;
 use App\Middleware\AuthMiddleware;
 
+// --- Static Uploaded Media & Documents Fallback Delivery ---
+$reqUri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+if (preg_match('#^/uploads/(.+)$#', $reqUri, $matches)) {
+    $subPath = $matches[1];
+    $candidates = [
+        __DIR__ . '/public/uploads/' . $subPath,
+        __DIR__ . '/uploads/' . $subPath,
+    ];
+    foreach ($candidates as $filePath) {
+        if (file_exists($filePath) && !is_dir($filePath)) {
+            $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+            $mimes = [
+                'pdf' => 'application/pdf',
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'webp' => 'image/webp',
+                'gif' => 'image/gif',
+                'doc' => 'application/msword',
+                'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'xls' => 'application/vnd.ms-excel',
+                'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ];
+            $contentType = $mimes[$ext] ?? (function_exists('mime_content_type') ? @mime_content_type($filePath) : 'application/octet-stream');
+            header('Content-Type: ' . $contentType);
+            header('Content-Length: ' . filesize($filePath));
+            header('Content-Disposition: inline; filename="' . basename($filePath) . '"');
+            header('Cache-Control: public, max-age=86400');
+            readfile($filePath);
+            exit;
+        }
+    }
+}
+
 // Handle authentication & direct entry routing (/ -> /login or /portal)
 AuthMiddleware::handle();
 
