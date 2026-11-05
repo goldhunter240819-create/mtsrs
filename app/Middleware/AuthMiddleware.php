@@ -70,7 +70,6 @@ class AuthMiddleware {
                         '/evoting' => 'evoting',
                         '/admin/pkkm' => 'pkkm',
                         '/pkkm' => 'pkkm',
-                        '/guru/pkkm' => 'pkkm',
                     ];
 
                     // Check portal modules first before generic admin blocks
