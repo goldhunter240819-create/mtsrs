@@ -545,6 +545,7 @@ $router->add('GET', '/guru/berkas-pribadi/hapus/{id}', [\App\Controllers\WebGuru
 $router->add('POST', '/guru/berkas/salin-paralel', [\App\Controllers\WebGuruController::class, 'berkasSalinParalel']);
 
 // Portal Guru - PKKM (Penilaian Kinerja Kepala Madrasah)
+$router->add('GET', '/guru/pkkm', [\App\Controllers\PortalGuruPkkmController::class, 'instrumen']);
 $router->add('GET', '/guru/pkkm/instrumen', [\App\Controllers\PortalGuruPkkmController::class, 'instrumen']);
 $router->add('GET', '/guru/pkkm/master-berkas', [\App\Controllers\PortalGuruPkkmController::class, 'masterBerkas']);
 $router->add('POST', '/guru/pkkm/berkas/save', [\App\Controllers\PortalGuruPkkmController::class, 'saveBerkas']);

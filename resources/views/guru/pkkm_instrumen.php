@@ -461,10 +461,6 @@
             </div>
             <?php endforeach; ?>
 
-        </div>
-    </div>
-</div>
-
 <!-- Modal Upload Berkas -->
 <div id="uploadModal" class="modal-custom">
     <div class="modal-dialog-custom">

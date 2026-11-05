@@ -20,20 +20,41 @@ class PortalGuruPkkmController {
         $db = Database::connect('core');
         $guru = null;
 
+        // 1. Cek langsung dari $_SESSION['guru_id']
         if (!empty($_SESSION['guru_id'])) {
             $stmt = $db->prepare("SELECT id, user_id, nama, nip, foto, jabatan, status_kepegawaian FROM guru WHERE id = ?");
             $stmt->execute([$_SESSION['guru_id']]);
             $guru = $stmt->fetch(PDO::FETCH_ASSOC);
         }
 
-        if (!$guru) {
+        // 2. Cek dari $_SESSION['user_id']
+        if (!$guru && !empty($_SESSION['user_id'])) {
             $stmt = $db->prepare("SELECT id, user_id, nama, nip, foto, jabatan, status_kepegawaian FROM guru WHERE user_id = ?");
             $stmt->execute([intval($_SESSION['user_id'])]);
             $guru = $stmt->fetch(PDO::FETCH_ASSOC);
         }
 
-        // Jika user adalah admin/developer yang membuka portal guru untuk simulasi
-        if (!$guru && isset($_SESSION['role_id']) && in_array($_SESSION['role_id'], [1, 99])) {
+        // 3. Fallback: Cari dari username atau nama jika user_id belum tertaut di tabel guru
+        if (!$guru) {
+            $username = $_SESSION['username'] ?? '';
+            $nama = $_SESSION['nama'] ?? '';
+            if (!empty($username) || !empty($nama)) {
+                $stmt = $db->prepare("SELECT id, user_id, nama, nip, foto, jabatan, status_kepegawaian FROM guru WHERE (nip = ? AND nip != '' AND nip IS NOT NULL) OR (nama = ? AND nama != '') LIMIT 1");
+                $stmt->execute([$username, $nama]);
+                $guru = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($guru && !empty($_SESSION['user_id'])) {
+                    // Auto-heal tautan user_id & session
+                    try {
+                        $db->prepare("UPDATE guru SET user_id = ? WHERE id = ?")->execute([$_SESSION['user_id'], $guru['id']]);
+                    } catch (\Exception $e) {}
+                    $_SESSION['guru_id'] = $guru['id'];
+                }
+            }
+        }
+
+        // 4. Jika user adalah admin/developer/kamad yang membuka portal guru untuk simulasi/monitoring
+        $isSupervisor = !empty($_SESSION['is_kamad']) || (isset($_SESSION['role_id']) && in_array($_SESSION['role_id'], [1, 99]));
+        if (!$guru && $isSupervisor) {
             $guru = [
                 'id' => 0,
                 'user_id' => $_SESSION['user_id'],
@@ -194,19 +215,34 @@ class PortalGuruPkkmController {
         // Ambil penugasan guru di PKKM
         $myAssignments = [];
         $myKomponenIds = [];
-        if ($guru['id'] > 0) {
+        if (!empty($guru['id']) && $guru['id'] > 0) {
             $stmtMy = $db->prepare("
                 SELECT t.*, k.nama_komponen, k.urutan as komponen_urutan
                 FROM pkkm_tim t
                 JOIN pkkm_komponen k ON t.komponen_id = k.id
-                WHERE t.guru_id = ?
+                WHERE t.guru_id = ? OR t.guru_id = ?
                 ORDER BY CAST(k.urutan AS UNSIGNED) ASC
             ");
-            $stmtMy->execute([$guru['id']]);
+            $stmtMy->execute([$guru['id'], $guru['user_id'] ?? 0]);
             $myAssignments = $stmtMy->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($myAssignments as $a) {
-                $myKomponenIds[] = (int)$a['komponen_id'];
-            }
+        }
+
+        // Fallback: Jika belum ketemu via id, cocokkan via nama atau NIP guru
+        if (empty($myAssignments) && !empty($guru['nama'])) {
+            $stmtMyName = $db->prepare("
+                SELECT t.*, k.nama_komponen, k.urutan as komponen_urutan
+                FROM pkkm_tim t
+                JOIN guru g ON t.guru_id = g.id
+                JOIN pkkm_komponen k ON t.komponen_id = k.id
+                WHERE g.nama = ? OR (g.nip = ? AND g.nip != '' AND g.nip IS NOT NULL)
+                ORDER BY CAST(k.urutan AS UNSIGNED) ASC
+            ");
+            $stmtMyName->execute([$guru['nama'], $guru['nip'] ?? '']);
+            $myAssignments = $stmtMyName->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        foreach ($myAssignments as $a) {
+            $myKomponenIds[] = (int)$a['komponen_id'];
         }
 
         $komponens = $db->query("SELECT * FROM pkkm_komponen ORDER BY CAST(urutan AS UNSIGNED) ASC")->fetchAll(PDO::FETCH_ASSOC);
@@ -221,23 +257,20 @@ class PortalGuruPkkmController {
 
         $isSupervisor = !empty($_SESSION['is_kamad']) || (isset($_SESSION['role_id']) && in_array($_SESSION['role_id'], [1, 99]));
 
-        // ISOLASI KOMPONEN: Jika guru biasa, HANYA muat komponen yang ditugaskan!
-        if (!$isSupervisor) {
-            if (!empty($myKomponenIds)) {
-                $komponens = array_values(array_filter($komponens, function($k) use ($myKomponenIds) {
-                    return in_array((int)$k['id'], $myKomponenIds);
-                }));
-                $sub_komponens = array_values(array_filter($sub_komponens, function($sk) use ($myKomponenIds) {
-                    return in_array((int)$sk['komponen_id'], $myKomponenIds);
-                }));
-                $indikators = array_values(array_filter($indikators, function($ind) use ($myKomponenIds) {
-                    return in_array((int)$ind['komponen_id'], $myKomponenIds);
-                }));
-            } else {
-                $komponens = [];
-                $sub_komponens = [];
-                $indikators = [];
-            }
+        // ISOLASI KOMPONEN:
+        // Jika guru biasa dan memiliki penugasan khusus di tim, tampilkan khusus komponen tugasnya.
+        // Jika guru belum/tidak memiliki penugasan spesifik (atau akun supervisor), jangan dikosongkan/diblokir!
+        // Tetap tampilkan seluruh komponen (4 komponen) agar guru tetap dapat membuka menu, mempelajari indikator, dan berkolaborasi.
+        if (!$isSupervisor && !empty($myKomponenIds)) {
+            $komponens = array_values(array_filter($komponens, function($k) use ($myKomponenIds) {
+                return in_array((int)$k['id'], $myKomponenIds);
+            }));
+            $sub_komponens = array_values(array_filter($sub_komponens, function($sk) use ($myKomponenIds) {
+                return in_array((int)$sk['komponen_id'], $myKomponenIds);
+            }));
+            $indikators = array_values(array_filter($indikators, function($ind) use ($myKomponenIds) {
+                return in_array((int)$ind['komponen_id'], $myKomponenIds);
+            }));
         }
 
         $berkas = $db->query("SELECT * FROM pkkm_berkas")->fetchAll(PDO::FETCH_ASSOC);
@@ -330,19 +363,34 @@ class PortalGuruPkkmController {
         // Ambil penugasan guru di PKKM
         $myAssignments = [];
         $myKomponenIds = [];
-        if ($guru['id'] > 0) {
+        if (!empty($guru['id']) && $guru['id'] > 0) {
             $stmtMy = $db->prepare("
                 SELECT t.*, k.nama_komponen, k.urutan as komponen_urutan
                 FROM pkkm_tim t
                 JOIN pkkm_komponen k ON t.komponen_id = k.id
-                WHERE t.guru_id = ?
+                WHERE t.guru_id = ? OR t.guru_id = ?
                 ORDER BY CAST(k.urutan AS UNSIGNED) ASC
             ");
-            $stmtMy->execute([$guru['id']]);
+            $stmtMy->execute([$guru['id'], $guru['user_id'] ?? 0]);
             $myAssignments = $stmtMy->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($myAssignments as $a) {
-                $myKomponenIds[] = (int)$a['komponen_id'];
-            }
+        }
+
+        // Fallback: Cocokkan via nama atau NIP guru
+        if (empty($myAssignments) && !empty($guru['nama'])) {
+            $stmtMyName = $db->prepare("
+                SELECT t.*, k.nama_komponen, k.urutan as komponen_urutan
+                FROM pkkm_tim t
+                JOIN guru g ON t.guru_id = g.id
+                JOIN pkkm_komponen k ON t.komponen_id = k.id
+                WHERE g.nama = ? OR (g.nip = ? AND g.nip != '' AND g.nip IS NOT NULL)
+                ORDER BY CAST(k.urutan AS UNSIGNED) ASC
+            ");
+            $stmtMyName->execute([$guru['nama'], $guru['nip'] ?? '']);
+            $myAssignments = $stmtMyName->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        foreach ($myAssignments as $a) {
+            $myKomponenIds[] = (int)$a['komponen_id'];
         }
 
         $master_berkas = $db->query("SELECT * FROM pkkm_master_berkas ORDER BY nama_berkas ASC")->fetchAll(PDO::FETCH_ASSOC);
@@ -399,12 +447,10 @@ class PortalGuruPkkmController {
             }
             $mb['is_my_task'] = $isMyTask;
 
-            // ISOLASI MASTER BERKAS: Jika guru biasa, sembunyikan berkas yang BUKAN tugas komponennya!
-            if (!$isSupervisor) {
-                if (!empty($myKomponenIds) && !$isMyTask) {
+            // ISOLASI MASTER BERKAS: Jika guru biasa dan punya penugasan khusus komponen, sembunyikan berkas yang BUKAN tugas komponennya!
+            if (!$isSupervisor && !empty($myKomponenIds)) {
+                if (!$isMyTask) {
                     continue; // Skip dokumen komponen lain!
-                } elseif (empty($myKomponenIds)) {
-                    continue; // Guru belum ditugaskan
                 }
             }
 
