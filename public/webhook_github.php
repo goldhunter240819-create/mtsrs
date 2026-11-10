@@ -1,7 +1,11 @@
 <?php
 
 // Webhook untuk otomatis pull dari GitHub
-// 1. Bersihkan perubahan lokal tak sengaja di server agar pull tidak abort (tetap lindungi folder uploads & storage)
+// Pindah ke root direktori repo
+chdir(__DIR__ . '/..');
+
+// 1. Amankan perubahan lokal tak sengaja agar pull tidak abort (tetap lindungi folder uploads & storage)
+shell_exec("git -c safe.directory=* stash 2>&1");
 shell_exec("git -c safe.directory=* checkout -- . 2>&1");
 shell_exec("git -c safe.directory=* clean -fd -e public/uploads/ -e uploads/ -e storage/ 2>&1");
 
