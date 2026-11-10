@@ -261,8 +261,8 @@
                             </div>
                         </div>
                         <div class="kt-right">
-                            <i data-lucide="info" style="width:13px;height:13px;color:#d97706;"></i>
-                            <span>Klik tombol di atas untuk mengisi serentak, lalu simpan di bawah.</span>
+                            <i data-lucide="shield-check" style="width:14px;height:14px;color:#059669;"></i>
+                            <span style="color:#047857;">Aksi kolektif otomatis melindungi data: Terlambat, Sakit, Izin, Alpa & jam asli tidak ditimpa.</span>
                         </div>
                     </div>
 
@@ -275,7 +275,7 @@
                                 <th style="padding:0.75rem 1rem;font-size:0.7rem;font-weight:800;color:#64748b;text-transform:uppercase;min-width:170px;">
                                     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
                                         <span>Status</span>
-                                        <button type="button" onclick="setKolektifStatus('Hadir')" class="btn-th-kolektif btn-th-hadir" title="Klik untuk set Hadir semua guru">
+                                        <button type="button" onclick="setKolektifStatus('Hadir')" class="btn-th-kolektif btn-th-hadir" title="Klik untuk set Hadir (Abaikan Terlambat/Sakit/Izin/Alpa)">
                                             <i data-lucide="check-check" style="width:11px;height:11px;"></i> Semua Hadir
                                         </button>
                                     </div>
@@ -283,7 +283,7 @@
                                 <th style="padding:0.75rem 1rem;font-size:0.7rem;font-weight:800;color:#64748b;text-transform:uppercase;min-width:180px;">
                                     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
                                         <span>Jam Masuk</span>
-                                        <button type="button" onclick="acakJamMasuk()" class="btn-th-kolektif btn-th-random" title="Klik untuk acak jam masuk (07:00 - 07:30)">
+                                        <button type="button" onclick="acakJamMasuk()" class="btn-th-kolektif btn-th-random" title="Klik untuk acak jam masuk yang masih kosong (07:00 - 07:30)">
                                             <i data-lucide="shuffle" style="width:11px;height:11px;"></i> Acak 07:00-07:30
                                         </button>
                                     </div>
@@ -294,9 +294,15 @@
                         <tbody>
                             <?php $no = 1; foreach($guruList as $g): 
                                 $ex = $existingAbsenByGuruId[$g['id']] ?? null;
+                                $hasExisting = ($ex !== null);
+                                $existingStatus = $ex ? $ex['status'] : '';
+                                $existingJam = ($ex && !empty($ex['jam_masuk'])) ? substr($ex['jam_masuk'], 0, 5) : '';
                                 $curStatus = $ex['status'] ?? 'Hadir';
                             ?>
-                            <tr class="absen-row">
+                            <tr class="absen-row"
+                                data-has-existing="<?php echo $hasExisting ? '1' : '0'; ?>"
+                                data-initial-status="<?php echo htmlspecialchars($existingStatus); ?>"
+                                data-initial-jam="<?php echo htmlspecialchars($existingJam); ?>">
                                 <td style="padding:0.75rem 1rem;color:#94a3b8;font-size:0.8rem;"><?php echo $no++; ?></td>
                                 <td style="padding:0.75rem 1rem;">
                                     <div style="font-weight:700;color:#0f172a;font-size:0.85rem;"><?php echo htmlspecialchars($g['nama']); ?></div>
@@ -316,7 +322,7 @@
                                 <td style="padding:0.75rem 1rem;">
                                     <input type="time" name="absen[<?php echo $g['id']; ?>][jam_masuk]"
                                            class="jam-masuk-input"
-                                           value="<?php echo $ex['jam_masuk'] ? substr($ex['jam_masuk'],0,5) : '07:00'; ?>">
+                                           value="<?php echo htmlspecialchars($existingJam); ?>">
                                 </td>
 
                                 <td style="padding:0.75rem 1rem;">
@@ -353,40 +359,98 @@
 <script>
 function updateStyle(el) {
     el.className = 'status-sel s-' + el.value.toLowerCase();
+    const row = el.closest('tr');
+    if (row) {
+        const timeInput = row.querySelector('.jam-masuk-input');
+        if (timeInput) {
+            if (['Sakit', 'Izin', 'Alpa'].includes(el.value)) {
+                timeInput.style.opacity = '0.4';
+                timeInput.style.filter = 'grayscale(1)';
+            } else {
+                timeInput.style.opacity = '1';
+                timeInput.style.filter = 'none';
+            }
+        }
+    }
 }
 
 /**
- * Mengubah status seluruh guru secara kolektif
+ * Mengubah status guru menjadi Hadir secara kolektif
+ * Menjaga data yang sudah ada (Terlambat, Sakit, Izin, Alpa) agar TIDAK tertimpa
  */
-function setKolektifStatus(status) {
-    const selects = document.querySelectorAll('select.status-sel');
-    selects.forEach(sel => {
+function setKolektifStatus(status = 'Hadir', showToast = true) {
+    let updatedCount = 0;
+    let skippedCount = 0;
+    const protectedStatuses = ['Terlambat', 'Sakit', 'Izin', 'Alpa'];
+
+    const rows = document.querySelectorAll('tr.absen-row');
+    rows.forEach(row => {
+        const sel = row.querySelector('select.status-sel');
+        if (!sel) return;
+
+        const currentVal = sel.value;
+        const initialStatus = row.getAttribute('data-initial-status') || '';
+
+        // JANGAN TIMPA jika status saat ini atau data awal dari DB adalah Terlambat, Sakit, Izin, atau Alpa
+        if (protectedStatuses.includes(currentVal) || protectedStatuses.includes(initialStatus)) {
+            skippedCount++;
+            return;
+        }
+
         sel.value = status;
         updateStyle(sel);
         sel.classList.add('status-updated');
         setTimeout(() => sel.classList.remove('status-updated'), 300);
+        updatedCount++;
     });
 
-    if (typeof Swal !== 'undefined') {
+    if (showToast && typeof Swal !== 'undefined') {
         Swal.fire({
             icon: 'success',
-            title: 'Status Diset Hadir!',
-            text: 'Seluruh guru (' + selects.length + ' orang) berhasil diubah menjadi HADIR.',
-            timer: 1800,
+            title: 'Status Diperbarui!',
+            html: `<b>${updatedCount} guru</b> diset Hadir.<br><small style="color:#64748b;">${skippedCount} guru (Terlambat / Sakit / Izin / Alpa) aman tidak ditimpa.</small>`,
+            timer: 2300,
             showConfirmButton: false,
             toast: true,
             position: 'top-end'
         });
     }
+
+    return { updatedCount, skippedCount };
 }
 
 /**
- * Mengacak jam masuk seluruh guru antara 07:00 sampai 07:30
+ * Mengacak jam masuk antara 07:00 sampai 07:30
+ * Hanya untuk guru yang HADIR dan jam masuknya BELUM TERISI (jangan timpa yang sudah ada)
  */
-function acakJamMasuk(startMin = 0, endMin = 30) {
-    const inputs = document.querySelectorAll('.jam-masuk-input');
-    inputs.forEach(input => {
-        // Random menit antara startMin (0) sampai endMin (30)
+function acakJamMasuk(startMin = 0, endMin = 30, showToast = true) {
+    let updatedCount = 0;
+    let skippedCount = 0;
+    const protectedStatuses = ['Terlambat', 'Sakit', 'Izin', 'Alpa'];
+
+    const rows = document.querySelectorAll('tr.absen-row');
+    rows.forEach(row => {
+        const sel = row.querySelector('select.status-sel');
+        const input = row.querySelector('.jam-masuk-input');
+        if (!input) return;
+
+        const currentStatus = sel ? sel.value : '';
+        const initialStatus = row.getAttribute('data-initial-status') || '';
+        const initialJam = row.getAttribute('data-initial-jam') || '';
+
+        // 1. Abaikan jika status bukan Hadir (misal Terlambat, Sakit, Izin, Alpa)
+        if (protectedStatuses.includes(currentStatus) || protectedStatuses.includes(initialStatus)) {
+            skippedCount++;
+            return;
+        }
+
+        // 2. Abaikan jika jam masuk SUDAH TERISI sebelumnya (data asli jangan ditimpa)
+        if (initialJam !== '' || (input.value && input.value !== '' && input.value !== '--:--')) {
+            skippedCount++;
+            return;
+        }
+
+        // 3. Random menit antara startMin (0) sampai endMin (30)
         const minute = Math.floor(Math.random() * (endMin - startMin + 1)) + startMin;
         const timeStr = '07:' + String(minute).padStart(2, '0');
         input.value = timeStr;
@@ -395,34 +459,38 @@ function acakJamMasuk(startMin = 0, endMin = 30) {
         input.classList.remove('time-updated');
         void input.offsetWidth; // trigger reflow
         input.classList.add('time-updated');
+        updatedCount++;
     });
 
-    if (typeof Swal !== 'undefined') {
+    if (showToast && typeof Swal !== 'undefined') {
         Swal.fire({
             icon: 'success',
             title: 'Jam Masuk Diacak!',
-            text: 'Jam masuk ' + inputs.length + ' guru berhasil diacak antara 07:00 s/d 07:30.',
-            timer: 2000,
+            html: `<b>${updatedCount} guru</b> diisi jam acak (07:00 - 07:30).<br><small style="color:#64748b;">${skippedCount} guru (yang sudah punya jam / Terlambat / Izin / Sakit / Alpa) aman tidak ditimpa.</small>`,
+            timer: 2500,
             showConfirmButton: false,
             toast: true,
             position: 'top-end'
         });
     }
+
+    return { updatedCount, skippedCount };
 }
 
 /**
- * 1-Klik Combo: Hadirkan semua guru & acak jam masuk 07:00 - 07:30 sekaligus
+ * 1-Klik Combo: Hadirkan semua guru & acak jam masuk yang masih kosong (07:00 - 07:30)
+ * Data yang sudah ada (Terlambat, Sakit, Izin, Alpa, & Jam Terisi) dijamin tidak akan tertimpa
  */
 function kolektifHadirDanAcak() {
-    setKolektifStatus('Hadir');
-    acakJamMasuk(0, 30);
+    const resStatus = setKolektifStatus('Hadir', false);
+    const resJam = acakJamMasuk(0, 30, false);
 
     if (typeof Swal !== 'undefined') {
         Swal.fire({
             icon: 'success',
             title: 'Aksi Kolektif Berhasil!',
-            text: 'Semua guru diset HADIR dengan jam masuk acak antara 07:00 - 07:30. Jangan lupa klik Simpan!',
-            timer: 2500,
+            html: `<b>${resStatus.updatedCount} guru</b> diset Hadir & <b>${resJam.updatedCount} guru</b> diisi jam acak (07:00 - 07:30).<br><small style="color:#047857;font-weight:700;">Data Terlambat, Sakit, Izin, Alpa & jam yang sudah ada aman tidak ditimpa!</small>`,
+            timer: 3000,
             showConfirmButton: false,
             toast: true,
             position: 'top-end'
@@ -434,5 +502,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
+    // Inisialisasi style awal semua select
+    document.querySelectorAll('select.status-sel').forEach(sel => {
+        updateStyle(sel);
+    });
 });
 </script>
