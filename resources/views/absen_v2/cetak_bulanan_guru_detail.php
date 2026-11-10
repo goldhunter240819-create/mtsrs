@@ -61,9 +61,12 @@
             </select>
         </form>
         <br>
-        <button onclick="window.print()" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold;">
+        <button onclick="window.print()" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 15px; cursor: pointer; font-weight: bold;">
             🖨️ Cetak Dokumen
         </button>
+        <a href="/absen/cetak-manual-guru?bulan=<?php echo htmlspecialchars($bulan); ?>&tahun=<?php echo htmlspecialchars($tahun); ?>&format=berisi_data" style="background: #10b981; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 15px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; margin-left: 10px;">
+            📋 Cetak Format Matriks Siswa (Landscape)
+        </a>
         <p style="margin-top: 10px; font-size: 14px; color: #cbd5e1;">Pilih pengaturan kertas A4 pada mode Portrait.</p>
     </div>
 
