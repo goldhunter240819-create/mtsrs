@@ -350,6 +350,7 @@ $router->add('GET', '/absen/pengaturan-guru', [\App\Controllers\AbsenV2Controlle
 $router->add('POST', '/absen/pengaturan-guru/save', [\App\Controllers\AbsenV2Controller::class, 'savePengaturanGuruCustom']);
 $router->add('POST', '/absen/pengaturan/save', [\App\Controllers\AbsenV2Controller::class, 'savePengaturan']);
 $router->add('GET', '/absen/cetak-bulanan-guru-detail', [\App\Controllers\AbsenV2Controller::class, 'cetakBulananGuruDetail']);
+$router->add('GET', '/absen/cetak-manual-guru', [\App\Controllers\AbsenV2Controller::class, 'cetakManualGuru']);
 $router->add('GET', '/absen/cetak-bulanan-siswa-detail', [\App\Controllers\AbsenV2Controller::class, 'cetakBulananSiswaDetail']);
 $router->add('GET', '/absen/cetak-top3-siswa', [\App\Controllers\AbsenV2Controller::class, 'cetakTop3Siswa']);
 $router->add('GET', '/absen/ketidakhadiran', [\App\Controllers\AbsenV2Controller::class, 'ketidakhadiran']);

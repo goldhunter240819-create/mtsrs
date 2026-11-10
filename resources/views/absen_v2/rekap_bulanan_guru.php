@@ -87,8 +87,11 @@
                         <i data-lucide="filter" style="width:14px;height:14px;"></i> Tampilkan
                     </button>
                     <?php $guruParam = (isset($guru_id) && $guru_id > 0) ? "&guru_id=".$guru_id : ""; ?>
-                    <a href="/absen/cetak-bulanan-guru-detail?bulan=<?php echo $bulan; ?>&tahun=<?php echo $tahun; ?>&jabatan=<?php echo urlencode($jabatan); ?><?php echo $guruParam; ?>" target="_blank" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:8px 14px;border-radius:10px;font-weight:700;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none;">
-                        <i data-lucide="printer" style="width:14px;height:14px;"></i> Cetak Laporan
+                    <a href="/absen/cetak-manual-guru?bulan=<?php echo $bulan; ?>&tahun=<?php echo $tahun; ?>&jabatan=<?php echo urlencode($jabatan); ?><?php echo $guruParam; ?>&format=berisi_data" target="_blank" style="background:#10b981;color:white;border:none;padding:8px 16px;border-radius:10px;font-weight:700;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none;box-shadow:0 2px 6px rgba(16,185,129,0.25);">
+                        <i data-lucide="printer" style="width:14px;height:14px;"></i> Cetak Lembar Rekap (Landscape)
+                    </a>
+                    <a href="/absen/cetak-bulanan-guru-detail?bulan=<?php echo $bulan; ?>&tahun=<?php echo $tahun; ?>&jabatan=<?php echo urlencode($jabatan); ?><?php echo $guruParam; ?>" target="_blank" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:8px 14px;border-radius:10px;font-weight:700;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none;" title="Cetak Rincian Harian Per-Guru (Portrait)">
+                        <i data-lucide="file-text" style="width:14px;height:14px;"></i> Cetak Rincian Guru
                     </a>
                 </form>
             </div>
@@ -143,9 +146,14 @@
                             <td style="padding:0.75rem 1rem;text-align:center;"><span class="status-badge s-a"><?php echo $r['Alpa']; ?></span></td>
                             <td style="padding:0.75rem 1rem;text-align:center;"><b style="color:#0f172a;"><?php echo $total; ?></b></td>
                             <td style="padding:0.75rem 1rem;text-align:center;">
-                                <a href="/absen/cetak-bulanan-guru-detail?bulan=<?php echo $bulan; ?>&tahun=<?php echo $tahun; ?>&guru_id=<?php echo $g['id']; ?>" target="_blank" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:#eff6ff;color:#3b82f6;border-radius:6px;text-decoration:none;" title="Cetak Detail">
-                                    <i data-lucide="printer" style="width:14px;"></i>
-                                </a>
+                                <div style="display:inline-flex;align-items:center;gap:5px;">
+                                    <a href="/absen/cetak-manual-guru?bulan=<?php echo $bulan; ?>&tahun=<?php echo $tahun; ?>&guru_id=<?php echo $g['id']; ?>&format=berisi_data" target="_blank" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:#dcfce7;color:#15803d;border-radius:6px;text-decoration:none;" title="Cetak Lembar Matriks (Landscape)">
+                                        <i data-lucide="printer" style="width:13px;height:13px;"></i>
+                                    </a>
+                                    <a href="/absen/cetak-bulanan-guru-detail?bulan=<?php echo $bulan; ?>&tahun=<?php echo $tahun; ?>&guru_id=<?php echo $g['id']; ?>" target="_blank" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:#eff6ff;color:#3b82f6;border-radius:6px;text-decoration:none;" title="Cetak Rincian Guru (Portrait)">
+                                        <i data-lucide="file-text" style="width:13px;height:13px;"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; endif; ?>

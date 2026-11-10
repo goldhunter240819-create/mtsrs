@@ -1658,6 +1658,90 @@ class AbsenV2Controller {
     }
 
     // ─────────────────────────────────────────────────────────
+    // CETAK LEMBAR ABSENSI GURU (FORMAT MATRIKS BULANAN / LANDSCAPE)
+    // ─────────────────────────────────────────────────────────
+    public static function cetakManualGuru() {
+        self::checkAccess();
+
+        $bulan_filter = isset($_GET['bulan']) && $_GET['bulan'] !== '' ? intval($_GET['bulan']) : intval(date('n'));
+        $tahun_filter = isset($_GET['tahun']) ? intval($_GET['tahun']) : intval(date('Y'));
+        $jabatan      = isset($_GET['jabatan']) ? trim($_GET['jabatan']) : '';
+        $guru_id      = isset($_GET['guru_id']) ? intval($_GET['guru_id']) : 0;
+        $format       = isset($_GET['format']) ? $_GET['format'] : 'berisi_data';
+
+        $db_core   = Database::connect();
+        $db_siakad = Database::connect();
+        $active_year = \App\Core\AcademicYear::current();
+        $active_year_name = $active_year ? $active_year['name'] : '2026/2027';
+
+        // Get instansi info
+        $inst = $db_core->query("SELECT * FROM institusi LIMIT 1")->fetch();
+
+        // Get list jabatan for filter dropdown
+        $jabatanList = $db_core->query("SELECT DISTINCT jabatan FROM guru WHERE jabatan IS NOT NULL AND jabatan != '' ORDER BY jabatan ASC")->fetchAll(\PDO::FETCH_COLUMN);
+
+        // All teachers for filter dropdown
+        $allGuru = $db_core->query("SELECT id, nama FROM guru ORDER BY nama ASC")->fetchAll();
+
+        // Query teachers to be displayed
+        $whereGuru = "WHERE 1=1";
+        $paramsGuru = [];
+        if (!empty($jabatan)) {
+            $whereGuru .= " AND g.jabatan = :jabatan";
+            $paramsGuru[':jabatan'] = $jabatan;
+        }
+        if ($guru_id > 0) {
+            $whereGuru .= " AND g.id = :guru_id";
+            $paramsGuru[':guru_id'] = $guru_id;
+        }
+
+        $sqlGuru = "SELECT g.id, g.nama, g.nip, g.npk, g.jabatan, g.jenis_kelamin 
+                    FROM guru g 
+                    $whereGuru 
+                    ORDER BY g.nama ASC";
+        $stmtG = $db_core->prepare($sqlGuru);
+        $stmtG->execute($paramsGuru);
+        $guruList = $stmtG->fetchAll();
+
+        // Ambil data hari libur dari kalender pendidikan
+        $holidays = [];
+        $stmtLibur = $db_core->prepare("SELECT tanggal_mulai, tanggal_selesai, kegiatan FROM kalender_pendidikan WHERE kategori = 'Libur'");
+        $stmtLibur->execute();
+        while ($lbr = $stmtLibur->fetch(\PDO::FETCH_ASSOC)) {
+            $start = strtotime($lbr['tanggal_mulai']);
+            $end = strtotime($lbr['tanggal_selesai']);
+            for ($d = $start; $d <= $end; $d += 86400) {
+                $holidays[date('Y-m-d', $d)] = $lbr['kegiatan'];
+            }
+        }
+
+        // Ambil data absensi guru jika format berisi_data
+        $absenData = [];
+        if ($format === 'berisi_data' && !empty($guruList)) {
+            $guruIds = array_column($guruList, 'id');
+            $placeholders = implode(',', array_fill(0, count($guruIds), '?'));
+            $sqlAbsen = "SELECT guru_id, MONTH(tanggal) as bln, DAY(tanggal) as tgl, status, jam_masuk, keterangan 
+                         FROM absensi_guru 
+                         WHERE YEAR(tanggal) = ? AND guru_id IN ($placeholders)";
+            $params = array_merge([$tahun_filter], $guruIds);
+            if (!empty($bulan_filter)) {
+                $sqlAbsen = "SELECT guru_id, MONTH(tanggal) as bln, DAY(tanggal) as tgl, status, jam_masuk, keterangan 
+                             FROM absensi_guru 
+                             WHERE YEAR(tanggal) = ? AND MONTH(tanggal) = ? AND guru_id IN ($placeholders)";
+                $params = array_merge([$tahun_filter, $bulan_filter], $guruIds);
+            }
+            
+            $stmtAbsen = $db_siakad->prepare($sqlAbsen);
+            $stmtAbsen->execute($params);
+            while ($row = $stmtAbsen->fetch()) {
+                $absenData[$row['guru_id']][intval($row['bln'])][intval($row['tgl'])] = $row['status'];
+            }
+        }
+
+        include __DIR__ . '/../../resources/views/absen_v2/cetak_manual_guru.php';
+    }
+
+    // ─────────────────────────────────────────────────────────
     // VERIFIKASI DOKUMEN CETAK
     // ─────────────────────────────────────────────────────────
     public static function verifyAbsen() {
