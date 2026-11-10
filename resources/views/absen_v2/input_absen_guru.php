@@ -250,11 +250,11 @@
                                     <i data-lucide="check-check" style="width:14px;height:14px;"></i>
                                     <span>Hadirkan Semua Guru</span>
                                 </button>
-                                <button type="button" class="btn-kt btn-kt-random" onclick="acakJamMasuk()" title="Isi jam masuk semua guru secara acak antara 07:00 s/d 07:30">
+                                <button type="button" class="btn-kt btn-kt-random" onclick="acakJamMasuk(25, 30)" title="Isi jam masuk semua guru secara acak antara 07:25 s/d 07:30">
                                     <i data-lucide="shuffle" style="width:14px;height:14px;"></i>
-                                    <span>Acak Jam (07:00 - 07:30)</span>
+                                    <span>Acak Jam (07:25 - 07:30)</span>
                                 </button>
-                                <button type="button" class="btn-kt btn-kt-combo" onclick="kolektifHadirDanAcak()" title="1-Klik: Set semua Hadir & acak jam masuk 07:00-07:30">
+                                <button type="button" class="btn-kt btn-kt-combo" onclick="kolektifHadirDanAcak()" title="1-Klik: Set semua Hadir & acak jam masuk 07:25-07:30">
                                     <i data-lucide="sparkles" style="width:14px;height:14px;"></i>
                                     <span>1-Klik: Hadir Semua & Acak Jam</span>
                                 </button>
@@ -283,8 +283,8 @@
                                 <th style="padding:0.75rem 1rem;font-size:0.7rem;font-weight:800;color:#64748b;text-transform:uppercase;min-width:180px;">
                                     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
                                         <span>Jam Masuk</span>
-                                        <button type="button" onclick="acakJamMasuk()" class="btn-th-kolektif btn-th-random" title="Klik untuk acak jam masuk yang masih kosong (07:00 - 07:30)">
-                                            <i data-lucide="shuffle" style="width:11px;height:11px;"></i> Acak 07:00-07:30
+                                        <button type="button" onclick="acakJamMasuk(25, 30)" class="btn-th-kolektif btn-th-random" title="Klik untuk acak jam masuk yang masih kosong (07:25 - 07:30)">
+                                            <i data-lucide="shuffle" style="width:11px;height:11px;"></i> Acak 07:25-07:30
                                         </button>
                                     </div>
                                 </th>
@@ -420,10 +420,10 @@ function setKolektifStatus(status = 'Hadir', showToast = true) {
 }
 
 /**
- * Mengacak jam masuk antara 07:00 sampai 07:30
+ * Mengacak jam masuk antara 07:25 sampai 07:30
  * Hanya untuk guru yang HADIR dan jam masuknya BELUM TERISI (jangan timpa yang sudah ada)
  */
-function acakJamMasuk(startMin = 0, endMin = 30, showToast = true) {
+function acakJamMasuk(startMin = 25, endMin = 30, showToast = true) {
     let updatedCount = 0;
     let skippedCount = 0;
     const protectedStatuses = ['Terlambat', 'Sakit', 'Izin', 'Alpa'];
@@ -450,7 +450,7 @@ function acakJamMasuk(startMin = 0, endMin = 30, showToast = true) {
             return;
         }
 
-        // 3. Random menit antara startMin (0) sampai endMin (30)
+        // 3. Random menit antara startMin (25) sampai endMin (30)
         const minute = Math.floor(Math.random() * (endMin - startMin + 1)) + startMin;
         const timeStr = '07:' + String(minute).padStart(2, '0');
         input.value = timeStr;
@@ -466,7 +466,7 @@ function acakJamMasuk(startMin = 0, endMin = 30, showToast = true) {
         Swal.fire({
             icon: 'success',
             title: 'Jam Masuk Diacak!',
-            html: `<b>${updatedCount} guru</b> diisi jam acak (07:00 - 07:30).<br><small style="color:#64748b;">${skippedCount} guru (yang sudah punya jam / Terlambat / Izin / Sakit / Alpa) aman tidak ditimpa.</small>`,
+            html: `<b>${updatedCount} guru</b> diisi jam acak (07:25 - 07:30).<br><small style="color:#64748b;">${skippedCount} guru (yang sudah punya jam / Terlambat / Izin / Sakit / Alpa) aman tidak ditimpa.</small>`,
             timer: 2500,
             showConfirmButton: false,
             toast: true,
@@ -478,18 +478,18 @@ function acakJamMasuk(startMin = 0, endMin = 30, showToast = true) {
 }
 
 /**
- * 1-Klik Combo: Hadirkan semua guru & acak jam masuk yang masih kosong (07:00 - 07:30)
+ * 1-Klik Combo: Hadirkan semua guru & acak jam masuk yang masih kosong (07:25 - 07:30)
  * Data yang sudah ada (Terlambat, Sakit, Izin, Alpa, & Jam Terisi) dijamin tidak akan tertimpa
  */
 function kolektifHadirDanAcak() {
     const resStatus = setKolektifStatus('Hadir', false);
-    const resJam = acakJamMasuk(0, 30, false);
+    const resJam = acakJamMasuk(25, 30, false);
 
     if (typeof Swal !== 'undefined') {
         Swal.fire({
             icon: 'success',
             title: 'Aksi Kolektif Berhasil!',
-            html: `<b>${resStatus.updatedCount} guru</b> diset Hadir & <b>${resJam.updatedCount} guru</b> diisi jam acak (07:00 - 07:30).<br><small style="color:#047857;font-weight:700;">Data Terlambat, Sakit, Izin, Alpa & jam yang sudah ada aman tidak ditimpa!</small>`,
+            html: `<b>${resStatus.updatedCount} guru</b> diset Hadir & <b>${resJam.updatedCount} guru</b> diisi jam acak (07:25 - 07:30).<br><small style="color:#047857;font-weight:700;">Data Terlambat, Sakit, Izin, Alpa & jam yang sudah ada aman tidak ditimpa!</small>`,
             timer: 3000,
             showConfirmButton: false,
             toast: true,
