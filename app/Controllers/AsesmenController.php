@@ -437,6 +437,50 @@ class AsesmenController
         require_once __DIR__ . '/../../resources/views/asesmen/cetak_denah.php';
     }
 
+    public function peserta()
+    {
+        $this->checkAccess();
+        $db = Database::connect('core');
+
+        $eventId = (int)($_GET['event_id'] ?? 0);
+        $ruangId = (int)($_GET['ruang_id'] ?? 0);
+
+        $events = $db->query("SELECT id, nama, kode FROM asesmen_event WHERE status = 'aktif' ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
+        if ($eventId === 0 && !empty($events)) {
+            $eventId = $events[0]['id'];
+        }
+
+        $ruangs = $db->query("SELECT id, nama_ruang, kapasitas FROM asesmen_ruang ORDER BY nama_ruang ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+        $sql = "
+            SELECT p.*, s.nama as nama_siswa, s.nis, s.nisn, s.jenis_kelamin, k.nama_kelas, r.nama_ruang, e.nama as nama_event
+            FROM asesmen_peserta p
+            JOIN siswa s ON p.siswa_id = s.id
+            LEFT JOIN kelas k ON s.kelas_id = k.id
+            LEFT JOIN asesmen_ruang r ON p.ruang_id = r.id
+            LEFT JOIN asesmen_event e ON p.event_id = e.id
+            WHERE p.event_id = ?
+        ";
+        $params = [$eventId];
+
+        if ($ruangId > 0) {
+            $sql .= " AND p.ruang_id = ?";
+            $params[] = $ruangId;
+        }
+
+        $sql .= " ORDER BY r.nama_ruang ASC, p.nomor_meja ASC";
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        $pesertaList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $totalSiswaAktif = $db->query("SELECT COUNT(*) FROM siswa WHERE status = 'aktif'")->fetchColumn() ?: 0;
+
+        $activeMenu = 'asesmen_peserta';
+        $title = 'Distribusi Peserta Ujian | MTs RS';
+
+        require_once __DIR__ . '/../../resources/views/asesmen/peserta.php';
+    }
+
     public function acakSiswa()
     {
         $this->checkAccess();
