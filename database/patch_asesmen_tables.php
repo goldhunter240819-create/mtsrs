@@ -38,10 +38,23 @@ try {
         event_id INT NULL,
         nama_ruang VARCHAR(50) NOT NULL,
         kapasitas INT DEFAULT 20,
+        tipe_meja TINYINT DEFAULT 1,
+        jumlah_kolom INT DEFAULT 5,
+        jumlah_baris INT DEFAULT 4,
+        pola_penomoran VARCHAR(20) DEFAULT 'kolom',
         lokasi VARCHAR(100) NULL,
         keterangan VARCHAR(255) NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    // Alter table if exists but missing columns
+    try {
+        $colsR = $pdo->query("SHOW COLUMNS FROM asesmen_ruang")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('tipe_meja', $colsR)) $pdo->exec("ALTER TABLE asesmen_ruang ADD COLUMN tipe_meja TINYINT DEFAULT 1 AFTER kapasitas");
+        if (!in_array('jumlah_kolom', $colsR)) $pdo->exec("ALTER TABLE asesmen_ruang ADD COLUMN jumlah_kolom INT DEFAULT 5 AFTER tipe_meja");
+        if (!in_array('jumlah_baris', $colsR)) $pdo->exec("ALTER TABLE asesmen_ruang ADD COLUMN jumlah_baris INT DEFAULT 4 AFTER jumlah_kolom");
+        if (!in_array('pola_penomoran', $colsR)) $pdo->exec("ALTER TABLE asesmen_ruang ADD COLUMN pola_penomoran VARCHAR(20) DEFAULT 'kolom' AFTER jumlah_baris");
+    } catch (\Exception $e) {}
 
     // 3. Distribusi Peserta & Nomor Meja
     $pdo->exec("CREATE TABLE IF NOT EXISTS asesmen_peserta (
@@ -51,10 +64,20 @@ try {
         ruang_id INT NULL,
         nomor_peserta VARCHAR(50) NULL,
         nomor_meja INT NULL,
+        posisi_baris INT NULL,
+        posisi_kolom INT NULL,
+        posisi_bangku INT DEFAULT 1,
         sesi INT DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE KEY unique_event_siswa (event_id, siswa_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    try {
+        $colsP = $pdo->query("SHOW COLUMNS FROM asesmen_peserta")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('posisi_baris', $colsP)) $pdo->exec("ALTER TABLE asesmen_peserta ADD COLUMN posisi_baris INT NULL AFTER nomor_meja");
+        if (!in_array('posisi_kolom', $colsP)) $pdo->exec("ALTER TABLE asesmen_peserta ADD COLUMN posisi_kolom INT NULL AFTER posisi_baris");
+        if (!in_array('posisi_bangku', $colsP)) $pdo->exec("ALTER TABLE asesmen_peserta ADD COLUMN posisi_bangku INT DEFAULT 1 AFTER posisi_kolom");
+    } catch (\Exception $e) {}
 
     // 4. Bank Soal & Kisi-Kisi
     $pdo->exec("CREATE TABLE IF NOT EXISTS asesmen_bank_soal (

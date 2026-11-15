@@ -575,13 +575,19 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
                     
                     <div class="z-nav-cat">PENGATURAN RUANG & SESI</div>
                     <a href="<?php echo Helper::url('/asesmen/ruang'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_ruang' ? 'active' : ''; ?>">
-                        <i data-lucide="building"></i> Ruang & Nomor Meja
+                        <i data-lucide="building"></i> Ruang & Formasi Meja
+                    </a>
+                    <a href="<?php echo Helper::url('/asesmen/denah'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_denah' ? 'active' : ''; ?>">
+                        <i data-lucide="layout-grid"></i> Denah & Atur Meja
                     </a>
                     <a href="<?php echo Helper::url('/asesmen/peserta'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_peserta' ? 'active' : ''; ?>">
                         <i data-lucide="users"></i> Distribusi Peserta
                     </a>
-                    <a href="<?php echo Helper::url('/asesmen/kartu-peserta'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_kartu_peserta' ? 'active' : ''; ?>">
-                        <i data-lucide="id-card"></i> Cetak Kartu & Meja
+                    <a href="<?php echo Helper::url('/asesmen/nomor-meja'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_nomor_meja' ? 'active' : ''; ?>">
+                        <i data-lucide="tag"></i> Cetak Nomor Meja
+                    </a>
+                    <a href="<?php echo Helper::url('/siakad/siswa/cetak-kartu-massal'); ?>" target="_blank" class="z-nav-item" title="Menggunakan Kartu Pelajar SIAKAD sebagai Kartu Ujian">
+                        <i data-lucide="id-card"></i> Kartu Pelajar (SIAKAD)
                     </a>
 
                     <div class="z-nav-cat">ADMINISTRASI & CETAK</div>

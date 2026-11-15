@@ -39,6 +39,12 @@ class Helper {
         return $target;
     }
 
+    public static function isAjax() {
+        return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') 
+            || (isset($_GET['ajax']) || isset($_POST['ajax'])) 
+            || (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false);
+    }
+
     public static function getPortalModules() {
         return [
             'siakad' => [

@@ -675,10 +675,32 @@ $router->add('GET', '/asesmen/dashboard', [\App\Controllers\AsesmenController::c
 $router->add('GET', '/asesmen/event', [\App\Controllers\AsesmenController::class, 'event']);
 $router->add('POST', '/asesmen/event/save', [\App\Controllers\AsesmenController::class, 'saveEvent']);
 $router->add('GET', '/asesmen/bank-soal', [\App\Controllers\AsesmenController::class, 'bankSoal']);
+$router->add('GET', '/asesmen/kisi-kisi', [\App\Controllers\AsesmenController::class, 'kisiKisi']);
 $router->add('GET', '/asesmen/ruang', [\App\Controllers\AsesmenController::class, 'ruang']);
 $router->add('POST', '/asesmen/ruang/save', [\App\Controllers\AsesmenController::class, 'saveRuang']);
+$router->add('POST', '/asesmen/ruang/delete', [\App\Controllers\AsesmenController::class, 'deleteRuang']);
+$router->add('GET', '/asesmen/denah', [\App\Controllers\AsesmenController::class, 'denah']);
+$router->add('GET', '/asesmen/denah/cetak', [\App\Controllers\AsesmenController::class, 'cetakDenah']);
+$router->add('POST', '/asesmen/denah/acak-siswa', [\App\Controllers\AsesmenController::class, 'acakSiswa']);
+$router->add('GET', '/asesmen/peserta', [\App\Controllers\AsesmenController::class, 'peserta']);
+$router->add('POST', '/asesmen/peserta/generate', [\App\Controllers\AsesmenController::class, 'generatePeserta']);
+$router->add('POST', '/asesmen/peserta/acak', [\App\Controllers\AsesmenController::class, 'acakSiswa']);
+$router->add('GET', '/asesmen/kartu-peserta', [\App\Controllers\AsesmenController::class, 'kartuPeserta']);
+$router->add('GET', '/asesmen/kartu-peserta/cetak', [\App\Controllers\AsesmenController::class, 'cetakKartuPeserta']);
+$router->add('GET', '/asesmen/nomor-meja', [\App\Controllers\AsesmenController::class, 'nomorMeja']);
+$router->add('GET', '/asesmen/nomor-meja/cetak', [\App\Controllers\AsesmenController::class, 'cetakNomorMeja']);
+$router->add('GET', '/asesmen/daftar-hadir', [\App\Controllers\AsesmenController::class, 'daftarHadir']);
+$router->add('GET', '/asesmen/daftar-hadir/cetak', [\App\Controllers\AsesmenController::class, 'cetakDaftarHadir']);
+$router->add('GET', '/asesmen/daftar-hadir-pengawas', [\App\Controllers\AsesmenController::class, 'daftarHadirPengawas']);
+$router->add('GET', '/asesmen/daftar-hadir-pengawas/cetak', [\App\Controllers\AsesmenController::class, 'cetakDaftarHadirPengawas']);
+$router->add('GET', '/asesmen/tata-tertib', [\App\Controllers\AsesmenController::class, 'tataTertib']);
+$router->add('GET', '/asesmen/tata-tertib/cetak', [\App\Controllers\AsesmenController::class, 'cetakTataTertib']);
 $router->add('GET', '/asesmen/berita-acara', [\App\Controllers\AsesmenController::class, 'beritaAcara']);
+$router->add('POST', '/asesmen/berita-acara/save', [\App\Controllers\AsesmenController::class, 'saveBeritaAcara']);
+$router->add('GET', '/asesmen/berita-acara/cetak', [\App\Controllers\AsesmenController::class, 'cetakBeritaAcara']);
 $router->add('GET', '/asesmen/jadwal', [\App\Controllers\AsesmenController::class, 'jadwal']);
+$router->add('POST', '/asesmen/jadwal/save', [\App\Controllers\AsesmenController::class, 'saveJadwal']);
+$router->add('GET', '/asesmen/jadwal/cetak', [\App\Controllers\AsesmenController::class, 'cetakJadwal']);
 
 // Default fallback 404
 $router->run();
