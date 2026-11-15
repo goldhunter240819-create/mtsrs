@@ -702,6 +702,13 @@ $router->add('GET', '/asesmen/jadwal', [\App\Controllers\AsesmenController::clas
 $router->add('POST', '/asesmen/jadwal/save', [\App\Controllers\AsesmenController::class, 'saveJadwal']);
 $router->add('POST', '/asesmen/jadwal/delete', [\App\Controllers\AsesmenController::class, 'deleteJadwal']);
 $router->add('GET', '/asesmen/jadwal/cetak', [\App\Controllers\AsesmenController::class, 'cetakJadwal']);
+$router->add('GET', '/asesmen/scan', [\App\Controllers\AsesmenController::class, 'scan']);
+$router->add('POST', '/asesmen/scan/process', [\App\Controllers\AsesmenController::class, 'processScan']);
+$router->add('GET', '/asesmen/scan/stats', [\App\Controllers\AsesmenController::class, 'getScanStats']);
+$router->add('POST', '/asesmen/scan/reset', [\App\Controllers\AsesmenController::class, 'resetPresensi']);
+$router->add('POST', '/asesmen/scan/manual', [\App\Controllers\AsesmenController::class, 'manualPresensi']);
+$router->add('GET', '/asesmen/berita-acara/auto-data', [\App\Controllers\AsesmenController::class, 'getAutoBeritaAcaraData']);
+
 
 // Default fallback 404
 $router->run();

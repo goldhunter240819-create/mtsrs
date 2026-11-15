@@ -259,14 +259,32 @@ $tglFormatted = date('j', $timeTgl) . ' ' . $bulanIndo[(int)date('n', $timeTgl)]
                         <td style="text-align: center; font-family: monospace; font-weight: bold;"><?php echo htmlspecialchars($p['nomor_peserta'] ?: '-'); ?></td>
                         <td style="font-weight: bold;"><?php echo htmlspecialchars($p['nama_siswa']); ?></td>
                         <td style="text-align: center;"><?php echo htmlspecialchars($p['nama_kelas']); ?></td>
-                        <td style="width: 75px; height: 32px; font-size: 8pt; vertical-align: bottom;">
+                        <td style="width: 75px; height: 32px; font-size: 8pt; vertical-align: middle;">
                             <?php if ($isOdd): ?>
-                                <?php echo $no; ?>. ....................
+                                <?php if (!empty($p['presensi_status'])): ?>
+                                    <div style="font-size: 8pt; font-weight: bold; color: #047857; text-align: left; padding-left: 4px;">
+                                        &#10003; <?php echo strtoupper($p['presensi_status']); ?><br>
+                                        <span style="font-size: 7pt; font-weight: normal; color: #334155;"><?php echo substr($p['jam_scan'], 0, 5); ?> WIB</span>
+                                    </div>
+                                <?php else: ?>
+                                    <div style="vertical-align: bottom; height: 100%; display: flex; align-items: flex-end;">
+                                        <?php echo $no; ?>. ....................
+                                    </div>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </td>
-                        <td style="width: 75px; height: 32px; font-size: 8pt; vertical-align: bottom;">
+                        <td style="width: 75px; height: 32px; font-size: 8pt; vertical-align: middle;">
                             <?php if (!$isOdd): ?>
-                                <?php echo $no; ?>. ....................
+                                <?php if (!empty($p['presensi_status'])): ?>
+                                    <div style="font-size: 8pt; font-weight: bold; color: #047857; text-align: left; padding-left: 4px;">
+                                        &#10003; <?php echo strtoupper($p['presensi_status']); ?><br>
+                                        <span style="font-size: 7pt; font-weight: normal; color: #334155;"><?php echo substr($p['jam_scan'], 0, 5); ?> WIB</span>
+                                    </div>
+                                <?php else: ?>
+                                    <div style="vertical-align: bottom; height: 100%; display: flex; align-items: flex-end;">
+                                        <?php echo $no; ?>. ....................
+                                    </div>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </td>
                     </tr>

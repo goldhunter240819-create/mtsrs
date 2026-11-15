@@ -144,6 +144,22 @@ class AsesmenController
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
+            $db->exec("CREATE TABLE IF NOT EXISTS asesmen_presensi (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                event_id INT NOT NULL,
+                jadwal_id INT NULL,
+                mapel_id INT NOT NULL,
+                siswa_id INT NOT NULL,
+                ruang_id INT NULL,
+                nomor_meja INT NULL,
+                tanggal DATE NOT NULL,
+                jam_scan TIME NOT NULL,
+                status ENUM('hadir', 'terlambat', 'izin', 'sakit', 'alpa') DEFAULT 'hadir',
+                keterangan VARCHAR(255) NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_presensi (event_id, mapel_id, tanggal, siswa_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
             // Seed default events if table is empty
             $check = $db->query("SELECT COUNT(*) FROM asesmen_event")->fetchColumn();
             if ($check == 0) {
@@ -918,14 +934,19 @@ class AsesmenController
         $mapel = $stmtM->fetch(PDO::FETCH_ASSOC);
 
         $stmtP = $db->prepare("
-            SELECT p.*, s.nama as nama_siswa, s.nis, s.nisn, k.nama_kelas
+            SELECT p.*, s.nama as nama_siswa, s.nis, s.nisn, k.nama_kelas,
+                   pr.id as presensi_id, pr.jam_scan, pr.status as presensi_status
             FROM asesmen_peserta p
             JOIN siswa s ON p.siswa_id = s.id
             LEFT JOIN kelas k ON s.kelas_id = k.id
+            LEFT JOIN asesmen_presensi pr ON pr.siswa_id = p.siswa_id 
+                 AND pr.event_id = p.event_id 
+                 AND pr.mapel_id = ? 
+                 AND pr.tanggal = ?
             WHERE p.event_id = ? AND p.ruang_id = ?
             ORDER BY p.nomor_meja ASC
         ");
-        $stmtP->execute([$eventId, $ruangId]);
+        $stmtP->execute([$mapelId, $tanggal, $eventId, $ruangId]);
         $pesertaList = $stmtP->fetchAll(PDO::FETCH_ASSOC);
 
         require_once __DIR__ . '/../../resources/views/asesmen/cetak_daftar_hadir.php';
@@ -1249,5 +1270,559 @@ class AsesmenController
         $jadwalList = $db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 
         require_once __DIR__ . '/../../resources/views/asesmen/cetak_jadwal.php';
+    }
+
+    public function scan()
+    {
+        $this->checkAccess();
+        $this->ensureTablesExist();
+        $db = Database::connect('core');
+
+        $today = date('Y-m-d');
+        $nowTime = date('H:i:s');
+
+        $events = $db->query("SELECT * FROM asesmen_event WHERE status = 'aktif' ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
+        $ruangs = $db->query("SELECT * FROM asesmen_ruang ORDER BY nama_ruang ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+        $requestedJadwalId = (int)($_GET['jadwal_id'] ?? 0);
+        $requestedRuangId = (int)($_GET['ruang_id'] ?? 0);
+
+        // All schedules for today
+        $jadwalsToday = $db->query("
+            SELECT j.*, m.nama_mapel, e.nama as nama_event, k.nama_kelas
+            FROM asesmen_jadwal j
+            JOIN mapel m ON j.mapel_id = m.id
+            JOIN asesmen_event e ON j.event_id = e.id
+            LEFT JOIN kelas k ON j.kelas_id = k.id
+            WHERE j.tanggal = '$today'
+            ORDER BY j.jam_mulai ASC
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        // Recent / upcoming schedules for dropdown
+        $allJadwals = $db->query("
+            SELECT j.*, m.nama_mapel, e.nama as nama_event, k.nama_kelas
+            FROM asesmen_jadwal j
+            JOIN mapel m ON j.mapel_id = m.id
+            JOIN asesmen_event e ON j.event_id = e.id
+            LEFT JOIN kelas k ON j.kelas_id = k.id
+            ORDER BY j.tanggal DESC, j.jam_mulai ASC
+            LIMIT 30
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        // Auto-detect active schedule
+        $activeJadwal = null;
+        if ($requestedJadwalId > 0) {
+            foreach ($allJadwals as $j) {
+                if ($j['id'] == $requestedJadwalId) {
+                    $activeJadwal = $j;
+                    break;
+                }
+            }
+        }
+
+        if (!$activeJadwal && !empty($jadwalsToday)) {
+            // Find schedule currently running or starting soon (within -45min to +30min)
+            foreach ($jadwalsToday as $j) {
+                $startCheck = date('H:i:s', strtotime($j['jam_mulai']) - 45 * 60);
+                $endCheck = date('H:i:s', strtotime($j['jam_selesai']) + 30 * 60);
+                if ($nowTime >= $startCheck && $nowTime <= $endCheck) {
+                    $activeJadwal = $j;
+                    break;
+                }
+            }
+            if (!$activeJadwal) {
+                $activeJadwal = $jadwalsToday[0];
+            }
+        }
+
+        if (!$activeJadwal && !empty($allJadwals)) {
+            $activeJadwal = $allJadwals[0];
+        }
+
+        $selectedRuangId = $requestedRuangId;
+        $pesertaList = [];
+        $totalPeserta = 0;
+        $totalHadir = 0;
+        $totalBelum = 0;
+        $recentScans = [];
+
+        if ($activeJadwal) {
+            $eventId = (int)$activeJadwal['event_id'];
+            $mapelId = (int)$activeJadwal['mapel_id'];
+            $jadwalTanggal = $activeJadwal['tanggal'];
+
+            $whereP = "p.event_id = $eventId";
+            if ($selectedRuangId > 0) {
+                $whereP .= " AND p.ruang_id = $selectedRuangId";
+            }
+            if (!empty($activeJadwal['kelas_id'])) {
+                $whereP .= " AND s.kelas_id = " . (int)$activeJadwal['kelas_id'];
+            } elseif (!empty($activeJadwal['tingkat']) && $activeJadwal['tingkat'] !== 'Semua') {
+                $whereP .= " AND (k.tingkat = '" . addslashes($activeJadwal['tingkat']) . "' OR k.nama_kelas LIKE '" . addslashes($activeJadwal['tingkat']) . "%')";
+            }
+
+            $pesertaList = $db->query("
+                SELECT p.*, s.nama as nama_siswa, s.nis, s.nisn, s.foto, k.nama_kelas, r.nama_ruang,
+                       pr.id as presensi_id, pr.jam_scan, pr.status as presensi_status, pr.keterangan as presensi_ket
+                FROM asesmen_peserta p
+                JOIN siswa s ON p.siswa_id = s.id
+                LEFT JOIN kelas k ON s.kelas_id = k.id
+                LEFT JOIN asesmen_ruang r ON p.ruang_id = r.id
+                LEFT JOIN asesmen_presensi pr ON pr.siswa_id = p.siswa_id
+                     AND pr.event_id = $eventId
+                     AND pr.mapel_id = $mapelId
+                     AND pr.tanggal = '$jadwalTanggal'
+                WHERE $whereP
+                ORDER BY p.ruang_id ASC, p.nomor_meja ASC
+            ")->fetchAll(PDO::FETCH_ASSOC);
+
+            $totalPeserta = count($pesertaList);
+            foreach ($pesertaList as $p) {
+                if (!empty($p['presensi_id'])) {
+                    $totalHadir++;
+                } else {
+                    $totalBelum++;
+                }
+            }
+
+            $whereRecent = "pr.event_id = $eventId AND pr.mapel_id = $mapelId AND pr.tanggal = '$jadwalTanggal'";
+            if ($selectedRuangId > 0) {
+                $whereRecent .= " AND pr.ruang_id = $selectedRuangId";
+            }
+
+            $recentScans = $db->query("
+                SELECT pr.*, s.nama as nama_siswa, s.nis, s.foto, k.nama_kelas, r.nama_ruang
+                FROM asesmen_presensi pr
+                JOIN siswa s ON pr.siswa_id = s.id
+                LEFT JOIN kelas k ON s.kelas_id = k.id
+                LEFT JOIN asesmen_ruang r ON pr.ruang_id = r.id
+                WHERE $whereRecent
+                ORDER BY pr.jam_scan DESC, pr.id DESC
+                LIMIT 20
+            ")->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        $persenHadir = $totalPeserta > 0 ? round(($totalHadir / $totalPeserta) * 100) : 0;
+        $activeMenu = 'asesmen_scan';
+        $title = 'Scan Presensi Ujian Siswa | MTs RS';
+
+        require_once __DIR__ . '/../../resources/views/asesmen/scan.php';
+    }
+
+    public function processScan()
+    {
+        header('Content-Type: application/json');
+        $this->ensureTablesExist();
+        $db = Database::connect('core');
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input) {
+            $input = $_POST;
+        }
+
+        $qrCode = trim($input['qr_code'] ?? '');
+        $jadwalId = (int)($input['jadwal_id'] ?? 0);
+        $ruangId = (int)($input['ruang_id'] ?? 0);
+
+        if (empty($qrCode)) {
+            echo json_encode(['success' => false, 'message' => 'Kode scan QR/NIS tidak boleh kosong!']);
+            exit;
+        }
+
+        // 1. Resolve Jadwal
+        $jadwal = null;
+        if ($jadwalId > 0) {
+            $stmtJ = $db->prepare("
+                SELECT j.*, m.nama_mapel, e.nama as nama_event 
+                FROM asesmen_jadwal j 
+                JOIN mapel m ON j.mapel_id = m.id 
+                JOIN asesmen_event e ON j.event_id = e.id 
+                WHERE j.id = ?
+            ");
+            $stmtJ->execute([$jadwalId]);
+            $jadwal = $stmtJ->fetch(PDO::FETCH_ASSOC);
+        } else {
+            $today = date('Y-m-d');
+            $nowTime = date('H:i:s');
+            $jadwal = $db->query("
+                SELECT j.*, m.nama_mapel, e.nama as nama_event 
+                FROM asesmen_jadwal j 
+                JOIN mapel m ON j.mapel_id = m.id 
+                JOIN asesmen_event e ON j.event_id = e.id 
+                WHERE j.tanggal = '$today' 
+                ORDER BY ABS(TIME_TO_SEC(TIMEDIFF(j.jam_mulai, '$nowTime'))) ASC 
+                LIMIT 1
+            ")->fetch(PDO::FETCH_ASSOC);
+        }
+
+        if (!$jadwal) {
+            echo json_encode(['success' => false, 'message' => 'Tidak ada jadwal ujian aktif atau sesi ujian belum dipilih!']);
+            exit;
+        }
+
+        $eventId = (int)$jadwal['event_id'];
+        $mapelId = (int)$jadwal['mapel_id'];
+        $tanggal = $jadwal['tanggal'];
+
+        // 2. Resolve Siswa by qr_token, nis, nisn, or nomor_peserta
+        $stmtS = $db->prepare("
+            SELECT s.id, s.nis, s.nisn, s.nama, s.foto, s.kelas_id, k.nama_kelas, k.tingkat
+            FROM siswa s
+            LEFT JOIN kelas k ON s.kelas_id = k.id
+            WHERE s.qr_token = ? OR s.nis = ? OR s.nisn = ?
+            LIMIT 1
+        ");
+        $stmtS->execute([$qrCode, $qrCode, $qrCode]);
+        $siswa = $stmtS->fetch(PDO::FETCH_ASSOC);
+
+        if (!$siswa) {
+            $stmtNP = $db->prepare("
+                SELECT s.id, s.nis, s.nisn, s.nama, s.foto, s.kelas_id, k.nama_kelas, k.tingkat
+                FROM asesmen_peserta p
+                JOIN siswa s ON p.siswa_id = s.id
+                LEFT JOIN kelas k ON s.kelas_id = k.id
+                WHERE p.nomor_peserta = ? AND p.event_id = ?
+                LIMIT 1
+            ");
+            $stmtNP->execute([$qrCode, $eventId]);
+            $siswa = $stmtNP->fetch(PDO::FETCH_ASSOC);
+        }
+
+        if (!$siswa) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'QR Code / Siswa tidak terdaftar dalam database (' . htmlspecialchars($qrCode) . ')!'
+            ]);
+            exit;
+        }
+
+        $siswaId = (int)$siswa['id'];
+
+        // 3. Find Peserta distribution in this event
+        $stmtP = $db->prepare("
+            SELECT p.*, r.nama_ruang
+            FROM asesmen_peserta p
+            LEFT JOIN asesmen_ruang r ON p.ruang_id = r.id
+            WHERE p.event_id = ? AND p.siswa_id = ?
+            LIMIT 1
+        ");
+        $stmtP->execute([$eventId, $siswaId]);
+        $peserta = $stmtP->fetch(PDO::FETCH_ASSOC);
+
+        $siswaRuangId = $peserta['ruang_id'] ?? null;
+        $nomorMeja = $peserta['nomor_meja'] ?? null;
+        $namaRuang = $peserta['nama_ruang'] ?? '-';
+
+        $warningRoom = null;
+        if ($ruangId > 0 && $siswaRuangId && $siswaRuangId != $ruangId) {
+            $warningRoom = "Perhatian: Siswa seharusnya berada di {$namaRuang} (Meja " . sprintf("%02d", $nomorMeja) . ")!";
+        }
+
+        $finalRuangId = ($ruangId > 0) ? $ruangId : $siswaRuangId;
+
+        // 4. Check Duplicate Attendance
+        $stmtCheck = $db->prepare("
+            SELECT * FROM asesmen_presensi
+            WHERE event_id = ? AND mapel_id = ? AND tanggal = ? AND siswa_id = ?
+            LIMIT 1
+        ");
+        $stmtCheck->execute([$eventId, $mapelId, $tanggal, $siswaId]);
+        $existing = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+        $photoUrl = !empty($siswa['foto']) ? Helper::url('/uploads/siswa/' . $siswa['foto']) : null;
+
+        if ($existing) {
+            echo json_encode([
+                'success' => false,
+                'duplicate' => true,
+                'message' => 'Siswa sudah presensi sebelumnya pukul ' . substr($existing['jam_scan'], 0, 5) . ' WIB',
+                'warning' => $warningRoom,
+                'data' => [
+                    'id' => $existing['id'],
+                    'siswa_id' => $siswaId,
+                    'nama' => $siswa['nama'],
+                    'nis' => $siswa['nis'],
+                    'nisn' => $siswa['nisn'],
+                    'kelas' => $siswa['nama_kelas'] ?? '-',
+                    'ruang' => $namaRuang,
+                    'nomor_meja' => $nomorMeja ? sprintf("%02d", $nomorMeja) : '-',
+                    'nomor_peserta' => $peserta['nomor_peserta'] ?? '-',
+                    'foto' => $photoUrl,
+                    'jam_scan' => substr($existing['jam_scan'], 0, 8),
+                    'status' => strtoupper($existing['status'])
+                ]
+            ]);
+            exit;
+        }
+
+        // 5. Determine Status (hadir vs terlambat)
+        $now = date('H:i:s');
+        $status = 'hadir';
+        if (!empty($jadwal['jam_mulai'])) {
+            $lateThreshold = date('H:i:s', strtotime($jadwal['jam_mulai']) + 15 * 60);
+            if ($now > $lateThreshold && $now <= $jadwal['jam_selesai']) {
+                $status = 'terlambat';
+            }
+        }
+
+        // 6. Insert Presensi
+        $stmtIns = $db->prepare("
+            INSERT INTO asesmen_presensi
+            (event_id, jadwal_id, mapel_id, siswa_id, ruang_id, nomor_meja, tanggal, jam_scan, status, keterangan)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $stmtIns->execute([
+            $eventId,
+            $jadwal['id'],
+            $mapelId,
+            $siswaId,
+            $finalRuangId,
+            $nomorMeja,
+            $tanggal,
+            $now,
+            $status,
+            $warningRoom ? 'Beda ruang: ' . $warningRoom : null
+        ]);
+        $newId = $db->lastInsertId();
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Presensi Berhasil!',
+            'warning' => $warningRoom,
+            'data' => [
+                'id' => $newId,
+                'siswa_id' => $siswaId,
+                'nama' => $siswa['nama'],
+                'nis' => $siswa['nis'],
+                'nisn' => $siswa['nisn'],
+                'kelas' => $siswa['nama_kelas'] ?? '-',
+                'ruang' => $namaRuang,
+                'nomor_meja' => $nomorMeja ? sprintf("%02d", $nomorMeja) : '-',
+                'nomor_peserta' => $peserta['nomor_peserta'] ?? '-',
+                'foto' => $photoUrl,
+                'jam_scan' => $now,
+                'status' => strtoupper($status)
+            ]
+        ]);
+        exit;
+    }
+
+    public function getScanStats()
+    {
+        header('Content-Type: application/json');
+        $db = Database::connect('core');
+
+        $jadwalId = (int)($_GET['jadwal_id'] ?? 0);
+        $ruangId = (int)($_GET['ruang_id'] ?? 0);
+
+        if ($jadwalId <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Jadwal ID diperlukan']);
+            exit;
+        }
+
+        $stmtJ = $db->prepare("SELECT * FROM asesmen_jadwal WHERE id = ?");
+        $stmtJ->execute([$jadwalId]);
+        $jadwal = $stmtJ->fetch(PDO::FETCH_ASSOC);
+
+        if (!$jadwal) {
+            echo json_encode(['success' => false, 'message' => 'Jadwal tidak ditemukan']);
+            exit;
+        }
+
+        $eventId = (int)$jadwal['event_id'];
+        $mapelId = (int)$jadwal['mapel_id'];
+        $tanggal = $jadwal['tanggal'];
+
+        $whereP = "p.event_id = $eventId";
+        if ($ruangId > 0) {
+            $whereP .= " AND p.ruang_id = $ruangId";
+        }
+        if (!empty($jadwal['kelas_id'])) {
+            $whereP .= " AND s.kelas_id = " . (int)$jadwal['kelas_id'];
+        } elseif (!empty($jadwal['tingkat']) && $jadwal['tingkat'] !== 'Semua') {
+            $whereP .= " AND (k.tingkat = '" . addslashes($jadwal['tingkat']) . "' OR k.nama_kelas LIKE '" . addslashes($jadwal['tingkat']) . "%')";
+        }
+
+        $totalExpected = (int)$db->query("
+            SELECT COUNT(*) 
+            FROM asesmen_peserta p
+            JOIN siswa s ON p.siswa_id = s.id
+            LEFT JOIN kelas k ON s.kelas_id = k.id
+            WHERE $whereP
+        ")->fetchColumn();
+
+        $wherePr = "pr.event_id = $eventId AND pr.mapel_id = $mapelId AND pr.tanggal = '$tanggal'";
+        if ($ruangId > 0) {
+            $wherePr .= " AND pr.ruang_id = $ruangId";
+        }
+
+        $totalHadir = (int)$db->query("
+            SELECT COUNT(*) 
+            FROM asesmen_presensi pr
+            WHERE $wherePr
+        ")->fetchColumn();
+
+        $totalBelum = max(0, $totalExpected - $totalHadir);
+        $persen = $totalExpected > 0 ? round(($totalHadir / $totalExpected) * 100) : 0;
+
+        $recentScans = $db->query("
+            SELECT pr.*, s.nama as nama_siswa, s.nis, s.foto, k.nama_kelas, r.nama_ruang
+            FROM asesmen_presensi pr
+            JOIN siswa s ON pr.siswa_id = s.id
+            LEFT JOIN kelas k ON s.kelas_id = k.id
+            LEFT JOIN asesmen_ruang r ON pr.ruang_id = r.id
+            WHERE $wherePr
+            ORDER BY pr.jam_scan DESC, pr.id DESC
+            LIMIT 10
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode([
+            'success' => true,
+            'stats' => [
+                'total' => $totalExpected,
+                'hadir' => $totalHadir,
+                'belum' => $totalBelum,
+                'persen' => $persen
+            ],
+            'recent' => $recentScans
+        ]);
+        exit;
+    }
+
+    public function resetPresensi()
+    {
+        header('Content-Type: application/json');
+        $this->checkAccess();
+        $db = Database::connect('core');
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input) $input = $_POST;
+
+        $id = (int)($input['id'] ?? 0);
+        if ($id > 0) {
+            $stmt = $db->prepare("DELETE FROM asesmen_presensi WHERE id = ?");
+            $stmt->execute([$id]);
+            echo json_encode(['success' => true, 'message' => 'Presensi berhasil dibatalkan']);
+            exit;
+        }
+
+        echo json_encode(['success' => false, 'message' => 'ID presensi tidak valid']);
+        exit;
+    }
+
+    public function manualPresensi()
+    {
+        header('Content-Type: application/json');
+        $this->checkAccess();
+        $this->ensureTablesExist();
+        $db = Database::connect('core');
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input) $input = $_POST;
+
+        $siswaId = (int)($input['siswa_id'] ?? 0);
+        $jadwalId = (int)($input['jadwal_id'] ?? 0);
+        $status = $input['status'] ?? 'hadir';
+        $keterangan = trim($input['keterangan'] ?? 'Manual');
+
+        if ($siswaId <= 0 || $jadwalId <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Parameter tidak lengkap']);
+            exit;
+        }
+
+        $stmtJ = $db->prepare("SELECT * FROM asesmen_jadwal WHERE id = ?");
+        $stmtJ->execute([$jadwalId]);
+        $jadwal = $stmtJ->fetch(PDO::FETCH_ASSOC);
+
+        if (!$jadwal) {
+            echo json_encode(['success' => false, 'message' => 'Jadwal tidak ditemukan']);
+            exit;
+        }
+
+        $eventId = (int)$jadwal['event_id'];
+        $mapelId = (int)$jadwal['mapel_id'];
+        $tanggal = $jadwal['tanggal'];
+
+        $stmtP = $db->prepare("SELECT * FROM asesmen_peserta WHERE event_id = ? AND siswa_id = ?");
+        $stmtP->execute([$eventId, $siswaId]);
+        $peserta = $stmtP->fetch(PDO::FETCH_ASSOC);
+
+        $ruangId = $peserta['ruang_id'] ?? null;
+        $nomorMeja = $peserta['nomor_meja'] ?? null;
+
+        $stmtCheck = $db->prepare("SELECT id FROM asesmen_presensi WHERE event_id = ? AND mapel_id = ? AND tanggal = ? AND siswa_id = ?");
+        $stmtCheck->execute([$eventId, $mapelId, $tanggal, $siswaId]);
+        $exist = $stmtCheck->fetchColumn();
+
+        if ($exist) {
+            $stmtUp = $db->prepare("UPDATE asesmen_presensi SET status = ?, keterangan = ?, jam_scan = CURTIME() WHERE id = ?");
+            $stmtUp->execute([$status, $keterangan, $exist]);
+        } else {
+            $stmtIns = $db->prepare("
+                INSERT INTO asesmen_presensi 
+                (event_id, jadwal_id, mapel_id, siswa_id, ruang_id, nomor_meja, tanggal, jam_scan, status, keterangan)
+                VALUES (?, ?, ?, ?, ?, ?, ?, CURTIME(), ?, ?)
+            ");
+            $stmtIns->execute([$eventId, $jadwalId, $mapelId, $siswaId, $ruangId, $nomorMeja, $tanggal, $status, $keterangan]);
+        }
+
+        echo json_encode(['success' => true, 'message' => 'Status presensi siswa berhasil diperbarui']);
+        exit;
+    }
+
+    public function getAutoBeritaAcaraData()
+    {
+        header('Content-Type: application/json');
+        $this->checkAccess();
+        $db = Database::connect('core');
+
+        $eventId = (int)($_GET['event_id'] ?? 0);
+        $ruangId = (int)($_GET['ruang_id'] ?? 0);
+        $mapelId = (int)($_GET['mapel_id'] ?? 0);
+        $tanggal = $_GET['tanggal'] ?? date('Y-m-d');
+
+        if ($eventId <= 0 || $ruangId <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Pilih event dan ruang terlebih dahulu']);
+            exit;
+        }
+
+        $stmtP = $db->prepare("
+            SELECT p.*, s.nama as nama_siswa, s.nis, k.nama_kelas,
+                   pr.id as presensi_id, pr.status as presensi_status
+            FROM asesmen_peserta p
+            JOIN siswa s ON p.siswa_id = s.id
+            LEFT JOIN kelas k ON s.kelas_id = k.id
+            LEFT JOIN asesmen_presensi pr ON pr.siswa_id = p.siswa_id
+                 AND pr.event_id = p.event_id
+                 AND pr.mapel_id = ?
+                 AND pr.tanggal = ?
+            WHERE p.event_id = ? AND p.ruang_id = ?
+            ORDER BY p.nomor_meja ASC
+        ");
+        $stmtP->execute([$mapelId, $tanggal, $eventId, $ruangId]);
+        $pesertaList = $stmtP->fetchAll(PDO::FETCH_ASSOC);
+
+        $totalSeharusnya = count($pesertaList);
+        $totalHadir = 0;
+        $tidakHadirNames = [];
+
+        foreach ($pesertaList as $p) {
+            if (!empty($p['presensi_id']) && in_array($p['presensi_status'], ['hadir', 'terlambat'])) {
+                $totalHadir++;
+            } else {
+                $tidakHadirNames[] = "Meja " . sprintf("%02d", $p['nomor_meja']) . ": " . $p['nama_siswa'] . " (" . ($p['nama_kelas'] ?? '-') . ")";
+            }
+        }
+
+        $totalTidakHadir = max(0, $totalSeharusnya - $totalHadir);
+
+        echo json_encode([
+            'success' => true,
+            'seharusnya' => $totalSeharusnya,
+            'hadir' => $totalHadir,
+            'tidak_hadir' => $totalTidakHadir,
+            'catatan_tidak_hadir' => implode("\n", $tidakHadirNames)
+        ]);
+        exit;
     }
 }

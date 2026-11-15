@@ -15,19 +15,19 @@ ob_start();
         </p>
     </div>
     <div style="display: flex; gap: 10px;">
-        <a href="<?php echo \App\Core\Helper::url('/siakad/siswa/cetak-kartu-massal'); ?>" target="_blank" class="btn" style="background: white; color: #4338ca; font-weight: 700; border-radius: 10px; padding: 10px 18px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <i data-lucide="id-card" style="width: 18px; height: 18px; color: #2563eb;"></i> Buka Kartu Pelajar SIAKAD
+        <a href="<?php echo \App\Core\Helper::url('/asesmen/scan'); ?>" class="btn" style="background: #10b981; color: white; font-weight: 700; border-radius: 10px; padding: 10px 18px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+            <i data-lucide="qr-code" style="width: 18px; height: 18px;"></i> Buka Scanner Presensi
         </a>
     </div>
 </div>
 
-<!-- Notice Bar: Sinkronisasi Kartu Pelajar -->
+<!-- Notice Bar: Presensi Ujian Otomatis -->
 <div class="z-card" style="padding: 1.25rem 1.5rem; border-radius: 14px; margin-bottom: 1.5rem; background: #f0fdf4; border: 1px solid #bbf7d0; display: flex; align-items: center; gap: 14px;">
     <div style="width: 38px; height: 38px; border-radius: 10px; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
         <i data-lucide="check-check" style="width: 22px; height: 22px;"></i>
     </div>
     <div style="font-size: 0.88rem; color: #166534; line-height: 1.5;">
-        <strong>Sistem Kartu Ujian Terintegrasi:</strong> Siswa menggunakan <strong>Kartu Pelajar SIAKAD</strong> resmi sebagai tanda peserta ujian (sudah ada QR Code, foto, dan NISN). Panitia cukup mencetak <strong>Label Nomor Meja</strong> di bawah ini untuk ditempel pada meja ruang ujian masing-masing.
+        <strong>Presensi Ujian Otomatis via QR Scan:</strong> Label nomor meja di bawah ini ditempel pada masing-masing meja ruang ujian. Saat ujian berlangsung, pengawas cukup menggunakan <strong>Scanner Presensi Ujian</strong> untuk men-scan barcode/QR siswa secara instan sesuai jadwal sesi dan mata pelajaran aktif.
     </div>
 </div>
 

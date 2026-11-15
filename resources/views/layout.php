@@ -586,11 +586,11 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
                     <a href="<?php echo Helper::url('/asesmen/nomor-meja'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_nomor_meja' ? 'active' : ''; ?>">
                         <i data-lucide="tag"></i> Cetak Nomor Meja
                     </a>
-                    <a href="<?php echo Helper::url('/siakad/siswa/cetak-kartu-massal'); ?>" target="_blank" class="z-nav-item" title="Menggunakan Kartu Pelajar SIAKAD sebagai Kartu Ujian">
-                        <i data-lucide="id-card"></i> Kartu Pelajar (SIAKAD)
-                    </a>
 
                     <div class="z-nav-cat">ADMINISTRASI & CETAK</div>
+                    <a href="<?php echo Helper::url('/asesmen/scan'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_scan' ? 'active' : ''; ?>" style="font-weight: 700; color: #10b981;">
+                        <i data-lucide="qr-code"></i> Scan Presensi Ujian
+                    </a>
                     <a href="<?php echo Helper::url('/asesmen/jadwal'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_jadwal' ? 'active' : ''; ?>">
                         <i data-lucide="clock"></i> Jadwal Pelaksanaan
                     </a>

@@ -101,7 +101,7 @@ ob_start();
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem;">
                 <div>
                     <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">Event Ujian <span style="color:red;">*</span></label>
-                    <select name="event_id" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
+                    <select name="event_id" id="baEventId" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
                         <?php foreach($events as $ev): ?>
                             <option value="<?php echo $ev['id']; ?>"><?php echo htmlspecialchars($ev['nama']); ?></option>
                         <?php endforeach; ?>
@@ -109,7 +109,7 @@ ob_start();
                 </div>
                 <div>
                     <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">Ruangan <span style="color:red;">*</span></label>
-                    <select name="ruang_id" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
+                    <select name="ruang_id" id="baRuangId" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
                         <?php foreach($ruangs as $r): ?>
                             <option value="<?php echo $r['id']; ?>"><?php echo htmlspecialchars($r['nama_ruang']); ?></option>
                         <?php endforeach; ?>
@@ -120,7 +120,7 @@ ob_start();
             <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem;">
                 <div>
                     <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">Tanggal Ujian</label>
-                    <input type="date" name="tanggal" value="<?php echo date('Y-m-d'); ?>" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
+                    <input type="date" name="tanggal" id="baTanggal" value="<?php echo date('Y-m-d'); ?>" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
                 </div>
                 <div>
                     <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">Jam Mulai</label>
@@ -130,6 +130,19 @@ ob_start();
                     <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">Jam Selesai</label>
                     <input type="time" name="jam_selesai" value="09:00" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
                 </div>
+            </div>
+
+            <!-- Sync Presensi Scanner Otomatis -->
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px 14px; margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="zap" style="color: #16a34a; width: 22px; height: 22px; flex-shrink: 0;"></i>
+                    <div style="font-size: 0.82rem; color: #166534; line-height: 1.4;">
+                        <strong>Presensi Scanner Otomatis:</strong> Tarik data kehadiran dan daftar peserta tidak hadir dari scanner QR ujian secara instan.
+                    </div>
+                </div>
+                <button type="button" onclick="syncPresensiBA()" class="btn btn-sm" style="background: #10b981; color: white; font-weight: 700; border-radius: 8px; padding: 8px 14px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(16,185,129,0.3);">
+                    <i data-lucide="download-cloud" style="width: 14px; height: 14px;"></i> Tarik Data
+                </button>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem;">
@@ -156,21 +169,21 @@ ob_start();
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem;">
                 <div>
                     <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">Seharusnya Hadir</label>
-                    <input type="number" name="jumlah_seharusnya" value="20" min="0" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
+                    <input type="number" name="jumlah_seharusnya" id="baJumlahSeharusnya" value="20" min="0" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
                 </div>
                 <div>
                     <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">Jumlah Hadir</label>
-                    <input type="number" name="jumlah_hadir" value="20" min="0" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
+                    <input type="number" name="jumlah_hadir" id="baJumlahHadir" value="20" min="0" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
                 </div>
                 <div>
                     <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">Tidak Hadir (Absen)</label>
-                    <input type="number" name="jumlah_tidak_hadir" value="0" min="0" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
+                    <input type="number" name="jumlah_tidak_hadir" id="baJumlahTidakHadir" value="0" min="0" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
                 </div>
             </div>
 
             <div style="margin-bottom: 1.2rem;">
                 <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">Nama / No. Peserta Tidak Hadir</label>
-                <input type="text" name="peserta_tidak_hadir" placeholder="Kosongkan jika nihil, atau tulis misal: Ahmad (Sakit)" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
+                <input type="text" name="peserta_tidak_hadir" id="baPesertaTidakHadir" placeholder="Kosongkan jika nihil, atau tulis misal: Ahmad (Sakit)" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--z-border); background: var(--z-bg); color: var(--z-text); outline: none;">
             </div>
 
             <div style="margin-bottom: 1.5rem;">
@@ -185,6 +198,42 @@ ob_start();
         </form>
     </div>
 </div>
+
+<script>
+function syncPresensiBA() {
+    const eventId = document.getElementById('baEventId').value;
+    const ruangId = document.getElementById('baRuangId').value;
+    const tanggal = document.getElementById('baTanggal').value;
+
+    if (!eventId || !ruangId) {
+        Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Pilih Event Ujian dan Ruangan terlebih dahulu!' });
+        return;
+    }
+
+    fetch('<?php echo \App\Core\Helper::url('/asesmen/berita-acara/auto-data'); ?>?event_id=' + eventId + '&ruang_id=' + ruangId + '&tanggal=' + tanggal)
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('baJumlahSeharusnya').value = data.seharusnya;
+            document.getElementById('baJumlahHadir').value = data.hadir;
+            document.getElementById('baJumlahTidakHadir').value = data.tidak_hadir;
+            document.getElementById('baPesertaTidakHadir').value = data.catatan_tidak_hadir ? data.catatan_tidak_hadir.replace(/\n/g, ', ') : 'Nihil';
+            Swal.fire({
+                icon: 'success',
+                title: 'Data Presensi Disinkronkan!',
+                text: `Seharusnya: ${data.seharusnya}, Hadir: ${data.hadir}, Tidak Hadir: ${data.tidak_hadir}`,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } else {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: data.message });
+        }
+    })
+    .catch(err => {
+        Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server untuk sinkronisasi data presensi.' });
+    });
+}
+</script>
 
 <?php
 $content = ob_get_clean();

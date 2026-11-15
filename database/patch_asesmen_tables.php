@@ -117,7 +117,6 @@ try {
         if (!in_array('kelas_id', $colsJ)) $pdo->exec("ALTER TABLE asesmen_jadwal ADD COLUMN kelas_id INT NULL AFTER tingkat");
         if (!in_array('sesi_ke', $colsJ)) $pdo->exec("ALTER TABLE asesmen_jadwal ADD COLUMN sesi_ke INT DEFAULT 1 AFTER jam_selesai");
     } catch (\Exception $e) {}
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
     // 6. Berita Acara Ujian
     $pdo->exec("CREATE TABLE IF NOT EXISTS asesmen_berita_acara (
@@ -136,6 +135,23 @@ try {
         peserta_tidak_hadir TEXT NULL,
         catatan_kejadian TEXT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    // 7. Presensi Scan Siswa Ujian Otomatis
+    $pdo->exec("CREATE TABLE IF NOT EXISTS asesmen_presensi (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        event_id INT NOT NULL,
+        jadwal_id INT NULL,
+        mapel_id INT NOT NULL,
+        siswa_id INT NOT NULL,
+        ruang_id INT NULL,
+        nomor_meja INT NULL,
+        tanggal DATE NOT NULL,
+        jam_scan TIME NOT NULL,
+        status ENUM('hadir', 'terlambat', 'izin', 'sakit', 'alpa') DEFAULT 'hadir',
+        keterangan VARCHAR(255) NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_presensi (event_id, mapel_id, tanggal, siswa_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
     // Insert Default Sample Event if table is empty
