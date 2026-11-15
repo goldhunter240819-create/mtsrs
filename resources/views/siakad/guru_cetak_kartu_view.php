@@ -60,7 +60,7 @@
 
         .card {
             box-sizing: border-box;
-            border-radius: 3mm;
+            border-radius: 4.5mm;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             position: relative;
@@ -79,11 +79,11 @@
         }
 
         <?php if ($mode === 'vertical'): ?>
-        .card { width: 55mm; height: 87mm; }
+        .card { width: 55mm; height: 87mm; border-radius: 4.5mm; }
         .container { grid-template-columns: repeat(5, 55mm); }
         @media print { .container { grid-template-columns: repeat(5, 55mm) !important; } }
         <?php else: ?>
-        .card { width: 87mm; height: 55mm; }
+        .card { width: 87mm; height: 55mm; border-radius: 4.5mm; }
         .container { grid-template-columns: repeat(2, 87mm); }
         @media print { .container { grid-template-columns: repeat(2, 87mm) !important; } }
         <?php endif; ?>
@@ -94,7 +94,7 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-top: 1px solid var(--glass-border);
-            border-radius: 0;
+            border-radius: 0 0 4.5mm 4.5mm;
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -278,7 +278,7 @@
                     <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'jpg')" title="Unduh Sisi Depan (JPG)">JPG</button>
                 </div>
                 <!-- VERTIKAL HEADER -->
-                <div style="height: 19mm; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5mm; color: white; position: relative; z-index: 2;">
+                <div style="height: 19mm; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5mm; color: white; position: relative; z-index: 2; border-top-left-radius: 4.5mm; border-top-right-radius: 4.5mm;">
                     <?php if($inst && $inst['logo']): ?>
                         <img src="<?php echo \App\Core\Helper::url('/public/uploads/logo'); ?>/<?php echo $inst['logo']; ?>" style="width: 9mm; height: 9mm; object-fit: contain; margin-bottom: 0.8mm; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
                     <?php else: ?>
@@ -293,7 +293,7 @@
                 <div class="gold-line"></div>
 
                 <!-- VERTIKAL BODY (Glassmorphism) -->
-                <div class="glass-panel" style="padding: 3mm; align-items: center; position: relative;">
+                <div class="glass-panel" style="padding: 3mm; align-items: center; position: relative; border-bottom-left-radius: 4.5mm; border-bottom-right-radius: 4.5mm;">
                     <?php if($inst && $inst['logo']): ?>
                     <!-- Center Watermark -->
                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 65%; height: 65%; background-image: url('<?php echo \App\Core\Helper::url('/public/uploads/logo/' . $inst['logo']); ?>'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.12; pointer-events: none;"></div>
@@ -332,7 +332,7 @@
                 $qrUrlBack = 'https://quickchart.io/qr?size=350&margin=0&ecLevel=M&text=' . urlencode($qrDataGuru);
         ?>
         <!-- SISI BELAKANG VERTIKAL -->
-        <div class="card card-back" data-id="<?php echo $g['id']; ?>" data-name="<?php echo htmlspecialchars($g['nama']); ?>" data-nis="<?php echo htmlspecialchars($g['niy'] ?? ''); ?>" data-side="belakang" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4mm; transform: rotate(180deg);">
+        <div class="card card-back" data-id="<?php echo $g['id']; ?>" data-name="<?php echo htmlspecialchars($g['nama']); ?>" data-nis="<?php echo htmlspecialchars($g['niy'] ?? ''); ?>" data-side="belakang" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4mm; border-radius: 4.5mm; transform: rotate(180deg);">
             <div class="card-quick-dl no-print">
                 <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'png')" title="Unduh Sisi Belakang (PNG)">PNG</button>
                 <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'jpg')" title="Unduh Sisi Belakang (JPG)">JPG</button>
@@ -397,7 +397,7 @@
                     <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'jpg')" title="Unduh Sisi Depan (JPG)">JPG</button>
                 </div>
                 <!-- HORIZONTAL HEADER -->
-                <div style="height: 14mm; display: flex; align-items: center; padding: 0 4mm; color: white; position: relative; z-index: 2;">
+                <div style="height: 14mm; display: flex; align-items: center; padding: 0 4mm; color: white; position: relative; z-index: 2; border-top-left-radius: 4.5mm; border-top-right-radius: 4.5mm;">
                     <?php if($inst && $inst['logo']): ?>
                         <img src="<?php echo \App\Core\Helper::url('/public/uploads/logo'); ?>/<?php echo $inst['logo']; ?>" style="width: 10mm; height: 10mm; object-fit: contain; margin-right: 3mm; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
                     <?php else: ?>
@@ -412,7 +412,7 @@
                 <div class="gold-line"></div>
 
                 <!-- HORIZONTAL BODY (Glassmorphism) -->
-                <div class="glass-panel" style="padding: 3mm 4mm; display: flex; flex-direction: row; gap: 4mm;">
+                <div class="glass-panel" style="padding: 3mm 4mm; display: flex; flex-direction: row; gap: 4mm; border-bottom-left-radius: 4.5mm; border-bottom-right-radius: 4.5mm;">
                     <?php if($inst && $inst['logo']): ?>
                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50%; height: 75%; background-image: url('<?php echo \App\Core\Helper::url('/public/uploads/logo/' . $inst['logo']); ?>'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.08; pointer-events: none;"></div>
                     <?php endif; ?>
@@ -474,7 +474,7 @@
         </div>
 
         <!-- SISI BELAKANG HORIZONTAL -->
-        <div class="card card-back" data-id="<?php echo $g['id']; ?>" data-name="<?php echo htmlspecialchars($g['nama']); ?>" data-nis="<?php echo htmlspecialchars($g['niy'] ?? ''); ?>" data-side="belakang" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4mm;">
+        <div class="card card-back" data-id="<?php echo $g['id']; ?>" data-name="<?php echo htmlspecialchars($g['nama']); ?>" data-nis="<?php echo htmlspecialchars($g['niy'] ?? ''); ?>" data-side="belakang" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4mm; border-radius: 4.5mm;">
             <div class="card-quick-dl no-print">
                 <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'png')" title="Unduh Sisi Belakang (PNG)">PNG</button>
                 <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'jpg')" title="Unduh Sisi Belakang (JPG)">JPG</button>
@@ -647,6 +647,47 @@
             }
         }
 
+        // Canvas Post-Processing (Smooth Rounded Corner Clipping & JPG White Fill)
+        function processCardCanvas(sourceCanvas, isJpg, radiusMm = 4.5) {
+            const scale = 3;
+            const radiusPx = Math.round(radiusMm * 3.779527559 * scale);
+            
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = sourceCanvas.width;
+            finalCanvas.height = sourceCanvas.height;
+            const ctx = finalCanvas.getContext('2d');
+
+            if (isJpg) {
+                // For JPG, fill outside area with crisp white background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+            }
+
+            // Clip with smooth anti-aliased rounded rectangle
+            ctx.save();
+            ctx.beginPath();
+            if (typeof ctx.roundRect === 'function') {
+                ctx.roundRect(0, 0, finalCanvas.width, finalCanvas.height, radiusPx);
+            } else {
+                const r = radiusPx, w = finalCanvas.width, h = finalCanvas.height;
+                ctx.moveTo(r, 0);
+                ctx.lineTo(w - r, 0);
+                ctx.quadraticCurveTo(w, 0, w, r);
+                ctx.lineTo(w, h - r);
+                ctx.quadraticCurveTo(w, h, w - r, h);
+                ctx.lineTo(r, h);
+                ctx.quadraticCurveTo(0, h, 0, h - r);
+                ctx.lineTo(0, r);
+                ctx.quadraticCurveTo(0, 0, r, 0);
+                ctx.closePath();
+            }
+            ctx.clip();
+            ctx.drawImage(sourceCanvas, 0, 0);
+            ctx.restore();
+
+            return finalCanvas;
+        }
+
         // Single Card Direct Download
         async function downloadCardElement(cardEl, format = 'png', customName = null) {
             if (!cardEl) return;
@@ -667,13 +708,14 @@
                     scale: 3,
                     useCORS: true,
                     allowTaint: true,
-                    backgroundColor: cardEl.classList.contains('card-front') ? '#00008E' : '#ffffff',
+                    backgroundColor: null,
                     logging: false
                 });
 
                 const isJpg = format.toLowerCase() === 'jpg' || format.toLowerCase() === 'jpeg';
+                const finalCanvas = processCardCanvas(canvas, isJpg, 4.5);
                 const mimeType = isJpg ? 'image/jpeg' : 'image/png';
-                const dataUrl = canvas.toDataURL(mimeType, 0.95);
+                const dataUrl = finalCanvas.toDataURL(mimeType, 0.95);
 
                 const guruName = (cardEl.dataset.name || 'kartu_guru').replace(/[^a-zA-Z0-9_-]/g, '_');
                 const sideName = cardEl.dataset.side || (cardEl.classList.contains('card-front') ? 'depan' : 'belakang');
@@ -768,12 +810,14 @@
                         scale: 3,
                         useCORS: true,
                         allowTaint: true,
-                        backgroundColor: cardEl.classList.contains('card-front') ? '#00008E' : '#ffffff',
+                        backgroundColor: null,
                         logging: false
                     });
 
-                    const mimeType = ext === 'jpg' ? 'image/jpeg' : 'image/png';
-                    const dataUrl = canvas.toDataURL(mimeType, 0.95);
+                    const isJpg = ext === 'jpg';
+                    const finalCanvas = processCardCanvas(canvas, isJpg, 4.5);
+                    const mimeType = isJpg ? 'image/jpeg' : 'image/png';
+                    const dataUrl = finalCanvas.toDataURL(mimeType, 0.95);
 
                     if (zip) {
                         const base64Data = dataUrl.split(',')[1];

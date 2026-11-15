@@ -61,7 +61,7 @@
 
         .card {
             box-sizing: border-box;
-            border-radius: 3mm;
+            border-radius: 4.5mm;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             position: relative;
@@ -80,11 +80,11 @@
         }
 
         <?php if ($mode === 'vertical'): ?>
-        .card { width: 55mm; height: 87mm; background-color: #00008E; }
+        .card { width: 55mm; height: 87mm; background-color: #00008E; border-radius: 4.5mm; }
         .container { grid-template-columns: repeat(5, 55mm); }
         @media print { .container { grid-template-columns: repeat(5, 55mm) !important; } }
         <?php else: ?>
-        .card { width: 87mm; height: 55mm; }
+        .card { width: 87mm; height: 55mm; border-radius: 4.5mm; }
         .container { grid-template-columns: repeat(2, 87mm); }
         @media print { .container { grid-template-columns: repeat(2, 87mm) !important; } }
         <?php endif; ?>
@@ -95,7 +95,7 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-top: 1px solid var(--glass-border);
-            border-radius: 0;
+            border-radius: 0 0 4.5mm 4.5mm;
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -296,7 +296,7 @@
                     <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'jpg')" title="Unduh Sisi Depan (JPG)">JPG</button>
                 </div>
                 <!-- VERTIKAL HEADER -->
-                <div style="height: 19mm; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5mm; color: white; position: relative; z-index: 2;">
+                <div style="height: 19mm; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5mm; color: white; position: relative; z-index: 2; border-top-left-radius: 4.5mm; border-top-right-radius: 4.5mm;">
                     <?php if($inst && $inst['logo']): ?>
                         <img src="<?php echo \App\Core\Helper::url('/public/uploads/logo'); ?>/<?php echo $inst['logo']; ?>" style="width: 9mm; height: 9mm; object-fit: contain; margin-bottom: 0.8mm; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
                     <?php else: ?>
@@ -311,7 +311,7 @@
                 <div class="gold-line"></div>
 
                 <!-- VERTIKAL BODY (Glassmorphism) -->
-                <div class="glass-panel" style="padding: 3mm; align-items: center; position: relative;">
+                <div class="glass-panel" style="padding: 3mm; align-items: center; position: relative; border-bottom-left-radius: 4.5mm; border-bottom-right-radius: 4.5mm;">
                     <?php if($inst && $inst['logo']): ?>
                     <!-- Center Watermark -->
                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 65%; height: 65%; background-image: url('<?php echo \App\Core\Helper::url('/public/uploads/logo/' . $inst['logo']); ?>'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.12; pointer-events: none;"></div>
@@ -352,7 +352,7 @@
                 $qrDataSiswa = $s['qr_token'] ?? 'NO-TOKEN';
         ?>
         <!-- SISI BELAKANG VERTIKAL -->
-        <div class="card card-back" data-id="<?php echo $s['id']; ?>" data-name="<?php echo htmlspecialchars($s['nama']); ?>" data-nis="<?php echo htmlspecialchars($s['nis'] ?? ''); ?>" data-side="belakang" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: white; border: 1px solid #00008E; position: relative; overflow: hidden; padding: 0; transform: rotate(180deg);">
+        <div class="card card-back" data-id="<?php echo $s['id']; ?>" data-name="<?php echo htmlspecialchars($s['nama']); ?>" data-nis="<?php echo htmlspecialchars($s['nis'] ?? ''); ?>" data-side="belakang" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: white; border: 1px solid #00008E; border-radius: 4.5mm; position: relative; overflow: hidden; padding: 0; transform: rotate(180deg);">
             <div class="card-quick-dl no-print">
                 <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'png')" title="Unduh Sisi Belakang (PNG)">PNG</button>
                 <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'jpg')" title="Unduh Sisi Belakang (JPG)">JPG</button>
@@ -363,20 +363,12 @@
             <div style="position: absolute; bottom: 10mm; left: -15mm; width: 40mm; height: 40mm; background: radial-gradient(circle, rgba(245, 158, 11, 0.06) 0%, transparent 70%); border-radius: 50%; z-index: 1;"></div>
 
             <!-- Header Melengkung (Curved) dengan List Emas -->
-            <div style="width: 100%; height: 26mm; background: #00008E; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 4mm; flex-shrink: 0; z-index: 2;">
+            <div style="width: 100%; height: 26mm; background: #00008E; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 4mm; flex-shrink: 0; z-index: 2; border-top-left-radius: 4.5mm; border-top-right-radius: 4.5mm;">
                 
-                <!-- Curved Bottom SVG -->
-                <svg viewBox="0 0 1440 320" style="position: absolute; bottom: -1px; left: 0; width: 100%; height: auto; z-index: 3;" preserveAspectRatio="none">
-                    <defs>
-                        <linearGradient id="goldGradientCurve" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#f59e0b" />
-                            <stop offset="50%" stop-color="#fcd34d" />
-                            <stop offset="100%" stop-color="#f59e0b" />
-                        </linearGradient>
-                    </defs>
-                    <path fill="white" d="M0,160L80,176C160,192,320,224,480,213.3C640,203,800,149,960,138.7C1120,128,1280,160,1360,176L1440,192L1440,320L0,320Z"></path>
-                    <path fill="none" stroke="url(#goldGradientCurve)" stroke-width="25" d="M0,160L80,176C160,192,320,224,480,213.3C640,203,800,149,960,138.7C1120,128,1280,160,1360,176L1440,192"></path>
-                </svg>
+                <!-- Curved Bottom SVG Wave (Renderable by html2canvas & Print) -->
+                <img src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' width='1440' height='320' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='goldGradCurve' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%23f59e0b'/%3E%3Cstop offset='50%25' stop-color='%23fcd34d'/%3E%3Cstop offset='100%25' stop-color='%23f59e0b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='%23ffffff' d='M0,160L80,176C160,192,320,224,480,213.3C640,203,800,149,960,138.7C1120,128,1280,160,1360,176L1440,192L1440,320L0,320Z'/%3E%3Cpath fill='none' stroke='url(%23goldGradCurve)' stroke-width='25' d='M0,160L80,176C160,192,320,224,480,213.3C640,203,800,149,960,138.7C1120,128,1280,160,1360,176L1440,192'/%3E%3C/svg%3E" 
+                     style="position: absolute; bottom: -1px; left: 0; width: 100%; height: 11mm; z-index: 3; display: block; pointer-events: none;" 
+                     alt="wave" />
 
                 <div style="font-weight: 800; font-size: 12px; letter-spacing: 1.5px; color: var(--gold-400); position: relative; z-index: 4;">AKSES DIGITAL</div>
                 <div style="font-size: 6.5px; color: #e2e8f0; margin-top: 1mm; font-weight: 500; letter-spacing: 0.5px; position: relative; z-index: 4;">Pindai QR Code untuk verifikasi identitas</div>
@@ -401,7 +393,7 @@
             </div>
             
             <!-- Footer dengan Aksen Garis -->
-            <div style="width: 100%; padding: 2.5mm 4mm; text-align: center; color: #64748b; font-size: 5px; line-height: 1.4; position: relative; z-index: 3; flex-shrink: 0; margin-bottom: 1mm;">
+            <div style="width: 100%; padding: 2.5mm 4mm; text-align: center; color: #64748b; font-size: 5px; line-height: 1.4; position: relative; z-index: 3; flex-shrink: 0; margin-bottom: 1mm; border-bottom-left-radius: 4.5mm; border-bottom-right-radius: 4.5mm;">
                 <div style="width: 15mm; height: 1.5px; background: #cbd5e1; margin: 0 auto 1.5mm auto; border-radius: 1px;"></div>
                 Diterbitkan oleh <strong><?php echo $instName; ?></strong><br>
                 Bila menemukan kartu ini, harap kembalikan ke Madrasah.
@@ -712,6 +704,47 @@
             }
         }
 
+        // Canvas Post-Processing (Smooth Rounded Corner Clipping & JPG White Fill)
+        function processCardCanvas(sourceCanvas, isJpg, radiusMm = 4.5) {
+            const scale = 3;
+            const radiusPx = Math.round(radiusMm * 3.779527559 * scale);
+            
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = sourceCanvas.width;
+            finalCanvas.height = sourceCanvas.height;
+            const ctx = finalCanvas.getContext('2d');
+
+            if (isJpg) {
+                // For JPG, fill outside area with crisp white background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+            }
+
+            // Clip with smooth anti-aliased rounded rectangle
+            ctx.save();
+            ctx.beginPath();
+            if (typeof ctx.roundRect === 'function') {
+                ctx.roundRect(0, 0, finalCanvas.width, finalCanvas.height, radiusPx);
+            } else {
+                const r = radiusPx, w = finalCanvas.width, h = finalCanvas.height;
+                ctx.moveTo(r, 0);
+                ctx.lineTo(w - r, 0);
+                ctx.quadraticCurveTo(w, 0, w, r);
+                ctx.lineTo(w, h - r);
+                ctx.quadraticCurveTo(w, h, w - r, h);
+                ctx.lineTo(r, h);
+                ctx.quadraticCurveTo(0, h, 0, h - r);
+                ctx.lineTo(0, r);
+                ctx.quadraticCurveTo(0, 0, r, 0);
+                ctx.closePath();
+            }
+            ctx.clip();
+            ctx.drawImage(sourceCanvas, 0, 0);
+            ctx.restore();
+
+            return finalCanvas;
+        }
+
         // Single Card Direct Download
         async function downloadCardElement(cardEl, format = 'png', customName = null) {
             if (!cardEl) return;
@@ -732,13 +765,14 @@
                     scale: 3,
                     useCORS: true,
                     allowTaint: true,
-                    backgroundColor: cardEl.classList.contains('card-front') ? '#00008E' : '#ffffff',
+                    backgroundColor: null,
                     logging: false
                 });
 
                 const isJpg = format.toLowerCase() === 'jpg' || format.toLowerCase() === 'jpeg';
+                const finalCanvas = processCardCanvas(canvas, isJpg, 4.5);
                 const mimeType = isJpg ? 'image/jpeg' : 'image/png';
-                const dataUrl = canvas.toDataURL(mimeType, 0.95);
+                const dataUrl = finalCanvas.toDataURL(mimeType, 0.95);
 
                 const studentName = (cardEl.dataset.name || 'kartu').replace(/[^a-zA-Z0-9_-]/g, '_');
                 const sideName = cardEl.dataset.side || (cardEl.classList.contains('card-front') ? 'depan' : 'belakang');
@@ -833,12 +867,14 @@
                         scale: 3,
                         useCORS: true,
                         allowTaint: true,
-                        backgroundColor: cardEl.classList.contains('card-front') ? '#00008E' : '#ffffff',
+                        backgroundColor: null,
                         logging: false
                     });
 
-                    const mimeType = ext === 'jpg' ? 'image/jpeg' : 'image/png';
-                    const dataUrl = canvas.toDataURL(mimeType, 0.95);
+                    const isJpg = ext === 'jpg';
+                    const finalCanvas = processCardCanvas(canvas, isJpg, 4.5);
+                    const mimeType = isJpg ? 'image/jpeg' : 'image/png';
+                    const dataUrl = finalCanvas.toDataURL(mimeType, 0.95);
 
                     if (zip) {
                         const base64Data = dataUrl.split(',')[1];
