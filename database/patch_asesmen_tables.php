@@ -103,11 +103,20 @@ try {
         event_id INT NOT NULL,
         mapel_id INT NOT NULL,
         tingkat VARCHAR(10) DEFAULT 'Semua',
+        kelas_id INT NULL,
         tanggal DATE NOT NULL,
         jam_mulai TIME NOT NULL,
         jam_selesai TIME NOT NULL,
+        sesi_ke INT DEFAULT 1,
         durasi_menit INT DEFAULT 90,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    try {
+        $colsJ = $pdo->query("SHOW COLUMNS FROM asesmen_jadwal")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('kelas_id', $colsJ)) $pdo->exec("ALTER TABLE asesmen_jadwal ADD COLUMN kelas_id INT NULL AFTER tingkat");
+        if (!in_array('sesi_ke', $colsJ)) $pdo->exec("ALTER TABLE asesmen_jadwal ADD COLUMN sesi_ke INT DEFAULT 1 AFTER jam_selesai");
+    } catch (\Exception $e) {}
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
     // 6. Berita Acara Ujian

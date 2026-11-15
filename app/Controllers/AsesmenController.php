@@ -111,12 +111,20 @@ class AsesmenController
                 event_id INT NOT NULL,
                 mapel_id INT NOT NULL,
                 tingkat VARCHAR(10) DEFAULT 'Semua',
+                kelas_id INT NULL,
                 tanggal DATE NOT NULL,
                 jam_mulai TIME NOT NULL,
                 jam_selesai TIME NOT NULL,
+                sesi_ke INT DEFAULT 1,
                 durasi_menit INT DEFAULT 90,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+            try {
+                $colsJ = $db->query("SHOW COLUMNS FROM asesmen_jadwal")->fetchAll(PDO::FETCH_COLUMN);
+                if (!in_array('kelas_id', $colsJ)) $db->exec("ALTER TABLE asesmen_jadwal ADD COLUMN kelas_id INT NULL AFTER tingkat");
+                if (!in_array('sesi_ke', $colsJ)) $db->exec("ALTER TABLE asesmen_jadwal ADD COLUMN sesi_ke INT DEFAULT 1 AFTER jam_selesai");
+            } catch (\Exception $e) {}
 
             $db->exec("CREATE TABLE IF NOT EXISTS asesmen_berita_acara (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -1095,16 +1103,73 @@ class AsesmenController
         $this->checkAccess();
         $db = Database::connect('core');
 
-        $jadwalList = $db->query("
-            SELECT j.*, m.nama_mapel, e.nama as nama_event
+        $eventId = (int)($_GET['event_id'] ?? 0);
+        $events = $db->query("SELECT id, nama, kode FROM asesmen_event WHERE status = 'aktif' ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
+        if ($eventId === 0 && !empty($events)) {
+            $eventId = $events[0]['id'];
+        }
+
+        $kelas = $db->query("SELECT id, nama_kelas, tingkat FROM kelas ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll(PDO::FETCH_ASSOC);
+        $mapels = $db->query("SELECT id, nama_mapel FROM mapel ORDER BY nama_mapel ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+        $sql = "
+            SELECT j.*, m.nama_mapel, e.nama as nama_event, k.nama_kelas
             FROM asesmen_jadwal j
             LEFT JOIN mapel m ON j.mapel_id = m.id
             LEFT JOIN asesmen_event e ON j.event_id = e.id
+            LEFT JOIN kelas k ON j.kelas_id = k.id
+            WHERE j.event_id = ?
             ORDER BY j.tanggal ASC, j.jam_mulai ASC
-        ")->fetchAll(PDO::FETCH_ASSOC);
+        ";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$eventId]);
+        $rawList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $events = $db->query("SELECT id, nama FROM asesmen_event WHERE status = 'aktif' ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
-        $mapels = $db->query("SELECT id, nama_mapel FROM mapel ORDER BY nama_mapel ASC")->fetchAll(PDO::FETCH_ASSOC);
+        $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+        $dates = [];
+        $jadwalMatrix = [];
+        $timeSlotsPerDate = [];
+
+        foreach ($rawList as $row) {
+            $tgl = $row['tanggal'];
+            $jamStr = substr($row['jam_mulai'], 0, 5) . ' - ' . substr($row['jam_selesai'], 0, 5);
+
+            if (!isset($dates[$tgl])) {
+                $ts = strtotime($tgl);
+                $dayEng = date('l', $ts);
+                $dayMap = ['Sunday' => 'Ahad', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+                $namaHari = $dayMap[$dayEng] ?? $dayEng;
+                $tglFmt = date('j', $ts) . ' ' . $bulanIndo[(int)date('n', $ts)] . ' ' . date('Y', $ts);
+                $dates[$tgl] = [
+                    'tanggal' => $tgl,
+                    'hari' => $namaHari,
+                    'formatted' => "HARI $namaHari, $tglFmt"
+                ];
+            }
+
+            if (!isset($timeSlotsPerDate[$tgl])) {
+                $timeSlotsPerDate[$tgl] = [];
+            }
+            if (!in_array($jamStr, $timeSlotsPerDate[$tgl])) {
+                $timeSlotsPerDate[$tgl][] = $jamStr;
+            }
+
+            // Map to classes
+            foreach ($kelas as $k) {
+                $match = false;
+                if (!empty($row['kelas_id']) && $row['kelas_id'] == $k['id']) {
+                    $match = true;
+                } elseif (empty($row['kelas_id'])) {
+                    if ($row['tingkat'] === 'Semua' || $row['tingkat'] == $k['tingkat']) {
+                        $match = true;
+                    }
+                }
+                if ($match) {
+                    $jadwalMatrix[$tgl][$jamStr][$k['id']] = $row;
+                }
+            }
+        }
 
         $activeMenu = 'asesmen_jadwal';
         $title = 'Jadwal Pelaksanaan Ujian | MTs RS';
@@ -1117,21 +1182,48 @@ class AsesmenController
         $this->checkAccess();
         $db = Database::connect('core');
 
+        $id = (int)($_POST['id'] ?? 0);
         $event_id = (int)($_POST['event_id'] ?? 0);
         $mapel_id = (int)($_POST['mapel_id'] ?? 0);
         $tingkat = $_POST['tingkat'] ?? 'Semua';
+        $kelas_id = !empty($_POST['kelas_id']) ? (int)$_POST['kelas_id'] : null;
         $tanggal = $_POST['tanggal'] ?? date('Y-m-d');
         $jam_mulai = $_POST['jam_mulai'] ?? '07:30';
         $jam_selesai = $_POST['jam_selesai'] ?? '09:00';
+        $sesi_ke = (int)($_POST['sesi_ke'] ?? 1);
         $durasi = (int)($_POST['durasi_menit'] ?? 90);
 
         if ($event_id > 0 && $mapel_id > 0) {
-            $stmt = $db->prepare("INSERT INTO asesmen_jadwal (event_id, mapel_id, tingkat, tanggal, jam_mulai, jam_selesai, durasi_menit) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$event_id, $mapel_id, $tingkat, $tanggal, $jam_mulai, $jam_selesai, $durasi]);
-            $_SESSION['flash_success'] = 'Jadwal ujian berhasil ditambahkan.';
+            if ($id > 0) {
+                $stmt = $db->prepare("UPDATE asesmen_jadwal SET event_id = ?, mapel_id = ?, tingkat = ?, kelas_id = ?, tanggal = ?, jam_mulai = ?, jam_selesai = ?, sesi_ke = ?, durasi_menit = ? WHERE id = ?");
+                $stmt->execute([$event_id, $mapel_id, $tingkat, $kelas_id, $tanggal, $jam_mulai, $jam_selesai, $sesi_ke, $durasi, $id]);
+                $_SESSION['flash_success'] = 'Jadwal ujian berhasil diperbarui.';
+            } else {
+                $stmt = $db->prepare("INSERT INTO asesmen_jadwal (event_id, mapel_id, tingkat, kelas_id, tanggal, jam_mulai, jam_selesai, sesi_ke, durasi_menit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$event_id, $mapel_id, $tingkat, $kelas_id, $tanggal, $jam_mulai, $jam_selesai, $sesi_ke, $durasi]);
+                $_SESSION['flash_success'] = 'Jadwal ujian berhasil ditambahkan ke jadwal harian.';
+            }
         }
 
-        header('Location: ' . Helper::url('/asesmen/jadwal'));
+        header('Location: ' . Helper::url('/asesmen/jadwal?event_id=' . $event_id));
+        exit;
+    }
+
+    public function deleteJadwal()
+    {
+        $this->checkAccess();
+        $db = Database::connect('core');
+
+        $id = (int)($_POST['id'] ?? 0);
+        $eventId = (int)($_POST['event_id'] ?? 0);
+
+        if ($id > 0) {
+            $stmt = $db->prepare("DELETE FROM asesmen_jadwal WHERE id = ?");
+            $stmt->execute([$id]);
+            $_SESSION['flash_success'] = 'Jadwal ujian berhasil dihapus.';
+        }
+
+        header('Location: ' . Helper::url('/asesmen/jadwal?event_id=' . $eventId));
         exit;
     }
 

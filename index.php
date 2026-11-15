@@ -700,6 +700,7 @@ $router->add('POST', '/asesmen/berita-acara/save', [\App\Controllers\AsesmenCont
 $router->add('GET', '/asesmen/berita-acara/cetak', [\App\Controllers\AsesmenController::class, 'cetakBeritaAcara']);
 $router->add('GET', '/asesmen/jadwal', [\App\Controllers\AsesmenController::class, 'jadwal']);
 $router->add('POST', '/asesmen/jadwal/save', [\App\Controllers\AsesmenController::class, 'saveJadwal']);
+$router->add('POST', '/asesmen/jadwal/delete', [\App\Controllers\AsesmenController::class, 'deleteJadwal']);
 $router->add('GET', '/asesmen/jadwal/cetak', [\App\Controllers\AsesmenController::class, 'cetakJadwal']);
 
 // Default fallback 404
