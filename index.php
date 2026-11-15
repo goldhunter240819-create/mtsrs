@@ -669,5 +669,16 @@ $router->add('POST', '/pengawas/pkkm/simpan-ttd', [\App\Controllers\PengawasPkkm
 $router->add('GET', '/pengawas/pkkm/cetak-rekap', [\App\Controllers\PengawasPkkmController::class, 'cetakRekap']);
 $router->add('GET', '/pengawas/pkkm/cetak-bukti/persuratan', [\App\Controllers\AdminPkkmController::class, 'cetakBuktiPersuratan']);
 
+// --- Asesmen & Ujian Module Routes ---
+$router->add('GET', '/asesmen', [\App\Controllers\AsesmenController::class, 'dashboard']);
+$router->add('GET', '/asesmen/dashboard', [\App\Controllers\AsesmenController::class, 'dashboard']);
+$router->add('GET', '/asesmen/event', [\App\Controllers\AsesmenController::class, 'event']);
+$router->add('POST', '/asesmen/event/save', [\App\Controllers\AsesmenController::class, 'saveEvent']);
+$router->add('GET', '/asesmen/bank-soal', [\App\Controllers\AsesmenController::class, 'bankSoal']);
+$router->add('GET', '/asesmen/ruang', [\App\Controllers\AsesmenController::class, 'ruang']);
+$router->add('POST', '/asesmen/ruang/save', [\App\Controllers\AsesmenController::class, 'saveRuang']);
+$router->add('GET', '/asesmen/berita-acara', [\App\Controllers\AsesmenController::class, 'beritaAcara']);
+$router->add('GET', '/asesmen/jadwal', [\App\Controllers\AsesmenController::class, 'jadwal']);
+
 // Default fallback 404
 $router->run();

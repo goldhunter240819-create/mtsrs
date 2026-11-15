@@ -31,6 +31,7 @@ $isGuruWeb = (strpos($activeMenu, 'guru_') === 0);
 $isSiswaWeb = (strpos($activeMenu, 'siswa_') === 0);
 $isEvoting = (strpos($activeMenu, 'evoting_') === 0);
 $isPkkm = (strpos($activeMenu, 'pkkm') === 0);
+$isAsesmen = (strpos($activeMenu, 'asesmen') === 0);
 
 $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institusi['logo']) : Helper::url('/assets/images/logo.png');
 ?>
@@ -552,6 +553,52 @@ $logoSrc = !empty($institusi['logo']) ? Helper::url('/uploads/logo/' . $institus
                     </a>
                     <a href="<?php echo Helper::url('/pengawas/pkkm'); ?>" target="_blank" class="z-nav-item">
                         <i data-lucide="external-link"></i> Portal Penilai Asesor
+                    </a>
+                <?php endif; ?>
+
+                <?php if ($isAsesmen): ?>
+                    <div class="z-nav-cat">ASESMEN & UJIAN</div>
+                    <a href="<?php echo Helper::url('/asesmen'); ?>" class="z-nav-item <?php echo in_array($activeMenu, ['asesmen', 'asesmen_dashboard']) ? 'active' : ''; ?>">
+                        <i data-lucide="layout-dashboard"></i> Dashboard Asesmen
+                    </a>
+                    <a href="<?php echo Helper::url('/asesmen/event'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_event' ? 'active' : ''; ?>">
+                        <i data-lucide="calendar-check"></i> Event / Kategori Ujian
+                    </a>
+                    
+                    <div class="z-nav-cat">BANK SOAL & KISI-KISI</div>
+                    <a href="<?php echo Helper::url('/asesmen/bank-soal'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_bank_soal' ? 'active' : ''; ?>">
+                        <i data-lucide="file-question"></i> Bank Soal & Kunci
+                    </a>
+                    <a href="<?php echo Helper::url('/asesmen/kisi-kisi'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_kisi_kisi' ? 'active' : ''; ?>">
+                        <i data-lucide="list-checks"></i> Kisi-Kisi Soal
+                    </a>
+                    
+                    <div class="z-nav-cat">PENGATURAN RUANG & SESI</div>
+                    <a href="<?php echo Helper::url('/asesmen/ruang'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_ruang' ? 'active' : ''; ?>">
+                        <i data-lucide="building"></i> Ruang & Nomor Meja
+                    </a>
+                    <a href="<?php echo Helper::url('/asesmen/peserta'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_peserta' ? 'active' : ''; ?>">
+                        <i data-lucide="users"></i> Distribusi Peserta
+                    </a>
+                    <a href="<?php echo Helper::url('/asesmen/kartu-peserta'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_kartu_peserta' ? 'active' : ''; ?>">
+                        <i data-lucide="id-card"></i> Cetak Kartu & Meja
+                    </a>
+
+                    <div class="z-nav-cat">ADMINISTRASI & CETAK</div>
+                    <a href="<?php echo Helper::url('/asesmen/jadwal'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_jadwal' ? 'active' : ''; ?>">
+                        <i data-lucide="clock"></i> Jadwal Pelaksanaan
+                    </a>
+                    <a href="<?php echo Helper::url('/asesmen/berita-acara'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_berita_acara' ? 'active' : ''; ?>">
+                        <i data-lucide="file-text"></i> Berita Acara Ujian
+                    </a>
+                    <a href="<?php echo Helper::url('/asesmen/daftar-hadir'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_daftar_hadir' ? 'active' : ''; ?>">
+                        <i data-lucide="clipboard-check"></i> Daftar Hadir Peserta
+                    </a>
+                    <a href="<?php echo Helper::url('/asesmen/daftar-hadir-pengawas'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_pengawas' ? 'active' : ''; ?>">
+                        <i data-lucide="user-check"></i> Kehadiran Pengawas
+                    </a>
+                    <a href="<?php echo Helper::url('/asesmen/tata-tertib'); ?>" class="z-nav-item <?php echo $activeMenu === 'asesmen_tata_tertib' ? 'active' : ''; ?>">
+                        <i data-lucide="shield-alert"></i> Tata Tertib Ujian
                     </a>
                 <?php endif; ?>
 

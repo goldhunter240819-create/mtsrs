@@ -162,6 +162,17 @@ class Helper {
                 'badge_class' => 'pill-green',
                 'badge_style' => 'background: rgba(5,150,105,0.15); color: #059669;',
             ],
+            'asesmen' => [
+                'url' => '/asesmen',
+                'title' => 'Asesmen & Ujian',
+                'subtitle' => 'Bank Soal, Ruang & Berita Acara',
+                'icon' => 'file-check-2',
+                'color' => '#4f46e5',
+                'card_class' => 'card-asesmen',
+                'badge_text' => 'New',
+                'badge_class' => 'pill-purple',
+                'badge_style' => 'background: rgba(79, 70, 229, 0.15); color: #4f46e5;',
+            ],
         ];
     }
 
