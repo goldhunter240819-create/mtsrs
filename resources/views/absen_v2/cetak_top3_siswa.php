@@ -94,17 +94,14 @@
                     $active_days = $class_active_days_count[$top['kelas_id']] ?? 1;
                     $persen = min(100, round(($top['total_hadir'] / max(1, $active_days)) * 100));
                     $avgTime = $top['avg_jam_masuk'] ? substr($top['avg_jam_masuk'], 0, 5) : '-';
-                    $alpa_sebenarnya = $top['total_alpa'];
-                    if ($top['total_hari_tercatat'] < $active_days) {
-                        $alpa_sebenarnya += ($active_days - $top['total_hari_tercatat']);
-                    }
+                    $alpa = $top['total_alpa'];
                     ?>
                     <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 10px; border-radius: 8px; border: 1px solid #fde047; box-shadow: 0 2px 4px -1px rgba(0,0,0,0.05);">
                         <div class="rank-badge rank-<?php echo $rk; ?>" style="width: 35px; height: 35px; font-size: 14pt; min-width: 35px;"><?php echo $rk; ?></div>
                         <div class="student-info">
                             <div class="student-name" style="font-size: 9.5pt; line-height:1.1; margin-bottom:3px;"><?php echo htmlspecialchars($top['nama']); ?></div>
                             <div class="student-stats" style="font-weight: bold; color: #1e293b; font-size:8pt;">Kelas <?php echo htmlspecialchars($top['nama_kelas']); ?></div>
-                            <div class="student-stats" style="margin-top: 2px; font-size:7.5pt;">Hadir: <?php echo $top['total_hadir']; ?> &bull; Alpa: <?php echo $alpa_sebenarnya; ?></div>
+                            <div class="student-stats" style="margin-top: 2px; font-size:7.5pt;">Hadir: <?php echo $top['total_hadir']; ?> &bull; Alpa: <?php echo $alpa; ?></div>
                             <div class="student-stats" style="margin-top: 1px; font-size:7.5pt;">Persentase: <?php echo $persen; ?>% &bull; Rata: <?php echo $avgTime; ?></div>
                         </div>
                     </div>
@@ -124,16 +121,13 @@
                                 $active_daysK = $class_active_days_count[$tk['kelas_id']] ?? 1;
                                 $persenK = min(100, round(($tk['total_hadir'] / max(1, $active_daysK)) * 100));
                                 $avgTimeK = $tk['avg_jam_masuk'] ? substr($tk['avg_jam_masuk'], 0, 5) : '-';
-                                $tk_alpa_sebenarnya = $tk['total_alpa'];
-                                if ($tk['total_hari_tercatat'] < $active_daysK) {
-                                    $tk_alpa_sebenarnya += ($active_daysK - $tk['total_hari_tercatat']);
-                                }
+                                $tk_alpa = $tk['total_alpa'];
                                 ?>
                                 <div class="top-item">
                                     <div class="rank-badge rank-<?php echo $rk; ?>"><?php echo $rk; ?></div>
                                     <div class="student-info">
                                         <div class="student-name"><?php echo htmlspecialchars($tk['nama']); ?></div>
-                                        <div class="student-stats">Hadir: <?php echo $tk['total_hadir']; ?> &bull; Alpa: <?php echo $tk_alpa_sebenarnya; ?></div>
+                                        <div class="student-stats">Hadir: <?php echo $tk['total_hadir']; ?> &bull; Alpa: <?php echo $tk_alpa; ?></div>
                                         <div class="student-stats" style="margin-top: 2px;">Persentase: <?php echo $persenK; ?>% &bull; Rata-rata jam: <?php echo $avgTimeK; ?></div>
                                     </div>
                                 </div>

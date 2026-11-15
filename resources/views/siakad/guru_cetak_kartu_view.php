@@ -7,6 +7,16 @@
     <link rel="icon" href="<?php echo \App\Core\Helper::url('/public/uploads/logo/' . (isset($inst['logo']) ? $inst['logo'] : '')); ?>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="<?php echo \App\Core\Helper::url('/public/assets/js/lucide.min.js'); ?>"></script>
+    <script src="<?php echo \App\Core\Helper::url('/public/assets/js/html2canvas.min.js'); ?>"></script>
+    <script src="<?php echo \App\Core\Helper::url('/public/assets/js/jszip.min.js'); ?>"></script>
+    <script>
+        if (typeof html2canvas === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>');
+        }
+        if (typeof JSZip === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>');
+        }
+    </script>
     <style>
         :root {
             --emerald-900: #064e3b;
@@ -111,6 +121,52 @@
         .print-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(6, 95, 70, 0.6); }
 
         .switch-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); }
+        .download-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5); }
+
+        .card { position: relative; }
+        .card:hover .card-quick-dl { opacity: 1; pointer-events: auto; }
+        .card-quick-dl {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 3px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+        .card-back[style*="rotate(180deg)"] .card-quick-dl {
+            transform: rotate(180deg);
+            top: auto;
+            right: auto;
+            bottom: 5px;
+            left: 5px;
+        }
+        .card-quick-dl button {
+            background: rgba(15, 23, 42, 0.85);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 4px;
+            padding: 3px 6px;
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            backdrop-filter: blur(4px);
+            transition: all 0.15s ease;
+        }
+        .card-quick-dl button:hover {
+            background: #f59e0b;
+            color: #0f172a;
+            border-color: #fbbf24;
+            transform: scale(1.08);
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
 
     </style>
 </head>
@@ -190,6 +246,10 @@
                     <?php endif; ?>
                     <?php echo $isVertical ? 'Versi Horizontal' : 'Versi Vertikal'; ?>
                 </a>
+                <button type="button" class="download-btn" onclick="openDownloadModal()" style="padding: 7px 15px; font-size: 11px; border: none; background: #0284c7; color: white; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 6px; text-transform: uppercase; font-weight: 700; transition: all 0.3s; box-shadow: 0 4px 14px 0 rgba(2, 132, 199, 0.4);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Download Gambar
+                </button>
                 <button class="print-btn" onclick="window.print()" style="padding: 7px 15px; font-size: 11px; border: none; background: var(--emerald-800); color: white; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 6px; text-transform: uppercase; font-weight: 700; transition: all 0.3s;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                     Cetak Sekarang
@@ -212,7 +272,11 @@
                     $instName = $inst ? $inst['nama'] : 'GH-SSS ACADEMY';
         ?>
         <!-- SISI DEPAN VERTIKAL -->
-        <div class="card card-front">
+        <div class="card card-front" data-id="<?php echo $g['id']; ?>" data-name="<?php echo htmlspecialchars($g['nama']); ?>" data-nis="<?php echo htmlspecialchars($g['niy'] ?? ''); ?>" data-side="depan">
+                <div class="card-quick-dl no-print">
+                    <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'png')" title="Unduh Sisi Depan (PNG)">PNG</button>
+                    <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'jpg')" title="Unduh Sisi Depan (JPG)">JPG</button>
+                </div>
                 <!-- VERTIKAL HEADER -->
                 <div style="height: 19mm; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5mm; color: white; position: relative; z-index: 2;">
                     <?php if($inst && $inst['logo']): ?>
@@ -268,7 +332,11 @@
                 $qrUrlBack = 'https://quickchart.io/qr?size=350&margin=0&ecLevel=M&text=' . urlencode($qrDataGuru);
         ?>
         <!-- SISI BELAKANG VERTIKAL -->
-        <div class="card card-back" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4mm; transform: rotate(180deg);">
+        <div class="card card-back" data-id="<?php echo $g['id']; ?>" data-name="<?php echo htmlspecialchars($g['nama']); ?>" data-nis="<?php echo htmlspecialchars($g['niy'] ?? ''); ?>" data-side="belakang" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4mm; transform: rotate(180deg);">
+            <div class="card-quick-dl no-print">
+                <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'png')" title="Unduh Sisi Belakang (PNG)">PNG</button>
+                <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'jpg')" title="Unduh Sisi Belakang (JPG)">JPG</button>
+            </div>
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--emerald-900); z-index: 1;"></div>
             <!-- Pattern Back -->
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.1), transparent 50%); z-index: 2;"></div>
@@ -323,7 +391,11 @@
                 }
         ?>
         <!-- SISI DEPAN HORIZONTAL -->
-        <div class="card card-front">
+        <div class="card card-front" data-id="<?php echo $g['id']; ?>" data-name="<?php echo htmlspecialchars($g['nama']); ?>" data-nis="<?php echo htmlspecialchars($g['niy'] ?? ''); ?>" data-side="depan">
+                <div class="card-quick-dl no-print">
+                    <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'png')" title="Unduh Sisi Depan (PNG)">PNG</button>
+                    <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'jpg')" title="Unduh Sisi Depan (JPG)">JPG</button>
+                </div>
                 <!-- HORIZONTAL HEADER -->
                 <div style="height: 14mm; display: flex; align-items: center; padding: 0 4mm; color: white; position: relative; z-index: 2;">
                     <?php if($inst && $inst['logo']): ?>
@@ -402,7 +474,11 @@
         </div>
 
         <!-- SISI BELAKANG HORIZONTAL -->
-        <div class="card card-back" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4mm;">
+        <div class="card card-back" data-id="<?php echo $g['id']; ?>" data-name="<?php echo htmlspecialchars($g['nama']); ?>" data-nis="<?php echo htmlspecialchars($g['niy'] ?? ''); ?>" data-side="belakang" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4mm;">
+            <div class="card-quick-dl no-print">
+                <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'png')" title="Unduh Sisi Belakang (PNG)">PNG</button>
+                <button type="button" onclick="event.stopPropagation(); downloadCardElement(this.closest('.card'), 'jpg')" title="Unduh Sisi Belakang (JPG)">JPG</button>
+            </div>
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--emerald-900); z-index: 1;"></div>
             <!-- Pattern Back -->
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.1), transparent 50%); z-index: 2;"></div>
@@ -423,6 +499,86 @@
         </div>
         <?php endforeach; ?>
         <?php endif; ?>
+    </div>
+
+    <!-- Modal Download Gambar -->
+    <div id="modalDownloadGambar" class="no-print" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div style="background: white; border-radius: 16px; width: 92%; max-width: 480px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #e2e8f0; overflow: hidden; animation: popIn 0.2s ease;">
+            <div style="background: linear-gradient(135deg, #0284c7, #0369a1); padding: 18px 22px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 14px; font-weight: 800; letter-spacing: 0.3px;">Unduh Kartu Identitas Guru</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 11px; opacity: 0.9;">Export kartu ke file gambar JPG / PNG</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeDownloadModal()" style="background: none; border: none; color: white; opacity: 0.8; cursor: pointer; font-size: 22px; line-height: 1; padding: 4px;">&times;</button>
+            </div>
+
+            <div style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                <!-- Format Gambar -->
+                <div>
+                    <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Pilih Format Gambar:</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <label id="lblFmtPng" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 2px solid #0284c7; background: #f0f9ff; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700; color: #0369a1;">
+                            <input type="radio" name="dlFormat" value="png" checked onchange="updateFmtRadios()" style="accent-color: #0284c7;">
+                            <span>PNG <span style="font-size: 10px; font-weight: 500; color: #0284c7;">(HD / Rekomendasi)</span></span>
+                        </label>
+                        <label id="lblFmtJpg" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700; color: #475569;">
+                            <input type="radio" name="dlFormat" value="jpg" onchange="updateFmtRadios()" style="accent-color: #0284c7;">
+                            <span>JPG <span style="font-size: 10px; font-weight: 500; color: #64748b;">(Ringan)</span></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Bagian Kartu -->
+                <div>
+                    <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Bagian Kartu:</label>
+                    <select id="dlSideSelect" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 12px; font-weight: 600; outline: none; color: #0f172a;">
+                        <option value="both">Keduanya (Depan & Belakang)</option>
+                        <option value="front">Sisi Depan Saja</option>
+                        <option value="back">Sisi Belakang Saja</option>
+                    </select>
+                </div>
+
+                <!-- Target Guru -->
+                <div>
+                    <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Pilih Target Guru:</label>
+                    <select id="dlTargetSelect" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 12px; font-weight: 600; outline: none; color: #0f172a;">
+                        <option value="all">⭐ Semua Guru Ditampilkan (ZIP Kolektif)</option>
+                        <?php if (!empty($gurus)): ?>
+                            <optgroup label="Pilih Satu Guru:">
+                            <?php foreach($gurus as $idx => $gItem): ?>
+                                <option value="<?php echo $gItem['id']; ?>">
+                                    <?php echo ($idx + 1) . '. ' . htmlspecialchars($gItem['nama']) . ' (' . htmlspecialchars($gItem['niy'] ?? '-') . ')'; ?>
+                                </option>
+                            <?php endforeach; ?>
+                            </optgroup>
+                        <?php endif; ?>
+                    </select>
+                </div>
+
+                <!-- Progress Box -->
+                <div id="dlProgressBarBox" style="display: none; background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span id="dlProgressText" style="font-size: 11px; font-weight: 700; color: #0369a1;">Sedang menyiapkan...</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden;">
+                        <div id="dlProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #0284c7, #10b981); transition: width 0.2s ease;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #f8fafc; padding: 14px 20px; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeDownloadModal()" style="padding: 8px 16px; font-size: 12px; font-weight: 700; border: 1px solid #cbd5e1; background: white; color: #64748b; border-radius: 8px; cursor: pointer;">Batal</button>
+                <button type="button" id="btnStartDownload" onclick="startBulkDownload()" style="padding: 8px 18px; font-size: 12px; font-weight: 700; border: none; background: #0284c7; color: white; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Mulai Unduh
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Script to handle dynamic updates (Toolbar) -->
@@ -459,6 +615,207 @@
                     el.style.display = showInfo.checked ? 'block' : 'none';
                 });
             }
+        }
+
+        // ================= DOWNLOAD HANDLERS =================
+        function openDownloadModal() {
+            document.getElementById('modalDownloadGambar').style.display = 'flex';
+        }
+
+        function closeDownloadModal() {
+            document.getElementById('modalDownloadGambar').style.display = 'none';
+        }
+
+        function updateFmtRadios() {
+            const isPng = document.querySelector('input[name="dlFormat"]:checked').value === 'png';
+            const lblPng = document.getElementById('lblFmtPng');
+            const lblJpg = document.getElementById('lblFmtJpg');
+            if (isPng) {
+                lblPng.style.border = '2px solid #0284c7';
+                lblPng.style.background = '#f0f9ff';
+                lblPng.style.color = '#0369a1';
+                lblJpg.style.border = '1px solid #cbd5e1';
+                lblJpg.style.background = 'white';
+                lblJpg.style.color = '#475569';
+            } else {
+                lblJpg.style.border = '2px solid #0284c7';
+                lblJpg.style.background = '#f0f9ff';
+                lblJpg.style.color = '#0369a1';
+                lblPng.style.border = '1px solid #cbd5e1';
+                lblPng.style.background = 'white';
+                lblPng.style.color = '#475569';
+            }
+        }
+
+        // Single Card Direct Download
+        async function downloadCardElement(cardEl, format = 'png', customName = null) {
+            if (!cardEl) return;
+            
+            // Check if vertical card-back has 180deg rotation
+            const originalTransform = cardEl.style.transform;
+            const isBackVertical = cardEl.classList.contains('card-back') && cardEl.style.transform.includes('180deg');
+            if (isBackVertical) {
+                cardEl.style.transform = 'none';
+            }
+            
+            // Hide dl buttons inside card during capture
+            const dlElements = cardEl.querySelectorAll('.no-print');
+            dlElements.forEach(el => el.style.visibility = 'hidden');
+
+            try {
+                const canvas = await html2canvas(cardEl, {
+                    scale: 3,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: cardEl.classList.contains('card-front') ? '#00008E' : '#ffffff',
+                    logging: false
+                });
+
+                const isJpg = format.toLowerCase() === 'jpg' || format.toLowerCase() === 'jpeg';
+                const mimeType = isJpg ? 'image/jpeg' : 'image/png';
+                const dataUrl = canvas.toDataURL(mimeType, 0.95);
+
+                const guruName = (cardEl.dataset.name || 'kartu_guru').replace(/[^a-zA-Z0-9_-]/g, '_');
+                const sideName = cardEl.dataset.side || (cardEl.classList.contains('card-front') ? 'depan' : 'belakang');
+                const ext = isJpg ? 'jpg' : 'png';
+                const filename = customName || `Kartu_${guruName}_${sideName}.${ext}`;
+
+                const a = document.createElement('a');
+                a.href = dataUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                return true;
+            } catch (err) {
+                console.error('Download card error:', err);
+                alert('Gagal mendownload kartu: ' + err.message);
+                return false;
+            } finally {
+                if (isBackVertical) {
+                    cardEl.style.transform = originalTransform;
+                }
+                dlElements.forEach(el => el.style.visibility = '');
+            }
+        }
+
+        // Bulk / Modal Download
+        async function startBulkDownload() {
+            const format = document.querySelector('input[name="dlFormat"]:checked').value;
+            const side = document.getElementById('dlSideSelect').value;
+            const targetScope = document.getElementById('dlTargetSelect').value;
+            
+            // Collect matching cards
+            const allCards = document.querySelectorAll('.card');
+            let cardsToProcess = [];
+            
+            allCards.forEach(card => {
+                if (card.style.display === 'none' || card.offsetParent === null) return;
+                
+                const isFront = card.classList.contains('card-front');
+                const isBack = card.classList.contains('card-back');
+                
+                if (side === 'front' && !isFront) return;
+                if (side === 'back' && !isBack) return;
+                
+                if (targetScope !== 'all' && card.dataset.id !== targetScope) return;
+                
+                cardsToProcess.push(card);
+            });
+
+            if (cardsToProcess.length === 0) {
+                alert('Tidak ada kartu yang sesuai dengan pilihan untuk diunduh.');
+                return;
+            }
+
+            const btnStart = document.getElementById('btnStartDownload');
+            const progressBox = document.getElementById('dlProgressBarBox');
+            const progressBar = document.getElementById('dlProgressBar');
+            const progressText = document.getElementById('dlProgressText');
+            
+            btnStart.disabled = true;
+            btnStart.style.opacity = '0.6';
+            progressBox.style.display = 'block';
+
+            const useZip = (typeof JSZip !== 'undefined') && cardsToProcess.length > 1;
+            const zip = useZip ? new JSZip() : null;
+
+            for (let i = 0; i < cardsToProcess.length; i++) {
+                const cardEl = cardsToProcess[i];
+                const currentNum = i + 1;
+                const total = cardsToProcess.length;
+                const pct = Math.round((currentNum / total) * 100);
+                
+                progressBar.style.width = pct + '%';
+                progressText.innerText = `Memproses ${currentNum} dari ${total} kartu...`;
+
+                const name = (cardEl.dataset.name || 'kartu').replace(/[^a-zA-Z0-9_-]/g, '_');
+                const niy = (cardEl.dataset.nis || '').replace(/[^a-zA-Z0-9_-]/g, '_');
+                const sideName = cardEl.dataset.side || (cardEl.classList.contains('card-front') ? 'depan' : 'belakang');
+                const ext = format === 'jpg' ? 'jpg' : 'png';
+                const filename = `Kartu_Guru_${niy ? niy + '_' : ''}${name}_${sideName}.${ext}`;
+
+                const originalTransform = cardEl.style.transform;
+                const isBackVertical = cardEl.classList.contains('card-back') && cardEl.style.transform.includes('180deg');
+                if (isBackVertical) {
+                    cardEl.style.transform = 'none';
+                }
+                const dlElements = cardEl.querySelectorAll('.no-print');
+                dlElements.forEach(el => el.style.visibility = 'hidden');
+
+                try {
+                    const canvas = await html2canvas(cardEl, {
+                        scale: 3,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: cardEl.classList.contains('card-front') ? '#00008E' : '#ffffff',
+                        logging: false
+                    });
+
+                    const mimeType = ext === 'jpg' ? 'image/jpeg' : 'image/png';
+                    const dataUrl = canvas.toDataURL(mimeType, 0.95);
+
+                    if (zip) {
+                        const base64Data = dataUrl.split(',')[1];
+                        zip.file(filename, base64Data, { base64: true });
+                    } else {
+                        const a = document.createElement('a');
+                        a.href = dataUrl;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        await new Promise(r => setTimeout(r, 350));
+                    }
+                } catch (err) {
+                    console.error('Error generating card image:', err);
+                } finally {
+                    if (isBackVertical) {
+                        cardEl.style.transform = originalTransform;
+                    }
+                    dlElements.forEach(el => el.style.visibility = '');
+                }
+            }
+
+            if (zip) {
+                progressText.innerText = 'Mengompres file ZIP...';
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(zipBlob);
+                a.download = `Kartu_Identitas_Guru_${format.toUpperCase()}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            }
+
+            progressText.innerText = '✅ Selesai diunduh!';
+            setTimeout(() => {
+                btnStart.disabled = false;
+                btnStart.style.opacity = '1';
+                progressBox.style.display = 'none';
+                closeDownloadModal();
+            }, 1200);
         }
     </script>
 </body>

@@ -96,7 +96,7 @@
                         <a href="/absen/cetak-bulanan-siswa-detail?bulan=<?php echo htmlspecialchars($bulan); ?>&tahun=<?php echo htmlspecialchars($tahun); ?>&kelas_id=<?php echo htmlspecialchars($kelas_id); ?>" target="_blank" style="padding:8px 16px; background:#f59e0b; color:white; border:none; border-radius:8px; font-weight:700; text-decoration:none; display:flex; align-items:center; gap:6px;">
                             <i data-lucide="qr-code" style="width:16px; height:16px;"></i> Cetak QR
                         </a>
-                        <a href="/absen/cetak-manual?kelas_id=<?php echo htmlspecialchars($kelas_id); ?>" target="_blank" style="padding:8px 16px; background:#3b82f6; color:white; border:none; border-radius:8px; font-weight:700; text-decoration:none; display:flex; align-items:center; gap:6px;">
+                        <a href="/absen/cetak-manual?kelas_id=<?php echo htmlspecialchars($kelas_id); ?>&bulan=<?php echo htmlspecialchars($bulan); ?>&tahun=<?php echo htmlspecialchars($tahun); ?>&format=berisi_data" target="_blank" style="padding:8px 16px; background:#3b82f6; color:white; border:none; border-radius:8px; font-weight:700; text-decoration:none; display:flex; align-items:center; gap:6px;">
                             <i data-lucide="printer" style="width:16px; height:16px;"></i> Cetak Manual
                         </a>
                     </form>
@@ -132,15 +132,7 @@
                                     <td style="padding:12px 16px; text-align:center; font-weight:700; color:#15803d; background:#f0fdf4;"><?php echo $r['rekap']['Hadir'] + $r['rekap']['Terlambat']; ?></td>
                                     <td style="padding:12px 16px; text-align:center; font-weight:700; color:#ca8a04; background:#fefce8;"><?php echo $r['rekap']['Sakit']; ?></td>
                                     <td style="padding:12px 16px; text-align:center; font-weight:700; color:#1d4ed8; background:#eff6ff;"><?php echo $r['rekap']['Izin']; ?></td>
-                                    <?php 
-                                        $active_days = $class_active_days_count[$r['kelas_id']] ?? 1;
-                                        $total_scanned = $r['rekap']['Hadir'] + $r['rekap']['Terlambat'] + $r['rekap']['Sakit'] + $r['rekap']['Izin'] + $r['rekap']['Alpa'] + $r['rekap']['Bolos'];
-                                        $alpa_sebenarnya = $r['rekap']['Alpa'];
-                                        if ($total_scanned < $active_days) {
-                                            $alpa_sebenarnya += ($active_days - $total_scanned);
-                                        }
-                                    ?>
-                                    <td style="padding:12px 16px; text-align:center; font-weight:700; color:#b91c1c; background:#fef2f2;"><?php echo $alpa_sebenarnya; ?></td>
+                                    <td style="padding:12px 16px; text-align:center; font-weight:700; color:#b91c1c; background:#fef2f2;"><?php echo $r['rekap']['Alpa']; ?></td>
                                     <td style="padding:12px 16px; text-align:center; font-weight:700; color:#9a3412; background:#ffedd5;"><?php echo $r['rekap']['Bolos']; ?></td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -184,12 +176,9 @@
                                 $active_daysK = $class_active_days_count[$tk['kelas_id']] ?? 1;
                                 $persenK = min(100, round(($tk['total_hadir'] / max(1, $active_daysK)) * 100));
                                 $avgTimeK = $tk['avg_jam_masuk'] ? substr($tk['avg_jam_masuk'], 0, 5) : '-';
-                                $tk_alpa_sebenarnya = $tk['total_alpa'];
-                                if ($tk['total_hari_tercatat'] < $active_daysK) {
-                                    $tk_alpa_sebenarnya += ($active_daysK - $tk['total_hari_tercatat']);
-                                }
+                                $tk_alpa = $tk['total_alpa'];
                                 ?>
-                                <div style="color:#64748b; font-size:0.75rem;">Hadir: <?php echo $tk['total_hadir']; ?> &bull; Alpa: <?php echo $tk_alpa_sebenarnya; ?></div>
+                                <div style="color:#64748b; font-size:0.75rem;">Hadir: <?php echo $tk['total_hadir']; ?> &bull; Alpa: <?php echo $tk_alpa; ?></div>
                                 <div style="color:#64748b; font-size:0.7rem; margin-top:2px;">
                                     <span><?php echo $persenK; ?>% Kehadiran &bull; Rata scan: <?php echo $avgTimeK; ?></span>
                                 </div>

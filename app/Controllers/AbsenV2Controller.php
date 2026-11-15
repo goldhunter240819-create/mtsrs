@@ -1226,12 +1226,14 @@ class AbsenV2Controller {
         $inst = $db_core->query("SELECT * FROM institusi LIMIT 1")->fetch();
         $kelasList = $db_core->query("SELECT id, nama_kelas FROM kelas ORDER BY nama_kelas ASC")->fetchAll();
 
-        // Get Active Days Per Class
-        $sqlActiveDays = "SELECT COALESCE(rks.kelas_id, s.kelas_id) as kelas_id, COUNT(DISTINCT a.tanggal) as active_days
+        // Get Active Days Per Class (Excluding Friday & Holidays)
+        $sqlActiveDays = "SELECT COALESCE(rks.kelas_id, s.kelas_id) as kelas_id, 
+                                 COUNT(DISTINCT CASE WHEN WEEKDAY(a.tanggal) != 4 THEN a.tanggal END) as active_days
                           FROM absensi_siswa a
                           JOIN siswa s ON a.siswa_id = s.id
                           LEFT JOIN riwayat_kelas_siswa rks ON s.id = rks.siswa_id AND rks.tahun_ajaran_id IN (SELECT id FROM tahun_ajaran WHERE name = ?)
                           WHERE MONTH(a.tanggal) = ? AND YEAR(a.tanggal) = ?
+                            AND NOT EXISTS (SELECT 1 FROM kalender_pendidikan kp WHERE kp.kategori = 'Libur' AND a.tanggal BETWEEN kp.tanggal_mulai AND kp.tanggal_selesai)
                           GROUP BY COALESCE(rks.kelas_id, s.kelas_id)";
         $stmtActive = $db_siakad->prepare($sqlActiveDays);
         $stmtActive->execute([$active_year_name, $bulan, $tahun]);
@@ -1324,12 +1326,14 @@ class AbsenV2Controller {
             $rekap[] = $s;
         }
 
-        // --- Get Active Days Per Class (All Classes) ---
-        $sqlActiveDays = "SELECT COALESCE(rks.kelas_id, s.kelas_id) as kelas_id, COUNT(DISTINCT a.tanggal) as active_days
+        // --- Get Active Days Per Class (All Classes, Excluding Friday & Holidays) ---
+        $sqlActiveDays = "SELECT COALESCE(rks.kelas_id, s.kelas_id) as kelas_id, 
+                                 COUNT(DISTINCT CASE WHEN WEEKDAY(a.tanggal) != 4 THEN a.tanggal END) as active_days
                           FROM absensi_siswa a
                           JOIN siswa s ON a.siswa_id = s.id
                           LEFT JOIN riwayat_kelas_siswa rks ON s.id = rks.siswa_id AND rks.tahun_ajaran_id IN (SELECT id FROM tahun_ajaran WHERE name = ?)
                           WHERE MONTH(a.tanggal) = ? AND YEAR(a.tanggal) = ?
+                            AND NOT EXISTS (SELECT 1 FROM kalender_pendidikan kp WHERE kp.kategori = 'Libur' AND a.tanggal BETWEEN kp.tanggal_mulai AND kp.tanggal_selesai)
                           GROUP BY COALESCE(rks.kelas_id, s.kelas_id)";
         $stmtActive = $db_siakad->prepare($sqlActiveDays);
         $stmtActive->execute([$active_year_name, $bulan, $tahun]);
