@@ -4133,7 +4133,7 @@ class ApkController
                 SELECT p.*, g.nama as nama_guru 
                 FROM pengajuan_izin_guru p 
                 JOIN guru g ON p.guru_id = g.id 
-                WHERE p.tanggal >= ? OR p.status_approval = 'Pending'
+                WHERE p.tanggal >= DATE_SUB(?, INTERVAL 7 DAY) OR p.status_approval = 'Pending'
                 ORDER BY 
                     CASE WHEN p.status_approval = 'Pending' THEN 0 ELSE 1 END,
                     p.tanggal DESC, p.created_at DESC
@@ -4301,19 +4301,28 @@ class ApkController
             $ins->execute([$today, $guru_id]);
         }
 
-        $hariArr = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+        $hariArr = ['Sunday' => 'Ahad', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
         $hari = $hariArr[date('l')] ?? 'Senin';
         $stmt_ta = $db->query("SELECT * FROM tahun_ajaran WHERE is_active = 1 LIMIT 1");
         $ta = $stmt_ta->fetch(\PDO::FETCH_ASSOC);
         $ta_id = $ta ? $ta['id'] : 1;
         $semester = $ta ? $ta['semester'] : 'Ganjil';
 
-        $stmtJ = $db->prepare("
-            SELECT jp.id as jadwal_id, jp.kelas_id, jp.mapel_id as mapel_id
-            FROM jadwal_pelajaran jp
-            WHERE jp.guru_id = ? AND jp.hari = ? AND jp.tahun_ajaran_id = ? AND jp.semester = ?
-        ");
-        $stmtJ->execute([$guru_id, $hari, $ta_id, $semester]);
+        if ($hari === 'Ahad' || $hari === 'Minggu') {
+            $stmtJ = $db->prepare("
+                SELECT jp.id as jadwal_id, jp.kelas_id, jp.mapel_id as mapel_id
+                FROM jadwal_pelajaran jp
+                WHERE jp.guru_id = ? AND jp.hari IN ('Ahad', 'Minggu') AND jp.tahun_ajaran_id = ? AND jp.semester = ?
+            ");
+            $stmtJ->execute([$guru_id, $ta_id, $semester]);
+        } else {
+            $stmtJ = $db->prepare("
+                SELECT jp.id as jadwal_id, jp.kelas_id, jp.mapel_id as mapel_id
+                FROM jadwal_pelajaran jp
+                WHERE jp.guru_id = ? AND jp.hari = ? AND jp.tahun_ajaran_id = ? AND jp.semester = ?
+            ");
+            $stmtJ->execute([$guru_id, $hari, $ta_id, $semester]);
+        }
         $jadwalList = $stmtJ->fetchAll(\PDO::FETCH_ASSOC);
 
         $tugasInval = [];
@@ -4450,9 +4459,8 @@ class ApkController
         $guru_id = $_SESSION['guru_id'];
         $tanggal = $_GET['tanggal'] ?? date('Y-m-d');
         
-        $hariList = ['Minggu' => 'Minggu', 'Senin' => 'Senin', 'Selasa' => 'Selasa', 'Rabu' => 'Rabu', 'Kamis' => 'Kamis', 'Jumat' => 'Jumat', 'Sabtu' => 'Sabtu'];
         $dayOfWeek = date('l', strtotime($tanggal));
-        $dayMap = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+        $dayMap = ['Sunday' => 'Ahad', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
         $hari = $dayMap[$dayOfWeek] ?? 'Senin';
 
         try {
@@ -4463,17 +4471,53 @@ class ApkController
             $ta_id = $ta ? $ta['id'] : 1;
             $semester = $ta ? $ta['semester'] : 'Ganjil';
 
+            if ($hari === 'Ahad' || $hari === 'Minggu') {
+                $sqlHari = "jp.hari IN ('Ahad', 'Minggu')";
+                $params = [$guru_id, $ta_id, $semester];
+            } else {
+                $sqlHari = "jp.hari = ?";
+                $params = [$guru_id, $hari, $ta_id, $semester];
+            }
+
             $stmt = $db->prepare("
                 SELECT jp.id, jp.kelas_id, jp.mapel_id as mapel_id, jp.jam_mulai, jp.jam_selesai,
                        k.nama_kelas, m.nama_mapel
                 FROM jadwal_pelajaran jp
                 JOIN kelas k ON jp.kelas_id = k.id
                 JOIN mapel m ON jp.mapel_id = m.id
-                WHERE jp.guru_id = ? AND jp.hari = ? AND jp.tahun_ajaran_id = ? AND jp.semester = ?
+                WHERE jp.guru_id = ? AND $sqlHari AND jp.tahun_ajaran_id = ? AND jp.semester = ?
                 ORDER BY jp.jam_mulai ASC
             ");
-            $stmt->execute([$guru_id, $hari, $ta_id, $semester]);
+            $stmt->execute($params);
             $jadwal = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Fallback jika belum ter-assign tahun ajaran / semester
+            if (empty($jadwal)) {
+                if ($hari === 'Ahad' || $hari === 'Minggu') {
+                    $stmtFb = $db->prepare("
+                        SELECT jp.id, jp.kelas_id, jp.mapel_id as mapel_id, jp.jam_mulai, jp.jam_selesai,
+                               k.nama_kelas, m.nama_mapel
+                        FROM jadwal_pelajaran jp
+                        JOIN kelas k ON jp.kelas_id = k.id
+                        JOIN mapel m ON jp.mapel_id = m.id
+                        WHERE jp.guru_id = ? AND jp.hari IN ('Ahad', 'Minggu')
+                        ORDER BY jp.jam_mulai ASC
+                    ");
+                    $stmtFb->execute([$guru_id]);
+                } else {
+                    $stmtFb = $db->prepare("
+                        SELECT jp.id, jp.kelas_id, jp.mapel_id as mapel_id, jp.jam_mulai, jp.jam_selesai,
+                               k.nama_kelas, m.nama_mapel
+                        FROM jadwal_pelajaran jp
+                        JOIN kelas k ON jp.kelas_id = k.id
+                        JOIN mapel m ON jp.mapel_id = m.id
+                        WHERE jp.guru_id = ? AND jp.hari = ?
+                        ORDER BY jp.jam_mulai ASC
+                    ");
+                    $stmtFb->execute([$guru_id, $hari]);
+                }
+                $jadwal = $stmtFb->fetchAll(\PDO::FETCH_ASSOC);
+            }
 
             echo json_encode($jadwal);
         } catch (\Exception $e) {
@@ -4731,7 +4775,8 @@ class ApkController
         
         $db = \App\Core\Database::connect();
         $today = date('Y-m-d');
-        $hari_ini = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][date('w')];
+        $hari_map = ['Sunday' => 'Ahad', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+        $hari_ini = $hari_map[date('l')] ?? 'Senin';
         
         // Guru hadir hari ini
         $stmt = $db->prepare("SELECT COUNT(DISTINCT guru_id) as total FROM absensi_guru WHERE tanggal = ?");
@@ -4739,8 +4784,13 @@ class ApkController
         $guruHadir = $stmt->fetch()['total'] ?? 0;
         
         // Kelas kosong (estimasi: jadwal total - jurnal terisi)
-        $stmt = $db->prepare("SELECT COUNT(id) as total FROM jadwal_pelajaran WHERE hari = ?");
-        $stmt->execute([$hari_ini]);
+        if ($hari_ini === 'Ahad' || $hari_ini === 'Minggu') {
+            $stmt = $db->prepare("SELECT COUNT(id) as total FROM jadwal_pelajaran WHERE hari IN ('Ahad', 'Minggu')");
+            $stmt->execute();
+        } else {
+            $stmt = $db->prepare("SELECT COUNT(id) as total FROM jadwal_pelajaran WHERE hari = ?");
+            $stmt->execute([$hari_ini]);
+        }
         $totalJadwal = $stmt->fetch()['total'] ?? 0;
         
         $stmt = $db->prepare("SELECT COUNT(id) as total FROM jurnal_guru WHERE tanggal = ?");
@@ -4792,8 +4842,27 @@ class ApkController
         $activeNav = "apps";
         
         $db = \App\Core\Database::connect();
-        $hari_ini = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][date('w')];
-        $jadwal = $db->query("SELECT j.*, m.nama_mapel, k.nama_kelas, g.nama as nama_guru FROM jadwal_pelajaran j LEFT JOIN mapel m ON j.mapel_id = m.id LEFT JOIN kelas k ON j.kelas_id = k.id LEFT JOIN guru g ON j.guru_id = g.id WHERE j.hari = '$hari_ini' ORDER BY j.jam_mulai ASC")->fetchAll();
+        $hari_map = ['Sunday' => 'Ahad', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+        $hari_default = $hari_map[date('l')] ?? 'Senin';
+        $pilih_hari = $_GET['hari'] ?? $hari_default;
+
+        if ($pilih_hari === 'Minggu' || $pilih_hari === 'Ahad') {
+            $whereHari = "j.hari IN ('Ahad', 'Minggu')";
+            $displayHari = "Ahad (Minggu)";
+        } else {
+            $whereHari = "j.hari = " . $db->quote($pilih_hari);
+            $displayHari = $pilih_hari;
+        }
+
+        $jadwal = $db->query("
+            SELECT j.*, m.nama_mapel, k.nama_kelas, g.nama as nama_guru 
+            FROM jadwal_pelajaran j 
+            LEFT JOIN mapel m ON j.mapel_id = m.id 
+            LEFT JOIN kelas k ON j.kelas_id = k.id 
+            LEFT JOIN guru g ON j.guru_id = g.id 
+            WHERE $whereHari 
+            ORDER BY j.jam_mulai ASC, k.nama_kelas ASC
+        ")->fetchAll();
 
         ob_start();
         include __DIR__ . '/../../resources/views/apk/waka_kurikulum_jadwal.php';

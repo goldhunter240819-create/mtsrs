@@ -129,11 +129,9 @@ function loadJadwal() {
         .then(r => r.json())
         .then(data => {
             if (data.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 25px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px;"><i data-lucide="calendar-off" style="width: 28px; height: 28px; color: #94a3b8;"></i><div style="font-size: 0.85rem; font-weight: 700; color: #475569; margin-top: 8px;">Tidak ada jadwal kelas pada tanggal ini.</div></div>';
+                container.innerHTML = '<div style="text-align: center; padding: 25px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px;"><i data-lucide="info" style="width: 28px; height: 28px; color: #3b82f6;"></i><div style="font-size: 0.85rem; font-weight: 700; color: #475569; margin-top: 8px;">Tidak ada jadwal mengajar pada tanggal ini.</div><div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Pengajuan izin tetap dapat diajukan (tanpa tugas kelas).</div></div>';
                 lucide.createIcons();
-                document.getElementById('btnSubmit').disabled = true;
-                document.getElementById('btnSubmit').style.background = '#94a3b8';
-                document.getElementById('btnSubmit').style.cursor = 'not-allowed';
+                validateForm();
                 return;
             }
             
@@ -190,11 +188,13 @@ function validateForm() {
         }
     });
 
-    // Pastikan minimal ada 1 jadwal/tugas
+    // Jika ada jadwal/tugas kelas, pastikan semua tugas terisi
     const tugasElements = form.querySelectorAll('textarea[name="tugas[]"]');
-    if (tugasElements.length === 0) {
-        isValid = false;
-    }
+    tugasElements.forEach(t => {
+        if (!t.value || t.value.trim() === '') {
+            isValid = false;
+        }
+    });
 
     if (isValid) {
         enableSubmit();

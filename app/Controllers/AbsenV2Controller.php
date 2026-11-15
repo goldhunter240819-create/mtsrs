@@ -2304,7 +2304,7 @@ class AbsenV2Controller {
         }
 
         // Get jadwal of alpa guru for today
-        $hariArr = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+        $hariArr = ['Sunday' => 'Ahad', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
         $hari = $hariArr[date('l')] ?? 'Senin';
         $stmt_ta = $db->query("SELECT * FROM siakad_db.tahun_ajaran WHERE is_active = 1 LIMIT 1");
         $ta = $stmt_ta->fetch(\PDO::FETCH_ASSOC);
@@ -2314,7 +2314,7 @@ class AbsenV2Controller {
         $stmtJ = $db->prepare("
             SELECT jp.id as jadwal_id, jp.kelas_id, jp.mapel_id as mapel_id
             FROM jadwal_pelajaran jp
-            WHERE jp.guru_id = ? AND jp.hari = ? AND jp.tahun_ajaran_id = ? AND jp.semester = ?
+            WHERE jp.guru_id = ? AND (jp.hari = ? OR (jp.hari IN ('Ahad', 'Minggu') AND ? IN ('Ahad', 'Minggu'))) AND jp.tahun_ajaran_id = ? AND jp.semester = ?
         ");
         $stmtJ->execute([$guru_id, $hari, $ta_id, $semester]);
         $jadwalList = $stmtJ->fetchAll(\PDO::FETCH_ASSOC);
