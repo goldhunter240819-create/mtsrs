@@ -49,6 +49,7 @@
                         <li><b>Masuk:</b> Jam scan QR di gerbang ('-' jika tidak scan gerbang)</li>
                         <li><b>Mapel:</b> Presensi kelas dari Jurnal Mengajar Guru</li>
                         <li><b>Status Pusat:</b> Status akhir kehadiran siswa</li>
+                        <li><b>Status Bolos:</b> Otomatis jika siswa tidak scan masuk gerbang namun tercatat <b>Hadir di jam pertama</b> (dan bukan Sakit/Izin/Alpa). Jika belum tercatat Hadir di jam pertama, siswa tidak dianggap bolos.</li>
                     </ul>
                 </div>
 

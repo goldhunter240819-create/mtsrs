@@ -849,8 +849,27 @@ class AbsenV2Controller {
                 }
 
                 if (!$global_override) {
-                    if ($row['masuk'] === '-' && in_array('Hadir', $statuses)) {
-                        $row['status_pusat'] = 'Bolos';
+                    $firstMapelId = !empty($mapelColumns) ? $mapelColumns[0]['mapel_id'] : null;
+                    $statusJamPertama = $firstMapelId ? ($row['mapel_status'][$firstMapelId] ?? '-') : '-';
+                    $isHadirJam1 = in_array($statusJamPertama, ['Hadir', 'Terlambat']);
+
+                    if ($row['masuk'] === '-') {
+                        // Tidak scan gerbang: Auto Bolos hanya jika tercatat Hadir di jam pertama
+                        if ($isHadirJam1) {
+                            $row['status_pusat'] = 'Bolos';
+                        } else {
+                            // Jika belum ada Hadir di jam pertama, siswa tidak bolos
+                            if ($row['status_pusat'] === 'Bolos') {
+                                $row['status_pusat'] = '-';
+                            }
+                        }
+                    } else {
+                        // Ada scan gerbang: Cek apakah alpa di mapel (bolos kelas)
+                        if (in_array('Alpa', $statuses)) {
+                            $row['status_pusat'] = 'Bolos';
+                        } elseif ($row['status_pusat'] !== 'Terlambat') {
+                            $row['status_pusat'] = 'Hadir';
+                        }
                     }
                 }
 
@@ -889,6 +908,8 @@ class AbsenV2Controller {
         $mapelColumns = [];
 
         if (!empty($kelas_id)) {
+            self::syncStatusPusat($tanggal, $kelas_id);
+
             $sqlSiswa = "SELECT s.id, s.nama, s.nis 
                          FROM siswa s 
                          LEFT JOIN riwayat_kelas_siswa rks ON s.id = rks.siswa_id 
@@ -970,8 +991,27 @@ class AbsenV2Controller {
                 }
 
                 if (!$global_override) {
-                    if ($row['masuk'] === '-' && in_array('Hadir', $statuses)) {
-                        $row['status_pusat'] = 'Bolos';
+                    $firstMapelId = !empty($mapelColumns) ? $mapelColumns[0]['mapel_id'] : null;
+                    $statusJamPertama = $firstMapelId ? ($row['mapel_status'][$firstMapelId] ?? '-') : '-';
+                    $isHadirJam1 = in_array($statusJamPertama, ['Hadir', 'Terlambat']);
+
+                    if ($row['masuk'] === '-') {
+                        // Tidak scan gerbang: Auto Bolos hanya jika tercatat Hadir di jam pertama
+                        if ($isHadirJam1) {
+                            $row['status_pusat'] = 'Bolos';
+                        } else {
+                            // Jika belum ada Hadir di jam pertama, siswa tidak bolos
+                            if ($row['status_pusat'] === 'Bolos') {
+                                $row['status_pusat'] = '-';
+                            }
+                        }
+                    } else {
+                        // Ada scan gerbang: Cek apakah alpa di mapel (bolos kelas)
+                        if (in_array('Alpa', $statuses)) {
+                            $row['status_pusat'] = 'Bolos';
+                        } elseif ($row['status_pusat'] !== 'Terlambat') {
+                            $row['status_pusat'] = 'Hadir';
+                        }
                     }
                 }
 
@@ -1011,19 +1051,26 @@ class AbsenV2Controller {
         $days = [1=>'Senin', 2=>'Selasa', 3=>'Rabu', 4=>'Kamis', 5=>'Jumat', 6=>'Sabtu', 7=>'Ahad'];
         $hari = $days[$dayNum];
 
-        $stmtMapel = $db_siakad->prepare("SELECT DISTINCT jp.mapel_id 
+        // Ambil urutan mapel hari ini berdasarkan jam_ke terkecil (Jam Pertama di posisi terdepan)
+        $stmtMapel = $db_siakad->prepare("SELECT jp.mapel_id, MIN(jp.jam_ke) as min_jam 
                                           FROM jadwal_pelajaran jp 
-                                          WHERE jp.hari = ? AND jp.kelas_id = ?");
+                                          WHERE jp.hari = ? AND jp.kelas_id = ?
+                                          GROUP BY jp.mapel_id
+                                          ORDER BY min_jam ASC");
         $stmtMapel->execute([$hari, $kelas_id]);
         $mapels = $stmtMapel->fetchAll(\PDO::FETCH_ASSOC);
 
         $jurnals = [];
-        foreach ($mapels as $mc) {
+        $firstJurnalId = null;
+        foreach ($mapels as $idx => $mc) {
             $stmtJurnal = $db_siakad->prepare("SELECT id FROM jurnal_guru WHERE tanggal = ? AND kelas_id = ? AND mapel_id = ? ORDER BY id DESC LIMIT 1");
             $stmtJurnal->execute([$tanggal, $kelas_id, $mc['mapel_id']]);
             $j = $stmtJurnal->fetch(\PDO::FETCH_ASSOC);
             if ($j) {
                 $jurnals[] = $j['id'];
+                if ($idx === 0) {
+                    $firstJurnalId = $j['id'];
+                }
             }
         }
 
@@ -1036,11 +1083,25 @@ class AbsenV2Controller {
         $stmtCheckGate = $db_siakad->prepare("SELECT id FROM absensi_siswa WHERE siswa_id = ? AND tanggal = ? LIMIT 1");
 
         foreach ($siswaList as $s) {
-            $stmtGate = $db_siakad->prepare("SELECT jam_masuk, status FROM absensi_siswa WHERE siswa_id = ? AND tanggal = ?");
+            $stmtGate = $db_siakad->prepare("SELECT id, jam_masuk, status FROM absensi_siswa WHERE siswa_id = ? AND tanggal = ?");
             $stmtGate->execute([$s['id'], $tanggal]);
             $gate = $stmtGate->fetch(\PDO::FETCH_ASSOC);
             $has_masuk = ($gate && !empty($gate['jam_masuk']));
             $gate_status = $gate ? $gate['status'] : null;
+
+            // Status khusus di Jam Pertama
+            $statusJamPertama = null;
+            if ($firstJurnalId) {
+                $stmtFirst = $db_siakad->prepare("SELECT status FROM absensi_permapel WHERE jurnal_id = ? AND siswa_id = ?");
+                $stmtFirst->execute([$firstJurnalId, $s['id']]);
+                $mf = $stmtFirst->fetch(\PDO::FETCH_ASSOC);
+                if ($mf) {
+                    $stF = $mf['status'];
+                    if ($stF === 'Bolos' || $stF === 'Alpha') $stF = 'Alpa';
+                    $statusJamPertama = $stF;
+                }
+            }
+            $isHadirJam1 = in_array($statusJamPertama, ['Hadir', 'Terlambat']);
 
             $statuses = [];
             foreach ($jurnals as $jid) {
@@ -1060,28 +1121,33 @@ class AbsenV2Controller {
             }
 
             $statusPusat = null;
+            // 1. Jika ada status mutlak (Sakit, Izin, Alpa) dari admin/surat izin, pertahankan!
             if (in_array($gate_status, ['Sakit', 'Izin', 'Alpa', 'Alpha'])) {
                 $statusPusat = $gate_status === 'Alpha' ? 'Alpa' : $gate_status;
             } else {
-                if (empty($statuses) && !$has_masuk) {
-                    $statusPusat = null;
-                } else {
-                    if (in_array('Hadir', $statuses) || $has_masuk) {
-                        if (in_array('Alpa', $statuses)) {
-                            $statusPusat = 'Bolos';
-                        } elseif (!$has_masuk) {
-                            $statusPusat = null; // biarkan dulu jika hadir tapi belum scan
-                        } else {
-                            $statusPusat = ($gate_status === 'Terlambat') ? 'Terlambat' : 'Hadir';
-                        }
+                if (!$has_masuk) {
+                    // Siswa TIDAK scan masuk gerbang:
+                    // Auto Bolos HANYA jika tercatat Hadir di jam pertama
+                    if ($isHadirJam1) {
+                        $statusPusat = 'Bolos';
                     } else {
-                        if (in_array('Alpa', $statuses)) {
-                            $statusPusat = 'Alpa';
-                        } elseif (in_array('Sakit', $statuses)) {
+                        // Jika belum ada Hadir di jam pertama, siswa TIDAK bolos
+                        if (in_array('Sakit', $statuses)) {
                             $statusPusat = 'Sakit';
                         } elseif (in_array('Izin', $statuses)) {
                             $statusPusat = 'Izin';
+                        } elseif (in_array('Alpa', $statuses)) {
+                            $statusPusat = 'Alpa';
+                        } else {
+                            $statusPusat = null;
                         }
+                    }
+                } else {
+                    // Siswa ADA scan masuk gerbang:
+                    if (in_array('Alpa', $statuses)) {
+                        $statusPusat = 'Bolos'; // Bolos kelas
+                    } else {
+                        $statusPusat = ($gate_status === 'Terlambat') ? 'Terlambat' : 'Hadir';
                     }
                 }
             }
@@ -1099,7 +1165,10 @@ class AbsenV2Controller {
             } else {
                 $stmtCheckGate->execute([$s['id'], $tanggal]);
                 if ($stmtCheckGate->fetch()) {
-                    $db_siakad->prepare("UPDATE absensi_siswa SET status = NULL WHERE siswa_id = ? AND tanggal = ?")->execute([$s['id'], $tanggal]);
+                    // Jika sebelumnya tercatat 'Bolos' padahal tidak hadir di jam pertama dan tanpa jam masuk, bersihkan status bolosnya
+                    if ($gate && $gate['status'] === 'Bolos' && empty($gate['jam_masuk'])) {
+                        $db_siakad->prepare("UPDATE absensi_siswa SET status = NULL WHERE siswa_id = ? AND tanggal = ?")->execute([$s['id'], $tanggal]);
+                    }
                 }
             }
         }

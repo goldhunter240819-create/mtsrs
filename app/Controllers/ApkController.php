@@ -2668,10 +2668,20 @@ class ApkController
                 $status_pusat = $s_data['final_status'];
                 
                 if (!in_array($status_pusat, ['Sakit', 'Izin', 'Alpa', 'Alpha'])) {
-                    if ($masuk === '-' && in_array('Hadir', $statuses)) {
-                        $status_pusat = 'Bolos';
+                    $first_status = !empty($statuses) ? $statuses[0] : '-';
+                    $is_hadir_jam1 = in_array($first_status, ['Hadir', 'Terlambat']);
+                    if ($masuk === '-') {
+                        if ($is_hadir_jam1) {
+                            $status_pusat = 'Bolos';
+                        } else {
+                            if ($status_pusat === 'Bolos') $status_pusat = '-';
+                        }
                     } elseif ($masuk !== '-') {
-                        $status_pusat = 'Hadir';
+                        if (in_array('Alpa', $statuses) || in_array('Alpha', $statuses)) {
+                            $status_pusat = 'Bolos';
+                        } else {
+                            $status_pusat = 'Hadir';
+                        }
                     }
                 }
                 
@@ -2816,10 +2826,20 @@ class ApkController
                     
                     if (!in_array($status_pusat, ['Sakit', 'Izin', 'Alpa', 'Alpha'])) {
                         $statuses = array_values($dData['mapel_dict']);
-                        if ($masuk === '-' && in_array('Hadir', $statuses)) {
-                            $status_pusat = 'Bolos';
+                        $first_status = !empty($statuses) ? $statuses[0] : '-';
+                        $is_hadir_jam1 = in_array($first_status, ['Hadir', 'Terlambat']);
+                        if ($masuk === '-') {
+                            if ($is_hadir_jam1) {
+                                $status_pusat = 'Bolos';
+                            } else {
+                                if ($status_pusat === 'Bolos') $status_pusat = '-';
+                            }
                         } elseif ($masuk !== '-') {
-                            $status_pusat = 'Hadir';
+                            if (in_array('Alpa', $statuses) || in_array('Alpha', $statuses)) {
+                                $status_pusat = 'Bolos';
+                            } else {
+                                $status_pusat = 'Hadir';
+                            }
                         }
                     }
                     
@@ -5883,10 +5903,20 @@ class ApkController
                 if (!in_array($status_pusat, ['Sakit', 'Izin', 'Alpa', 'Alpha'])) {
                     $masuk = $s_data['masuk'];
                     $statuses = array_values($s_data['mapel_dict']);
-                    if ($masuk === '-' && in_array('Hadir', $statuses)) {
-                        $status_pusat = 'Bolos';
+                    $first_status = !empty($statuses) ? $statuses[0] : '-';
+                    $is_hadir_jam1 = in_array($first_status, ['Hadir', 'Terlambat']);
+                    if ($masuk === '-') {
+                        if ($is_hadir_jam1) {
+                            $status_pusat = 'Bolos';
+                        } else {
+                            if ($status_pusat === 'Bolos') $status_pusat = '-';
+                        }
                     } elseif ($masuk !== '-') {
-                        $status_pusat = 'Hadir';
+                        if (in_array('Alpa', $statuses) || in_array('Alpha', $statuses)) {
+                            $status_pusat = 'Bolos';
+                        } else {
+                            $status_pusat = 'Hadir';
+                        }
                     }
                 }
                 
@@ -6008,10 +6038,20 @@ class ApkController
                     
                     if (!in_array($status_pusat, ['Sakit', 'Izin', 'Alpa', 'Alpha'])) {
                         $statuses = array_values($dData['mapel_dict']);
-                        if ($masuk === '-' && in_array('Hadir', $statuses)) {
-                            $status_pusat = 'Bolos';
+                        $first_status = !empty($statuses) ? $statuses[0] : '-';
+                        $is_hadir_jam1 = in_array($first_status, ['Hadir', 'Terlambat']);
+                        if ($masuk === '-') {
+                            if ($is_hadir_jam1) {
+                                $status_pusat = 'Bolos';
+                            } else {
+                                if ($status_pusat === 'Bolos') $status_pusat = '-';
+                            }
                         } elseif ($masuk !== '-') {
-                            $status_pusat = 'Hadir';
+                            if (in_array('Alpa', $statuses) || in_array('Alpha', $statuses)) {
+                                $status_pusat = 'Bolos';
+                            } else {
+                                $status_pusat = 'Hadir';
+                            }
                         }
                     }
                     
